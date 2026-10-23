@@ -53,6 +53,26 @@ test('HTTP API: real unavailable states, scoped history, safe validation, no dem
       assert.equal(response.status, 400, path);
     }
     assert.equal((await fetch(base + '/api/prices', { method: 'POST' })).status, 405);
+    response = await fetch(base + '/api/grain-screening/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ crop: 'pearl_millet', reviewed: true, counts: { grains: 25, broken: 2 } }) });
+    const review = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(review.counts.broken, 2);
+    assert.equal(review.counts.foreignMaterial, null);
+    assert.equal(review.moisture, null);
+    assert.equal(review.stored, false);
+    assert.equal((await fetch(base + '/api/grain-screening/review')).status, 405);
+    assert.equal((await fetch(base + '/api/grain-screening', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ crop: 'rice', consentToUpload: false }) })).status, 400);
+    // An authorized local archive works without API credentials and keeps its source date.
+    const { partitionName, ARCHIVE_SOURCE } = await import('./local-prices.mjs');
+    const { writeJson } = await import('./store.mjs');
+    await writeJson(partitionName('Test', 'Wheat'), [{ ...row, source: ARCHIVE_SOURCE }]);
+    process.env.PRICE_PROVIDER = 'local';
+    const local = await (await fetch(base + '/api/prices?state=Test&commodity=Wheat')).json();
+    assert.equal(local.providerMode, 'local_archive');
+    assert.equal(local.rows[0].date, '2026-01-01');
+    assert.equal(local.rows[0].source.id, ARCHIVE_SOURCE.id);
+    assert.equal(local.rows[0].stale, true);
+    delete process.env.PRICE_PROVIDER;
   } finally {
     await new Promise(resolve => server.close(resolve));
     assert.equal(resolve(dirname(dir)), resolve(tmpdir()));

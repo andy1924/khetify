@@ -32,6 +32,13 @@ Government price access **does** require a data.gov.in key. Put `DATA_GOV_API_KE
 | `GET /api/forecast?state=...&district=...&market=...&commodity=...&variety=...&grade=...&horizon=7` | Historical context, rolling back-tests, release reasons and a range only when every gate passes |
 | `GET /api/photo-prices/capabilities` | Published photo crop scope, upload limits, confirmation requirements and model-configuration status |
 | `POST /api/photo-prices` | Crop photo → tentative identity → local sourced prices → farmer confirmation → gated forecast |
+| `GET /api/crops` | Configured identity mappings plus commodity coverage derived from sourced records; crop IDs for manual review/price linking |
+| `POST /api/grain-screening` | Consented photo → validated specialized detector observations, or an honest unavailable/retake result |
+| `POST /api/grain-screening/review` | Validate farmer-corrected visible counts and optional calibrated-meter reading; no storage |
+| `POST /api/grain-screening/prices` | Reviewed grain observations → confirmed source commodity → existing price comparison and forecast gate |
+| `POST /api/grain-history/session` | Explicit opt-in to result storage; creates a private bearer token |
+| `GET /api/grain-history` / `POST /api/grain-history` | List or explicitly save reviewed results within the bearer token's private history |
+| `DELETE /api/grain-history/:id` / `DELETE /api/grain-history` | Delete one owned result, or delete the history and revoke its token |
 
 Price search requires state and commodity; optional exact filters are district, market, variety and grade. API names are the source names, so an OSM administrative name may need correction before matching the price feed. Queries above 10,000 upstream rows fail with a request to narrow the area; they are not partially accepted. Each successful query is cached for 15 minutes. Refresh failure is labelled separately from each row's source age. Prices older than three days are stale.
 
@@ -52,6 +59,8 @@ Example comparison request (record IDs must come from `/api/prices`; all costs b
 ```
 
 Transport, handling and fees are total INR for this quantity/trip, keyed by price record ID. `null` or omitted means unknown; explicit zero means a known zero cost. The backend returns gross at the reported modal rate, entered total costs and a remainder only when all inputs exist. Other costs may apply. A mixed variety/grade/date/unit or stale list has `comparable=false`. Original reported values and units are retained. Only kg/quintal conversion is supported; no inferred grades or fees.
+
+Comparison responses additionally include `marketState`, using the existing app's `commodity`, `grade`, `quantityQuintals` and `quotes[{id,name,pricePerQuintal,costs,quotedOn}]` field names. Source metadata, stale status and variety are retained. This adapter is null if quantity or a consistent sourced crop/variety/grade/unit is unavailable. It never fills unknown grades or costs. IDs remain actual source-record IDs; the app's TypeScript union of three demo-market IDs is unchanged and still needs client integration separately. Existing `rows`, `estimate`, `comparable`, endpoints and forecast rules remain available.
 
 For OSM locations, first search the market name with district/state using `/api/places`, then have the caller confirm the matching mandi rather than a nearby town. A comparison can include:
 
@@ -79,13 +88,15 @@ npm run import:history -- C:\path\to\verified-agmarknet-export.json
 
 History import accepts a JSON records array or `{ "records": [...] }` from the same AGMARKNET schema: `state`, `district`, `market`, `commodity`, `variety`, `grade`, `arrival_date` (DD/MM/YYYY or ISO date), `min_price`, `max_price`, `modal_price`; optional `unit` must be `INR/quintal`. Prices must be positive and min ≤ modal ≤ max; future/invalid dates, unknown units and blank identity fields are rejected. Import is all-or-nothing and requires source verification. Do not relabel unrelated or synthetic data as AGMARKNET. Same-series/date revisions replace older records. Other series remain separate.
 
-Run collection regularly using your deployment scheduler. On-demand lookups also retain history. Use one server process and stop it before CLI import/sync; the local atomic JSON store is a single-writer pilot store, not a multi-replica production database. Back up `.price-data/`; no user identity, costs or exact GPS is stored. Town-search cache can be deleted. Prices and imported history persist until the operator removes them. Move to a transactional database before multi-process ingestion or large deployment.
+Run collection regularly using your deployment scheduler. On-demand lookups also retain history. Use one server process and stop it before CLI import/sync; the local atomic JSON store is a single-writer pilot store, not a multi-replica production database. Back up market data separately from opt-in private result histories in `.price-data/grain-history/`. Photos, account identities, costs and exact GPS are not stored. Town-search cache can be deleted. Prices and imported history persist until the operator removes them. Move to a transactional database before multi-process ingestion or large deployment.
 
 ## Crop photo to price workflow
 
 This remains **backend only**; the mobile camera and screens are not connected. Configure server `OPENAI_API_KEY` and `CROP_VISION_MODEL` for a model supporting image input and strict Structured Outputs via the Responses API. No default model is silently chosen. Live recognition has not been verified without these credentials. The price-data credential is separate.
 
 The initial photo suggestion scope is wheat, maize, paddy, soybean and onion. `crop-scope.json` maps identities to exact source commodity names; confirm these mappings against the connected price feed before expanding coverage. This scope is an experimental suggestion list, not an expert-validated crop classifier. The model's confidence labels are not calibrated probabilities. Farmer confirmation is mandatory before a forecast, including when the model reports high confidence.
+
+Manual price lookup is independent of this five-crop recognition scope. `/api/crops` derives additional commodity names and stable crop identifiers from the current price catalog. It includes the source's other agricultural commodities as well as grains; catalog membership is not automatic grain-recognition coverage. `hasSourcedPrices` describes stored catalog coverage, not freshness or model validation. POST `/api/photo-prices` with `cropConfirmed:true`, `query.commodity` from that catalog and no `image` or `analysisToken` uses farmer-confirmed identity, needs no vision key and performs no image inference. Its existing price/variety/grade/market confirmations and forecast gate still apply. Manual identity tokens contain no photo digest and never claim image recognition.
 
 First call:
 
@@ -163,6 +174,32 @@ No thresholds have been agreed for a real series. An approval must set positive 
 Rate limiting is per socket IP (60 requests/minute); a reverse proxy must apply appropriate limits before public use. Errors do not expose API keys. No request/location logs are emitted. Forecast evaluation is CPU-bound and recalculated on request; load testing and a database-backed job queue are deployment work, not completed production certification.
 
 ## Verification
+
+### Mandi-Ready Crop Grader
+
+This implementation changes backend files only. No camera, navigation, screens, frontend state or app persistence is added. Crop identifiers are configurable rather than restricted to wheat and soybean: cereals, millets, pulses and other named grains can be documented manually. Automatic observations require a separately validated detector for each crop. Accepting a crop identifier does not establish detector coverage.
+
+`POST /api/grain-screening` accepts `{crop,image:{mimeType,base64},referenceConfirmed:true,consentToUpload:true}`. Image preprocessing flags poor lighting/detail; these heuristics are not grain measurements. Without a validated specialized detector, counts stay null. OpenAI is not used for this endpoint. Set `GRAIN_DETECTOR_URL` (HTTPS or loopback), optional server-only `GRAIN_DETECTOR_TOKEN`, and `.price-data/grain-detector.json`:
+
+```text
+{ validated:true, modelVersion, validationUrl (HTTPS), expiresOn,
+  retention:"none", minConfidence (0.8–1),
+  crops:{ cropId:{ traits:["foreignMaterial","broken","discolored"], criteria? } } }
+```
+
+Detector request: `{crop,image:<metadata-stripped JPEG data URL>,modelVersion,retention:"none"}`. Response: `{crop,modelVersion,lighting,focus,referenceVisible,plainBackground,objects}`. Lighting/focus values are `adequate`, `poor` or `unknown`. Each object has unique `id`, `kind` (`grain` or `foreign_material`), normalized `[x,y,width,height]` `box`, confidence 0–1, and for grain objects `broken` and `discolored` booleans or null. These are observations of the photo, never moisture, weight percentages, official grades or prices. Low confidence withholds counts. No supported criterion ships. Optional criteria require `{crop,basis:"visible-object-count",version,sourceUrl,minGrains,maxFractions:{foreignMaterial,broken,discolored}}`; thresholds must come from the operator's reviewed source.
+
+`POST /api/grain-screening/review` accepts `{crop,cropName?,reviewed:true,counts?:{grains,foreignMaterial,broken,discolored},moisture?:{percent,meter,measuredOn,calibrated:true}}`. Use a stable lowercase crop identifier (letters, digits, underscores or hyphens, 2–64 characters); `other` requires a crop name. Counts are non-negative whole numbers up to 100000; omitted/null counts remain unknown. Broken/discolored counts cannot exceed a known grain count. Moisture is optional, requires a farmer-confirmed calibrated meter and valid date, and stays null/`not_measured` otherwise. The returned record has farmer-reviewed provenance, no model summary or official grade, and `stored:false`. Arbitrary submitted model/grade/price claims are not accepted into it. This endpoint itself creates no stored record.
+
+To link a review to prices, POST `/api/grain-screening/prices` with `{review:<reviewed record>,query:<source selection>,cropConfirmed:true,quantity?,unit?,costs?,origin?,consentToLocationLookup?,marketLocations?,radiusKm?,horizonDays?,varietyConfirmed?,gradeConfirmed?}`. Select a crop identifier and its matching `commodity` from `/api/crops`; a named `other` review permits an explicitly farmer-confirmed custom mapping. A known mismatched crop/commodity is rejected. The response retains the review and uses the same `reportedPrices`, cost calculations, approximate-location consent and forecast gate as the existing photo-price workflow. `qualityPriceAdjustment` stays null: defects never turn into a made-up premium, discount or grade. Exact variety/grade/market must be confirmed independently before a forecast is considered.
+
+Optional result history uses the same atomic JSON persistence approach without changing mobile state. POST `/api/grain-history/session` with `{consentToStore:true}` returns a random private token once. Send `Authorization: Bearer <token>` for subsequent history requests. POST `/api/grain-history` with `{consentToStore:true,review:<reviewed record>}` revalidates all observations and stores only the reviewed counts, optional meter reading and timestamps. Images and arbitrary external claims are rejected or excluded. GET lists only that token's records. DELETE `/api/grain-history/:id` removes one owned record; DELETE `/api/grain-history` deletes its file and revokes the token. No account ID, shared global history or demo tool-history mutation is used. Keep the token private and keep HTTP on loopback or behind HTTPS. Records persist until deletion, including across server restarts; there is no automatic expiry claim or account-based token recovery. Each scope holds at most 100 records and rejects new saves when full. Concurrent operations are serialized within the single server process. Operators must respect deletions in backups separately; no backup service is implemented.
+
+Image upload requires explicit consent on every screening request. A future client must explain that photos are processed transiently, forwarded only to the configured detector requiring no retention, and never saved by this backend. Image deletion is unnecessary here because no image storage exists; client-managed local copies/history need their own delete control when a UI is separately requested. The manifest is an operator assertion: verify the actual provider's retention behavior and crop-specific evaluation before connecting it.
+
+Key-free historical prices: `npm run collect:public-prices` imports the [CC BY 4.0 KrashiMitra archive](https://github.com/kunal-rajput-317/mandi-data), pins its Git revision, records per-file hashes, validates all rows and partitions real reports by state/commodity. Set `PRICE_PROVIDER=local` to serve these reports without feed credentials. Source dates, attribution, missing grades and stale status remain visible. This source is a third-party archive of AGMARKNET reports, not an official current offer. Large data stays in ignored `.price-data/`; repeat the collector to reproduce it. No synthetic rates are generated and archive age never advances to today's date.
+
+Candidate training datasets found: [soybean defect images, CC BY 4.0](https://data.mendeley.com/datasets/xnx9bfbh6b/1), [mechanically harvested soybean images](https://data.mendeley.com/datasets/hwdtghttp7/2), and [GrainDet](https://github.com/hellodfan/GrainDet). They do not establish all-grain, India/phone-domain detection performance; some contain cropped images, limited classes or licensing constraints. No model or expert-labelled Indian validation set was fabricated or declared validated. A deployed specialized detector with appropriate rights and crop-specific evaluation is still needed for automated counts.
 
 ```powershell
 npm test
