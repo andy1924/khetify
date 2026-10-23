@@ -91,14 +91,14 @@ export function SoilResultScreen() {
         onPress={() => setEvidenceOpen(true)}
         style={styles.evidenceRow}
       >
-        <Icon name="book-open" size={18} color="#565F59" />
+        <Icon name="book-open" size={18} color="#52664D" />
         <Text style={styles.evidenceLabel}>{t('soilResult.evidence')}</Text>
-        <Icon name="chevron-down" size={16} color="#565F59" />
+        <Icon name="chevron-down" size={16} color="#52664D" />
       </Pressable>
 
       {state.soil.imported ? (
         <View style={styles.importedNote}>
-          <Icon name="check" size={16} color="#565F59" />
+          <Icon name="check" size={16} color="#52664D" />
           <Text style={styles.importedText}>
             {toolCopy('soil.imported')} · {toolCopy('soil.importedNote')}
           </Text>
@@ -142,44 +142,44 @@ function EvidenceRow({ label, value, muted }: { label: string; value: string; mu
 
 const styles = StyleSheet.create({
   valuesCard: {
-    backgroundColor: '#F2EEE5',
+    backgroundColor: '#EDF4E4',
     borderRadius: 18,
     padding: 16,
     gap: 8,
   },
-  captured: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#607052' },
+  captured: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#607052' },
   valueGrid: { flexDirection: 'row', gap: 18, flexWrap: 'wrap' },
   valueCell: { flexBasis: '44%', flexGrow: 1, minWidth: 0, gap: 5 },
-  valueBig: { fontFamily: 'DMSans_600SemiBold', fontSize: 36, lineHeight: 49, color: '#3D5C30' },
-  valueLabel: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#637058' },
-  explain: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#646861' },
+  valueBig: { fontFamily: 'System', fontWeight: '600', fontSize: 36, lineHeight: 45, color: '#3D5C30' },
+  valueLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#637058' },
+  explain: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#687560' },
   limitations: { backgroundColor: '#F6F0E0', borderRadius: 18, padding: 16, gap: 8 },
-  limitationsTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 14, lineHeight: 19, color: '#7b683a' },
-  limitationsBody: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#77694b' },
+  limitationsTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: '#7b683a' },
+  limitationsBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#77694b' },
   evidenceRow: {
     minHeight: 50,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#EDF2F7',
+    backgroundColor: '#F4F7EF',
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
   evidenceLabel: {
     flex: 1,
-    fontFamily: 'DMSans_600SemiBold',
-    fontSize: 14,
-    lineHeight: 19,
+    fontFamily: 'System', fontWeight: '600',
+    fontSize: 13,
+    lineHeight: 18,
     color: '#5A714C',
   },
   importedNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  importedText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#646861' },
+  importedText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#687560' },
   actions: { gap: 8 },
-  footnote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
-  sheetBody: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#646861' },
-  evidenceList: { backgroundColor: '#EDF2F7', borderRadius: 14, paddingHorizontal: 14 },
+  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 10, lineHeight: 14, color: '#697462' },
+  sheetBody: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
+  evidenceList: { backgroundColor: '#F4F7EF', borderRadius: 14, paddingHorizontal: 14 },
   evidenceItem: { paddingVertical: 10, gap: 3 },
-  evidenceItemLabel: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#6a7560' },
-  evidenceItemValue: { fontFamily: 'DMSans_500Medium', fontSize: 14, lineHeight: 19, color: '#526D43' },
+  evidenceItemLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#6a7560' },
+  evidenceItemValue: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#526D43' },
 });

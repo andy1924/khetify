@@ -19,7 +19,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FAF8F4"
+          "backgroundColor": "#FBFCF9"
         }
       ],
       [

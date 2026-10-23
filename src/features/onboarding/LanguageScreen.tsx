@@ -86,10 +86,10 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFFFC',
     borderWidth: 1,
     borderColor: colors.borderSoft,
   },
-  optionSelected: { backgroundColor: '#EEEDE6', borderColor: '#EEEDE6' },
+  optionSelected: { backgroundColor: '#EFF4E8', borderColor: '#EFF4E8' },
   optionLabels: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
 });

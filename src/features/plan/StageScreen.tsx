@@ -148,7 +148,7 @@ export function StageScreen() {
                 <Text style={styles.taskValue} numberOfLines={1}>
                   {selectedSeed ? planText(selectedSeed.labelKey) : t('stage.seed.awaiting')}
                 </Text>
-                <Icon name="chevron-right" size={14} color="#565F59" strokeWidth={1.8} />
+                <Icon name="chevron-right" size={14} color="#52664D" strokeWidth={1.8} />
               </View>
             </PressableRow>
 
@@ -163,9 +163,9 @@ export function StageScreen() {
             onPress={() => setSourceSheet(true)}
             style={styles.evidenceRow}
           >
-            <Icon name="book-open" size={20} color="#565F59" strokeWidth={1.6} />
+            <Icon name="book-open" size={20} color="#52664D" strokeWidth={1.6} />
             <Text style={styles.evidenceLabel}>{t('stage.evidence')}</Text>
-            <Icon name="chevron-right" size={16} color="#565F59" strokeWidth={1.8} />
+            <Icon name="chevron-right" size={16} color="#52664D" strokeWidth={1.8} />
           </PressableRow>
 
           <View style={styles.quoteField}>
@@ -247,7 +247,7 @@ export function StageScreen() {
                 style={[styles.seedOption, selected && styles.seedOptionSelected]}
               >
                 <Text style={styles.seedOptionLabel}>{planText(option.labelKey)}</Text>
-                {selected ? <Icon name="check" size={16} color="#343A33" strokeWidth={2} /> : null}
+                {selected ? <Icon name="check" size={16} color="#30432B" strokeWidth={2} /> : null}
               </PressableRow>
             );
           })}
@@ -286,7 +286,7 @@ export function StageScreen() {
                 {t(`plan.stage.${id}.title` as const)}
               </Text>
               {id === stageId ? (
-                <Icon name="check" size={14} color="#565F59" strokeWidth={2} />
+                <Icon name="check" size={14} color="#52664D" strokeWidth={2} />
               ) : null}
             </View>
           ))}
@@ -328,19 +328,19 @@ export function StageScreen() {
 
 const styles = StyleSheet.create({
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24, alignSelf: 'flex-start' },
-  backText: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#65775B' },
+  backText: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#65775B' },
 
-  taskCard: { backgroundColor: '#F4F1EA', borderRadius: 18, padding: 16, gap: 10 },
-  taskTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 21, lineHeight: 29, color: '#343A33' },
-  taskBody: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#636f57' },
+  taskCard: { backgroundColor: '#F1F6EA', borderRadius: 18, padding: 16, gap: 10 },
+  taskTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 21, lineHeight: 29, color: '#30472B' },
+  taskBody: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#636f57' },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
     minHeight: 40,
-    borderTopWidth: 1,
-    borderTopColor: '#DEDAD2',
+    borderTopWidth: 0,
+    borderTopColor: '#DFE6D8',
     paddingTop: 10,
   },
   taskRowPlain: {
@@ -351,47 +351,47 @@ const styles = StyleSheet.create({
     minHeight: 28,
     paddingBottom: 4,
   },
-  taskLabel: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#66705d' },
+  taskLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#66705d' },
   taskValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
-  taskValue: { fontFamily: 'DMSans_500Medium', fontSize: 13, lineHeight: 18, color: '#455C3C', textAlign: 'right' },
+  taskValue: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#455C3C', textAlign: 'right' },
 
   evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48, paddingVertical: 14 },
-  evidenceLabel: { flex: 1, fontFamily: 'DMSans_500Medium', fontSize: 16, lineHeight: 22, color: '#4F6843' },
+  evidenceLabel: { flex: 1, fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#4F6843' },
 
   quoteField: {
-    backgroundColor: '#F6F3ED',
+    backgroundColor: '#F6F8F3',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 6,
   },
-  quoteLabel: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#666f63' },
+  quoteLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#666f63' },
   quoteInput: {
     padding: 0,
     margin: 0,
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 16,
-    lineHeight: 22,
-    color: '#292D29',
+    fontFamily: 'System', fontWeight: '400',
+    fontSize: 14,
+    lineHeight: 19,
+    color: '#243527',
     includeFontPadding: false,
   },
-  quoteError: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#8B4A3A' },
-  savedNote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#5A714C' },
+  quoteError: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
+  savedNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#5A714C' },
 
   actionsRow: { flexDirection: 'row', gap: 12 },
   actionCell: { flex: 1 },
   clearRow: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' },
-  clearText: { fontFamily: 'DMSans_500Medium', fontSize: 13, lineHeight: 18, color: '#526C43' },
-  footer: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#6c7564' },
+  clearText: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#526C43' },
+  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6c7564' },
 
   lockedPanel: { backgroundColor: '#F6F0DF', borderRadius: 18, padding: 16, gap: 10 },
   lockedHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  lockedTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 16, lineHeight: 22, color: '#78643A' },
-  lockedBody: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#76694C' },
+  lockedTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 14, lineHeight: 20, color: '#78643A' },
+  lockedBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#76694C' },
 
   sheetBody: { gap: 10 },
-  sheetText: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 20, color: '#646861' },
-  sheetNote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
+  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: '#687560' },
+  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
 
   seedOption: {
     minHeight: 52,
@@ -399,24 +399,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFFFC',
     borderWidth: 1,
-    borderColor: '#DEDAD2',
+    borderColor: '#DFE6D8',
     borderRadius: 12,
     paddingHorizontal: 14,
   },
-  seedOptionSelected: { backgroundColor: '#F1EEE8', borderColor: '#D7E5D8' },
-  seedOptionLabel: { fontFamily: 'DMSans_500Medium', fontSize: 16, lineHeight: 22, color: '#343A33' },
-  seedClear: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#646861' },
+  seedOptionSelected: { backgroundColor: '#EEF4E7', borderColor: '#C4DEA9' },
+  seedOptionLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
+  seedClear: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
 
   sourceRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     paddingVertical: 9,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9E5DD',
+    borderBottomWidth: 0,
+    borderBottomColor: '#E6EBE1',
   },
-  sourceOrdinal: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#8A9A80', width: 20 },
-  sourceLabel: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#343A33' },
+  sourceOrdinal: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#8A9A80', width: 20 },
+  sourceLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#30432B' },
 });

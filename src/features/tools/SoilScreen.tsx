@@ -144,7 +144,7 @@ export function SoilScreen() {
           style={styles.editButton}
         >
           <Text style={styles.editLabel}>{t('soil.edit')}</Text>
-          <Icon name="pencil" size={15} color="#64665F" />
+          <Icon name="pencil" size={15} color="#657360" />
         </Pressable>
       </View>
 
@@ -185,7 +185,7 @@ export function SoilScreen() {
         <Icon
           name="chevron-down"
           size={20}
-          color="#64665F"
+          color="#657360"
         />
       </Pressable>
 
@@ -347,7 +347,7 @@ function SoilValueField({
                 style={styles.unitButton}
               >
                 <Text style={styles.unitButtonLabel}>{unit || '—'}</Text>
-                <Icon name="chevron-down" size={13} color="#64665F" />
+                <Icon name="chevron-down" size={13} color="#657360" />
               </Pressable>
             ) : null}
           </View>
@@ -391,52 +391,48 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 4,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DEDAD2',
+    borderBottomWidth: 0,
+    borderBottomColor: '#DFE6D8',
     minHeight: 48,
   },
-  context: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#64665F' },
+  context: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#657360' },
   editButton: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingLeft: 8 },
-  editLabel: { fontFamily: 'DMSans_500Medium', fontSize: 14, lineHeight: 19, color: '#292C29' },
+  editLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#263B29' },
 
   fields: { gap: 16 },
   valueCard: {
     minHeight: 78,
     borderRadius: 12,
-    backgroundColor: '#F6F3ED',
+    backgroundColor: '#F6F8F3',
     paddingHorizontal: 14,
     paddingVertical: 10,
     justifyContent: 'center',
   },
   valueCardCompact: { minHeight: 64 },
   valueLabels: { gap: 4 },
-  valueLabel: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#64665F' },
+  valueLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 16, color: '#657360' },
   valueRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   inputLarge: {
     flex: 1,
-    minWidth: 0,
     padding: 0,
     margin: 0,
-    fontFamily: 'DMSans_500Medium',
+    fontFamily: 'System', fontWeight: '500',
     fontSize: 22,
-    lineHeight: 30,
-    color: '#292C29',
+    lineHeight: 28,
+    color: '#263B29',
     includeFontPadding: false,
   },
   inputSmall: {
     flex: 1,
-    minWidth: 0,
     padding: 0,
     margin: 0,
-    fontFamily: 'DMSans_500Medium',
+    fontFamily: 'System', fontWeight: '500',
     fontSize: 16,
     lineHeight: 22,
-    color: '#292C29',
+    color: '#263B29',
     includeFontPadding: false,
   },
   unitButton: {
-    minHeight: 48,
-    minWidth: 48,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
@@ -445,12 +441,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#EAF0E2',
   },
-  unitButtonLabel: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#4A693D' },
+  unitButtonLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 14, color: '#4A693D' },
   fieldError: {
     marginTop: 6,
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 12,
-    lineHeight: 16,
+    fontFamily: 'System', fontWeight: '400',
+    fontSize: 11,
+    lineHeight: 15,
     color: '#8B4A3A',
   },
 
@@ -460,19 +456,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 18,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#DEDAD2',
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    borderColor: '#DFE6D8',
   },
   additionalCopy: { flex: 1, gap: 5 },
-  additionalTitle: { fontFamily: 'DMSans_500Medium', fontSize: 15, lineHeight: 20, color: '#292C29' },
-  additionalSub: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#64665F' },
+  additionalTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 20, color: '#263B29' },
+  additionalSub: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 16, color: '#657360' },
 
   actions: { gap: 12 },
-  footer: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#64665F' },
-  emptyHint: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#77694b' },
+  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#657360' },
+  emptyHint: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#77694b' },
 
-  sheetNote: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#64665F' },
+  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#657360' },
   unitRow: {
     minHeight: 48,
     flexDirection: 'row',
@@ -480,8 +476,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#EDF2F7',
+    backgroundColor: '#F4F7EF',
   },
   unitRowSelected: { backgroundColor: '#E4EED8' },
-  unitRowLabel: { fontFamily: 'DMSans_500Medium', fontSize: 16, lineHeight: 22, color: '#292C29' },
+  unitRowLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#263B29' },
 });

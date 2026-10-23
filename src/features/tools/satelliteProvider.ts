@@ -3,6 +3,8 @@ export type FieldPolygon = Point[];
 export type RegisteredField = { id: string; name: string; polygon: FieldPolygon; crop: string; sowingDate: string; alertsOptIn: boolean; shareApproximate: boolean; radiusKm: number };
 export type PestReport = { id: string; fieldId: string; crop: string; date: string; notes: string; status: 'pending-review' | 'withdrawn' };
 export interface SatelliteObservation {
+  imageUrl?: string;
+  imageError?: string;
   capturedAt: string; source: string; cloudPercent: number | null; fieldCoveragePercent: number | null;
   confidence: 'low' | 'moderate'; summary: string; ndvi: number | null;
 }
@@ -13,7 +15,7 @@ export const fieldMonitoringProvider: FieldMonitoringProvider = {
   id: 'copernicus-sentinel-2',
   async getObservations(polygon) {
     if (!apiBase) return { status: 'unconfigured', observations: [] };
-    const response = await fetch(`${apiBase}/api/field-observations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ polygon }), signal: AbortSignal.timeout(30000) });
+    const response = await fetch(`${apiBase}/api/field-observations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ polygon }), signal: AbortSignal.timeout(90000) });
     if (!response.ok) throw new Error('Observation provider unavailable. Please retry.');
     return response.json();
   },

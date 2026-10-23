@@ -206,7 +206,7 @@ export function AssessmentScreen() {
                     style={styles.unitChip}
                   >
                     <Text style={styles.unitLabel}>{planText(`assessment.unit.${unit}`)}</Text>
-                    <Icon name="chevron-down" size={12} color="#565F59" strokeWidth={1.8} />
+                    <Icon name="chevron-down" size={12} color="#52664D" strokeWidth={1.8} />
                   </Pressable>
                 </View>
                 {errors.area ? <Text style={styles.error}>{errors.area}</Text> : null}
@@ -401,23 +401,23 @@ export function AssessmentScreen() {
 
 const styles = StyleSheet.create({
   screenContent: { gap: 20 },
-  card: { backgroundColor: '#F2EFE9', borderRadius: 18, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 8, gap: 8 },
-  cardTitle: { fontFamily: 'DMSans_500Medium', fontSize: 16, lineHeight: 22, color: '#343A33' },
-  cardBody: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#6a7560' },
-  cardNote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63', paddingBottom: 6 },
+  card: { backgroundColor: '#F2F5EE', borderRadius: 18, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 8, gap: 8 },
+  cardTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
+  cardBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
+  cardNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462', paddingBottom: 6 },
 
   pairRow: { flexDirection: 'row', gap: 16 },
   pairCell: { flex: 1, gap: 4, paddingVertical: 10 },
   fullRow: { paddingVertical: 10, gap: 4 },
-  fieldLabel: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#66705d' },
+  fieldLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#66705d' },
   input: {
     padding: 0,
     margin: 0,
     minHeight: 24,
-    fontFamily: 'DMSans_500Medium',
+    fontFamily: 'System', fontWeight: '500',
     fontSize: 15,
     lineHeight: 21,
-    color: '#343A33',
+    color: '#30432B',
     includeFontPadding: false,
   },
   areaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -427,29 +427,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 3,
     borderRadius: 99,
-    backgroundColor: '#E9E6DF',
+    backgroundColor: '#E8EDE3',
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  unitLabel: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#4A693D' },
+  unitLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: '#4A693D' },
 
   budgetRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  currency: { fontFamily: 'DMSans_500Medium', fontSize: 15, lineHeight: 21, color: '#343A33' },
+  currency: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 21, color: '#30432B' },
   budgetInput: { flex: 1 },
-  budgetHint: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
+  budgetHint: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
 
   seasonRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 2 },
   seasonChip: {
     minHeight: 30,
     justifyContent: 'center',
     borderRadius: 99,
-    backgroundColor: '#E9E6DF',
+    backgroundColor: '#E8EDE3',
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
-  seasonChipSelected: { backgroundColor: '#E4ECE4' },
-  seasonText: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#4A693D' },
-  seasonTextSelected: { color: '#3D5C30', fontFamily: 'DMSans_600SemiBold' },
+  seasonChipSelected: { backgroundColor: '#D4E7BE' },
+  seasonText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#4A693D' },
+  seasonTextSelected: { color: '#3D5C30', fontFamily: 'System', fontWeight: '600' },
 
   waterRow: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
   waterChip: {
@@ -457,25 +457,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 99,
-    backgroundColor: '#E9E6DF',
+    backgroundColor: '#E8EDE3',
     paddingHorizontal: 14,
   },
-  waterChipSelected: { backgroundColor: '#E4ECE4' },
-  waterText: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#4A693D' },
+  waterChipSelected: { backgroundColor: '#D4E7BE' },
+  waterText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#4A693D' },
 
-  error: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#8B4A3A' },
+  error: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
 
   summaryCard: { backgroundColor: '#EFF5E7', borderRadius: 18, padding: 14 },
   summaryHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  summaryText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#526D43' },
+  summaryText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#526D43' },
 
   choiceList: { gap: 8, marginTop: 2 },
 
   stepActions: { gap: 12 },
   skipButton: { minHeight: 48, alignItems: 'center', justifyContent: 'center' },
-  skipText: { fontFamily: 'DMSans_500Medium', fontSize: 14, lineHeight: 19, color: '#526C43' },
+  skipText: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#526C43' },
 
   sheetActions: { flexDirection: 'row', gap: 12 },
   sheetCell: { flex: 1 },
-  sheetText: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 20, color: '#646861' },
+  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: '#687560' },
 });

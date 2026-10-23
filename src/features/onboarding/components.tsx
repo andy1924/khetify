@@ -15,7 +15,6 @@ export function OnboardingHeader({ showSelector = true }: { showSelector?: boole
   return (
     <View style={styles.header}>
       <View style={styles.brand}>
-        <Icon name="sprout" size={24} color={colors.ink} />
         <Text variant="heading" weight="semiBold" color={colors.ink} style={styles.wordmark}>
           {t('common.brand.name')}
         </Text>
@@ -89,7 +88,6 @@ export function SelectionDot({ selected }: { selected: boolean }) {
 export function StepHeading({
   step,
   title,
-  description,
 }: {
   step: string;
   title: string;
@@ -102,9 +100,6 @@ export function StepHeading({
       </Text>
       <Text variant="display" weight="semiBold" color={colors.ink} style={styles.title}>
         {title}
-      </Text>
-      <Text variant="body" color={colors.muted} style={styles.description}>
-        {description}
       </Text>
     </View>
   );
@@ -175,7 +170,7 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingHorizontal: 12,
     borderRadius: 14,
-    backgroundColor: '#EEEDE6',
+    backgroundColor: '#EFF4E8',
   },
   sheetList: { gap: 6 },
   sheetRow: {
@@ -187,7 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     backgroundColor: colors.surfacePlain,
   },
-  optionSelected: { backgroundColor: '#EEEDE6' },
+  optionSelected: { backgroundColor: '#EFF4E8' },
   dot: {
     width: 22,
     height: 22,
@@ -195,8 +190,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotSelected: { backgroundColor: '#D7E5D8' },
-  dotIdle: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
+  dotSelected: { backgroundColor: '#C4DEA9' },
+  dotIdle: { backgroundColor: '#FEFFFC', borderWidth: 1, borderColor: colors.border },
   headingBlock: { gap: 4 },
   step: { letterSpacing: 0.4 },
   title: { marginTop: 6 },

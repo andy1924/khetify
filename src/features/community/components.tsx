@@ -14,7 +14,6 @@ import type { ObservationStatus } from '../../demo';
  */
 export function CommunityHeading({
   title,
-  subtitle,
   action,
   back,
 }: {
@@ -31,11 +30,6 @@ export function CommunityHeading({
           <Text variant="heading" color={colors.heading} accessibilityRole="header">
             {title}
           </Text>
-          {subtitle ? (
-            <Text variant="caption" color={colors.mutedSoft} style={styles.headingSubtitle}>
-              {subtitle}
-            </Text>
-          ) : null}
         </View>
         {action}
       </View>
@@ -97,7 +91,7 @@ export function FeedPost({
       <View style={styles.badgeRow}>
         <StatusChip status={status} label={statusLabel} />
       </View>
-      <Text variant="subtitle" color={colors.ink}>
+      <Text variant="subtitle" color="#47603B">
         {title}
       </Text>
       <Text variant="caption" color="#68715C" style={styles.postDetail}>
@@ -154,11 +148,11 @@ export function FixtureArt({
   return (
     <View style={[styles.art, { height }]} accessible={false}>
       <Svg width="100%" height="100%" viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
-        <Rect x="0" y="0" width="320" height="150" fill="#F4F1EA" />
+        <Rect x="0" y="0" width="320" height="150" fill="#F1F6EA" />
         {id === 'fixture-leaf-spots' ? <LeafSpotsArt /> : null}
         {id === 'fixture-waterlogging' ? <WaterloggingArt /> : null}
         {id === 'fixture-sprout' ? <SproutRowsArt /> : null}
-        <Rect x="0" y="0" width="320" height="150" fill="none" stroke="#DEDAD2" strokeWidth="2" />
+        <Rect x="0" y="0" width="320" height="150" fill="none" stroke="#DFE6D8" strokeWidth="2" />
       </Svg>
       {!compact ? (
         <View style={styles.artBadge}>
@@ -248,16 +242,16 @@ const styles = StyleSheet.create({
     minHeight: 136,
     paddingVertical: 14,
     gap: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
     borderBottomColor: colors.borderSoft,
   },
   pressed: { opacity: 0.85 },
   postMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 20 },
   postMetaText: { flex: 1 },
   badgeRow: { flexDirection: 'row', minHeight: 25, alignItems: 'center' },
-  postDetail: { lineHeight: 20 },
+  postDetail: { lineHeight: 17 },
 
-  art: { width: '100%', backgroundColor: '#F4F1EA', overflow: 'hidden' },
+  art: { width: '100%', backgroundColor: '#F1F6EA', overflow: 'hidden' },
   artBadge: {
     position: 'absolute',
     left: 12,

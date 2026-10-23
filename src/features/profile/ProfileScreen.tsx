@@ -32,7 +32,6 @@ type SheetId =
   | 'edit'
   | 'reset'
   | 'signOut'
-  | 'firstVisit'
   | null;
 
 /** 15 · Farm profile & privacy — fixture identity, resources, settings and demo controls. */
@@ -59,9 +58,6 @@ export function ProfileScreen() {
         <Text variant="heading" color={colors.heading} accessibilityRole="header">
           {t('profile.title')}
         </Text>
-        <Text variant="caption" color={colors.mutedSoft}>
-          {t('profile.subtitle')}
-        </Text>
       </View>
 
       <View
@@ -71,9 +67,9 @@ export function ProfileScreen() {
           .replace('{name}', state.farm.farmerName)
           .replace('{location}', fullLocation)}
       >
-        <Avatar initials={state.farm.initials} size={48} background={colors.surface} color={colors.ink} />
+        <Avatar initials={state.farm.initials} size={48} background="#E6F0DA" color="#567043" />
         <View style={styles.identityText}>
-          <Text variant="title" color={colors.ink}>
+          <Text variant="title" color="#405E33">
             {state.farm.farmerName}
           </Text>
           <Text variant="caption" color="#697560">
@@ -92,7 +88,7 @@ export function ProfileScreen() {
           }}
           style={styles.farmHead}
         >
-          <Text variant="title" color={colors.ink} style={styles.flex}>
+          <Text variant="title" color="#4D6E3C" style={styles.flex}>
             {state.farm.farmName}
           </Text>
           <Icon name="pencil" size={17} color={colors.icon} />
@@ -115,14 +111,7 @@ export function ProfileScreen() {
           onPress={() => setSheet('consent')}
           style={styles.settingsRow}
         />
-        <ListRow
-          icon="book-open"
-          title={t('profile.evidence')}
-          description={t('profile.evidenceBody')}
-          onPress={() => setSheet('evidence')}
-          style={styles.settingsRow}
-        />
-        <ListRow
+<ListRow
           icon="refresh-cw"
           title={t('profile.freshness')}
           description={t('profile.freshnessBody')}
@@ -147,29 +136,7 @@ export function ProfileScreen() {
 
       {/* Demo controls sit below the reference content, not inside it. */}
       <View style={styles.demoBlock}>
-        <Text variant="label" color={colors.muted}>
-          {profileCopy['profile.demoControls']}
-        </Text>
-        <Text variant="meta" color={colors.faint}>
-          {profileCopy['profile.demoNote']}
-        </Text>
-
-        <DemoRow
-          icon="replace"
-          title={profileCopy['profile.firstVisit']}
-          body={profileCopy['profile.firstVisitBody']}
-          accessibilityLabel={profileCopy['profile.firstVisitA11y']}
-          onPress={() => setSheet('firstVisit')}
-        />
-        <DemoRow
-          icon="refresh-cw"
-          title={t('profile.reset')}
-          body={t('profile.resetBody')}
-          accessibilityLabel={profileCopy['profile.resetA11y']}
-          onPress={() => setSheet('reset')}
-        />
-        <DemoRow
-          icon="log-out"
+        <DemoRow icon="log-out"
           title={t('profile.signOut')}
           body={t('profile.signOutBody')}
           accessibilityLabel={profileCopy['profile.signOutA11y']}
@@ -341,6 +308,9 @@ export function ProfileScreen() {
           <View style={styles.form}>
             <Field
               label={profileCopy['profile.field.name']}
+              placeholder="Enter your name"
+              autoCapitalize="words"
+              autoComplete="name"
               value={draft.farmerName}
               onChangeText={farmerName => actions.updateProfileDraft({ farmerName })}
               error={attempted && !draft.farmerName.trim() ? t('profile.error.name') : undefined}
@@ -506,30 +476,7 @@ export function ProfileScreen() {
         </Text>
       </Sheet>
 
-      <Sheet
-        visible={sheet === 'firstVisit'}
-        onClose={close}
-        title={profileCopy['profile.firstVisit']}
-        footer={
-          <View style={styles.confirmActions}>
-            <Button title={t('common.cancel')} variant="secondary" trailingArrow={false} onPress={close} />
-            <Button
-              title={t('common.continue')}
-              trailingArrow={false}
-              onPress={() => {
-                actions.startFirstVisit();
-                close();
-                router.navigate('/(tabs)/plan');
-              }}
-            />
-          </View>
-        }
-      >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
-          {profileCopy['profile.firstVisitBody']}
-        </Text>
-      </Sheet>
-    </Screen>
+</Screen>
   );
 }
 
@@ -628,11 +575,11 @@ const styles = StyleSheet.create({
   identity: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 51 },
   identityText: { flex: 1, gap: 4 },
 
-  farmCard: { backgroundColor: '#F1EEE8', borderRadius: 18, padding: 16, gap: 10 },
+  farmCard: { backgroundColor: '#EEF4E7', borderRadius: 18, padding: 16, gap: 10 },
   farmHead: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   resourceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 17 },
 
-  settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#E8E4DC' },
+  settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: 0, borderBottomColor: '#E7EDE0' },
 
   demoBlock: { gap: 10, paddingTop: 8 },
   demoRow: {
@@ -641,8 +588,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E8E4DC',
+    borderBottomWidth: 0,
+    borderBottomColor: '#E7EDE0',
   },
   pressed: { opacity: 0.8 },
 
@@ -657,7 +604,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 16,
-    backgroundColor: '#F2EFE9',
+    backgroundColor: '#F2F5EC',
   },
   languageRowSelected: { backgroundColor: '#E8F0DE' },
   dot: {
@@ -665,12 +612,12 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: '#DEDAD2',
-    backgroundColor: '#FFFFFF',
+    borderColor: '#D6DFD0',
+    backgroundColor: '#FEFFFC',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotSelected: { backgroundColor: '#D7E5D8', borderColor: '#D7E5D8' },
+  dotSelected: { backgroundColor: '#C4DEA9', borderColor: '#C4DEA9' },
 
   consentRow: {
     minHeight: 64,
@@ -678,8 +625,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E8E4DC',
+    borderBottomWidth: 0,
+    borderBottomColor: '#E7EDE0',
   },
   sourceList: { gap: 8, paddingVertical: 4 },
   sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
@@ -694,8 +641,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 99,
-    backgroundColor: '#ECEFE9',
+    backgroundColor: '#EBF2E4',
   },
-  waterChipSelected: { backgroundColor: '#E4ECE4' },
+  waterChipSelected: { backgroundColor: '#D4E7BE' },
   confirmActions: { gap: 10 },
 });

@@ -5,13 +5,13 @@
 @layer theme {
   :root {
     @variant light {
-      --background: #FAF8F4;
-      --foreground: #292C29;
-      --accent: #285B45;
-      --accent-foreground: #FFFFFF;
-      --surface: #F1EEE8;
-      --muted: #64665F;
-      --border: #DEDAD2;
+      --background: #FBFCF9;
+      --foreground: #263B29;
+      --accent: #BEDDA7;
+      --accent-foreground: #263B29;
+      --surface: #EEF4E7;
+      --muted: #657360;
+      --border: #DFE6D8;
     }
   }
 }

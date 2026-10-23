@@ -5,7 +5,7 @@ import { useT } from '../../locales';
 import type { ToolKind } from '../../demo';
 import type { StringKey } from '../../locales';
 import { formatDateLabel } from '../../demo';
-import { colors, Icon, Screen, Text } from './ui';
+import { Icon, Screen, Text } from './ui';
 import { ScreenHeading, Sheet, StatusChip, Button } from './components';
 import { useToolHistory } from './history';
 import { toolCopy } from './strings';
@@ -23,7 +23,7 @@ interface ToolEntry {
 
 const TOOLS: ToolEntry[] = [
   { kind: 'soil', titleKey: 'tools.soil.title', detailKey: 'tools.soil.detail', status: 'ready', icon: 'flask-conical', route: '/tools/soil' },
-  { kind: 'cropPhoto', titleKey: 'tools.cropPhoto.title', detailKey: 'tools.cropPhoto.detail', status: 'limited', icon: 'camera', route: '/tools/photo?tool=cropPhoto' },
+  { kind: 'cropPhoto', titleKey: 'tools.cropPhoto.title', detailKey: 'tools.cropPhoto.detail', status: 'limited', icon: 'scan-line', route: '/tools/photo?tool=cropPhoto' },
   { kind: 'grainQuality', titleKey: 'tools.grainQuality.title', detailKey: 'tools.grainQuality.detail', status: 'unavailable', icon: 'wheat' },
   { kind: 'grainId', titleKey: 'tools.grainId.title', detailKey: 'tools.grainId.detail', status: 'limited', icon: 'scan' },
   { kind: 'forecast', titleKey: 'tools.forecast.title', detailKey: 'tools.forecast.detail', status: 'unavailable', icon: 'chart-no-axes-combined', route: '/tools/forecast' },
@@ -39,16 +39,6 @@ const statusLabel: Record<ToolStatus, StringKey> = {
 
 const statusTone = { ready: 'ready', limited: 'limited', unavailable: 'unavailable' } as const;
 
-const toolPalettes: Record<ToolKind, { background: string; ink: string }> = {
-  soil: { background: colors.clayBg, ink: colors.clayInk },
-  cropPhoto: { background: colors.blueBg, ink: colors.blueInk },
-  grainQuality: { background: colors.goldBg, ink: colors.goldInk },
-  grainId: { background: colors.goldBg, ink: colors.goldInk },
-  forecast: { background: colors.blueBg, ink: colors.blueInk },
-  mandi: { background: colors.surface, ink: colors.accentDeep },
-  satellite: { background: colors.surface, ink: colors.accentDeep },
-};
-
 const KIND_LABEL: Record<ToolKind, StringKey> = {
   soil: 'tools.soil.title',
   cropPhoto: 'tools.cropPhoto.title',
@@ -59,7 +49,7 @@ const KIND_LABEL: Record<ToolKind, StringKey> = {
   satellite: 'tools.satellite.title',
 };
 
-/** 07 · Independent tools with capability states and local history. */
+/** 07 · Independent tools — six entries with capability states and local history. */
 export function ToolsScreen() {
   const t = useT();
   const history = useToolHistory();
@@ -78,36 +68,33 @@ export function ToolsScreen() {
       <ScreenHeading
         title={t('tools.title')}
         subtitle={t('tools.subtitle')}
-        titleColor="#292C29"
+        titleColor="#263B29"
         subtitleSize={14}
       />
 
-      <View style={styles.catalog}>
-        {TOOLS.map(tool => {
+      <View>
+        {TOOLS.filter(tool => tool.route && tool.kind !== 'forecast').map(tool => {
           const usable = tool.status !== 'unavailable';
           return (
             <Pressable
               key={tool.titleKey}
               accessibilityRole="button"
-              accessibilityLabel={`${t(tool.titleKey)}. ${t(tool.detailKey)}. ${t(statusLabel[tool.status])}.`}
+              accessibilityLabel={`${t(tool.titleKey)}. ${t(tool.detailKey)}.`}
               onPress={() => open(tool)}
               android_ripple={{ color: 'rgba(38, 59, 41, 0.05)' }}
               style={({ pressed }) => [styles.row, pressed && styles.pressed]}
             >
-              <View style={[styles.iconCell, { backgroundColor: toolPalettes[tool.kind].background }]}>
-                <Icon name={tool.icon} size={24} color={usable ? toolPalettes[tool.kind].ink : colors.icon} strokeWidth={1.8} />
+              <View style={styles.iconCell}>
+                <Icon name={tool.icon} size={24} color={usable ? '#6B8C52' : '#A3AF99'} strokeWidth={1.6} />
               </View>
               <View style={styles.labels}>
                 <Text style={styles.title}>{t(tool.titleKey)}</Text>
-                <Text style={styles.sub}>{t(tool.detailKey)}</Text>
               </View>
-              <StatusChip label={t(statusLabel[tool.status])} tone={statusTone[tool.status]} />
+              {tool.status === 'ready' ? <Icon name="arrow-right" size={18} color="#7C8C72" /> : null}
             </Pressable>
           );
         })}
       </View>
-
-      <Text style={styles.note}>{t('tools.importNote')}</Text>
 
       {history.length > 0 ? (
         <View style={styles.history}>
@@ -142,7 +129,7 @@ export function ToolsScreen() {
           <View style={styles.sheetBody}>
             <StatusChip label={t(statusLabel[sheetTool.status])} tone={statusTone[sheetTool.status]} />
             <Text style={styles.body13}>{t(sheetTool.detailKey)}</Text>
-            <Text style={styles.body13}>{t('tools.unavailableNote')}</Text>
+            <Text style={styles.body13}>This feature is being prepared.</Text>
             {sheetTool.kind === 'grainId' ? (
               <Text style={styles.meta}>{toolCopy('tools.grainId.sheetBody')}</Text>
             ) : null}
@@ -161,18 +148,17 @@ function isoDay(timestamp: number): string {
 }
 
 const styles = StyleSheet.create({
-  catalog: { gap: 12 },
-  row: { minHeight: 100, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, padding: 16, borderRadius: 20, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.borderSoft },
+  row: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, marginBottom: 10, borderRadius: 18, backgroundColor: '#F2F5EE' },
   pressed: { backgroundColor: 'rgba(38, 59, 41, 0.03)' },
-  iconCell: { width: 48, height: 48, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
-  labels: { flex: 1, minWidth: 115, gap: 5 },
-  title: { fontFamily: 'DMSans_600SemiBold', fontSize: 16, lineHeight: 22, color: '#292C29' },
-  sub: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#64665F' },
-  subStrong: { fontFamily: 'DMSans_500Medium', fontSize: 13, lineHeight: 18, color: '#292C29' },
-  meta: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
-  eyebrow: { fontFamily: 'DMSans_600SemiBold', fontSize: 12, lineHeight: 16, letterSpacing: 0.4, color: '#64665F' },
-  body13: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#646861' },
-  note: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 19, color: '#64665F' },
+  iconCell: { width: 26, height: 24, justifyContent: 'center' },
+  labels: { flex: 1, gap: 5 },
+  title: { fontFamily: 'System', fontSize: 17, lineHeight: 23, color: '#263B29', fontWeight: '600' },
+  sub: { fontFamily: 'System', fontSize: 14, lineHeight: 20, color: '#52604D' },
+  subStrong: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#263B29' },
+  meta: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  eyebrow: { fontFamily: 'System', fontWeight: '600', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: '#657360' },
+  body13: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
+  note: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 18, color: '#657360' },
   history: { gap: 12, paddingTop: 4 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   historyLabel: { flex: 1, gap: 2 },

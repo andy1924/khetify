@@ -164,6 +164,30 @@ export function KeyValue({ label, value, layout = 'stack', strong = false, style
 }
 
 /* ------------------------------------------------------------------ */
+/* DemoBadge                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Small demo marker. The reference uses 11/500 chip text on EB F2 E4 at 99
+ * radius. Keep this the only engineering-facing badge on a screen.
+ */
+export function DemoBadge({
+  label = 'Demo',
+  style,
+}: {
+  label?: string;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[styles.demoBadge, style]} accessibilityLabel={`${label} data`}>
+      <Text variant="meta" weight="medium" color={colors.chipInk}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* IconSurface                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -553,7 +577,7 @@ export function LinkText({
 export { SectionLabel };
 
 const styles = StyleSheet.create({
-  divider: { height: StyleSheet.hairlineWidth, width: '100%' },
+  divider: { height: 0, width: '100%' },
   notice: {
     borderRadius: radii.xl,
     paddingHorizontal: 12,
@@ -566,6 +590,13 @@ const styles = StyleSheet.create({
   flexText: { flex: 1 },
   inlineRow: { paddingVertical: 2 },
   stack: { gap: 4 },
+  demoBadge: {
+    borderRadius: radii.pill,
+    backgroundColor: colors.chipBg,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
   toggle: {
     width: 36,
     height: 22,

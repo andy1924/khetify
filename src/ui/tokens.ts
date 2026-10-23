@@ -1,60 +1,54 @@
 /**
- * Friendly Khetify palette: warm neutral surfaces, readable charcoal type,
- * restrained green actions, and blue / terracotta supporting accents.
+ * Khetify design tokens, extracted from the final Pencil frame (Qx0SG).
+ * 390 × 844 reference · content padding 24 · section gap 20.
  */
 
 export const colors = {
-  background: '#FAF8F4',
-  ink: '#292C29',
-  heading: '#242824',
-  muted: '#64665F',
-  mutedSoft: '#686A63',
-  faint: '#686A63',
-  subtle: '#686A63',
+  background: '#FBFCF9',
+  ink: '#263B29',
+  heading: '#213827',
+  muted: '#657360',
+  mutedSoft: '#6A7667',
+  faint: '#6C7564',
+  subtle: '#697462',
 
-  accent: '#285B45',
-  accentPressed: '#386D55',
-  accentInk: '#FFFFFF',
-  accentDeep: '#285B45',
-  blueBg: '#EAF0F7',
-  blueInk: '#355E81',
-  clayBg: '#F6EAE1',
-  clayInk: '#965737',
-  goldBg: '#F6F0DC',
-  goldInk: '#7C642D',
+  accent: '#BEDDA7',
+  accentPressed: '#AFCF91',
+  accentInk: '#263B29',
+  accentDeep: '#3D5C30',
 
-  surface: '#F1EEE8',
-  surfaceSoft: '#F6F3ED',
-  surfaceMuted: '#F2EFE9',
-  surfaceAlt: '#ECEFF3',
-  surfaceTint: '#F2EEE5',
-  surfacePlain: '#FFFFFF',
-  sheet: '#FFFDFA',
+  surface: '#EEF4E7',
+  surfaceSoft: '#F6F8F3',
+  surfaceMuted: '#F2F5EE',
+  surfaceAlt: '#F0F4EB',
+  surfaceTint: '#EDF4E4',
+  surfacePlain: '#FBFCF9',
+  sheet: '#F9FBF5',
 
-  border: '#DEDAD2',
-  borderSoft: '#E9E5DD',
-  divider: '#E9E5DD',
+  border: '#DFE6D8',
+  borderSoft: '#E6EBE1',
+  divider: '#E6EBE1',
 
-  selected: '#E4ECE4',
-  chipBg: '#ECEFE9',
+  selected: '#D4E7BE',
+  chipBg: '#EBF2E4',
   chipInk: '#4A693D',
 
-  icon: '#565F59',
-  iconFaint: '#767A71',
+  icon: '#52664D',
+  iconFaint: '#A1AC96',
   iconQuiet: '#8AA474',
 
-  track: '#E8E4DC',
-  trackFill: '#386D55',
+  track: '#E7EDE0',
+  trackFill: '#AFCF91',
   toggleOff: '#D3DCCA',
   toggleOn: '#4E6B3C',
 
-  danger: '#963D32',
-  dangerBg: '#F9EAE6',
+  danger: '#78643A',
+  dangerBg: '#F6F0DF',
   warningBg: '#F6F0DF',
   warningInk: '#78643A',
   warningBody: '#76694C',
-  infoBg: '#EDF2F7',
-  infoInk: '#355E81',
+  infoBg: '#F4F7EF',
+  infoInk: '#5A714C',
   successBg: '#E9F1DF',
   successInk: '#2E452B',
 
@@ -91,11 +85,12 @@ export const radii = {
 } as const;
 
 export const fonts = {
-  regular: 'DMSans_400Regular',
-  medium: 'DMSans_500Medium',
-  semiBold: 'DMSans_600SemiBold',
-  bold: 'DMSans_700Bold',
-  fallback: 'DMSans_400Regular',
+  // Use the platform's native system face (SF Pro on iOS, system sans-serif elsewhere).
+  regular: 'System',
+  medium: 'System',
+  semiBold: 'System',
+  bold: 'System',
+  fallback: 'System',
 } as const;
 
 export type TextVariant =
@@ -118,23 +113,23 @@ type TextStyleToken = {
 
 export const typography: Record<TextVariant, TextStyleToken> = {
   // 30/600 — hero statements on Home
-  display: { fontFamily: fonts.semiBold, fontSize: 30, lineHeight: 40 },
+  display: { fontFamily: fonts.semiBold, fontSize: 30, lineHeight: 37.5 },
   // 28/600 — screen titles
   heading: { fontFamily: fonts.semiBold, fontSize: 28, lineHeight: 39 },
   // 21/600 — card and section titles
   title: { fontFamily: fonts.semiBold, fontSize: 21, lineHeight: 29 },
   // 16/600 — list titles
   subtitle: { fontFamily: fonts.semiBold, fontSize: 16, lineHeight: 22 },
-  // 16/400 — body copy
-  body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 22 },
-  // 16/500 — emphasised inline text
-  strong: { fontFamily: fonts.medium, fontSize: 16, lineHeight: 22 },
-  // 13/400 — supporting copy
-  caption: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
-  // 12/400 — footnotes
-  meta: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 16 },
-  // 12/600 — section labels
-  label: { fontFamily: fonts.semiBold, fontSize: 12, lineHeight: 16, letterSpacing: 0.4 },
+  // 14/400 — body copy
+  body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 24 },
+  // 14/500 — emphasised inline text
+  strong: { fontFamily: fonts.medium, fontSize: 16, lineHeight: 24 },
+  // 12/400 — supporting copy
+  caption: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 20 },
+  // 11/400 — footnotes, demo notes
+  meta: { fontFamily: fonts.regular, fontSize: 11, lineHeight: 15 },
+  // 10/600 — section labels (SEED TO GRAIN, YOUR NEXT STEP)
+  label: { fontFamily: fonts.semiBold, fontSize: 12, lineHeight: 18, letterSpacing: 0.2 },
 };
 
 /** Default text colour per variant, matching the reference hierarchy. */
@@ -151,7 +146,7 @@ export const textColors: Record<TextVariant, string> = {
 };
 
 /** Minimum accessible touch target. */
-export const touchTarget = 48;
+export const touchTarget = 56;
 
 export const contentPadding = 24;
 export const sectionGap = 20;

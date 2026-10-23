@@ -33,7 +33,6 @@ export type HeaderProps = {
  */
 export function Header({
   title,
-  subtitle,
   back = false,
   onBack,
   backLabel,
@@ -70,11 +69,6 @@ export function Header({
               {title}
             </Text>
           )}
-          {subtitle ? (
-            <Text variant={size === 'lg' ? 'caption' : 'meta'} color={colors.mutedSoft} style={styles.subtitle}>
-              {subtitle}
-            </Text>
-          ) : null}
         </View>
         {right ? <View style={styles.right}>{right}</View> : null}
       </View>

@@ -201,7 +201,7 @@ export function PhotoToolScreen() {
 
       {recorded ? (
         <View style={styles.recordedRow}>
-          <Icon name="check" size={15} color="#565F59" />
+          <Icon name="check" size={15} color="#52664D" />
           <Text style={styles.footnote}>{toolCopy('photo.recorded')}</Text>
         </View>
       ) : null}
@@ -251,9 +251,9 @@ function FixtureArt({ kind, compact }: { kind: Fixture['kind']; compact?: boolea
   return (
     <View style={[styles.art, { height }]} accessible={false}>
       <Svg width="100%" height="100%" viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice">
-        <Rect x="0" y="0" width="320" height="210" fill="#F4F1EA" />
+        <Rect x="0" y="0" width="320" height="210" fill="#F1F6EA" />
         {kind === 'leaf' ? <LeafArt /> : kind === 'grain' ? <GrainLotArt /> : <GrainCloseArt />}
-        <Rect x="0" y="0" width="320" height="210" fill="none" stroke="#DEDAD2" strokeWidth="2" />
+        <Rect x="0" y="0" width="320" height="210" fill="none" stroke="#DFE6D8" strokeWidth="2" />
       </Svg>
       <View style={styles.artBadge}>
         <Text style={styles.artBadgeText}>{toolCopy('photo.badge')}</Text>
@@ -340,13 +340,13 @@ function GrainCloseArt() {
 
 const styles = StyleSheet.create({
   unavailableBlock: { gap: 10, paddingVertical: 8 },
-  body: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#697460' },
-  footnote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
+  body: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#697460' },
+  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
 
   previewCard: {
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: '#F4F1EA',
+    backgroundColor: '#F1F6EA',
     minHeight: 210,
   },
   previewEmpty: {
@@ -357,13 +357,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   previewEmptyText: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 14,
-    lineHeight: 19,
-    color: '#64665F',
+    fontFamily: 'System', fontWeight: '400',
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#657360',
     textAlign: 'center',
   },
-  art: { width: '100%', backgroundColor: '#F4F1EA' },
+  art: { width: '100%', backgroundColor: '#F1F6EA' },
   artBadge: {
     position: 'absolute',
     left: 12,
@@ -373,19 +373,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  artBadgeText: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#4A693D' },
+  artBadgeText: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: '#4A693D' },
 
   previewMeta: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   previewMetaText: { flex: 1, gap: 3 },
-  previewTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 15, lineHeight: 21, color: '#292C29' },
+  previewTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: '#263B29' },
 
-  limitsCard: { backgroundColor: '#EDF2F7', borderRadius: 18, padding: 16, gap: 8 },
-  limitsTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 14, lineHeight: 19, color: '#5A714C' },
+  limitsCard: { backgroundColor: '#F4F7EF', borderRadius: 18, padding: 16, gap: 8 },
+  limitsTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: '#5A714C' },
   attributeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  attribute: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#646861' },
+  attribute: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#687560' },
 
   actions: { gap: 10 },
-  contextLine: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
+  contextLine: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
   recordedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 
   fixtureGrid: { flexDirection: 'row', gap: 10 },
@@ -399,9 +399,9 @@ const styles = StyleSheet.create({
   },
   fixtureCellActive: { borderColor: '#9DBA82' },
   fixtureLabel: {
-    fontFamily: 'DMSans_500Medium',
-    fontSize: 12,
-    lineHeight: 16,
+    fontFamily: 'System', fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 15,
     color: '#4A693D',
     paddingHorizontal: 4,
     paddingBottom: 4,

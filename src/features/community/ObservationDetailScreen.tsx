@@ -210,7 +210,7 @@ function Row({ label, value }: { label: string; value: string }) {
 
 const statusBadge = {
   reported: { backgroundColor: '#F0ECDC' },
-  reviewed: { backgroundColor: '#E9E6DF' },
+  reviewed: { backgroundColor: '#E8EDE3' },
   confirmed: { backgroundColor: '#DCECCF' },
 } as const;
 
@@ -234,17 +234,17 @@ const styles = StyleSheet.create({
   noPhoto: {
     minHeight: 96,
     borderRadius: 18,
-    backgroundColor: '#F2EFE9',
+    backgroundColor: '#F2F5EC',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  summaryCard: { backgroundColor: '#EDF2F7', borderRadius: 18, padding: 16, gap: 8 },
+  summaryCard: { backgroundColor: '#F4F7EF', borderRadius: 18, padding: 16, gap: 8 },
   summaryBody: { lineHeight: 20 },
-  metaCard: { backgroundColor: '#F2EFE9', borderRadius: 18, paddingHorizontal: 16, paddingVertical: 6 },
+  metaCard: { backgroundColor: '#F2F5EC', borderRadius: 18, paddingHorizontal: 16, paddingVertical: 6 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   metaValue: { flex: 1, textAlign: 'right' },
-  limitsCard: { backgroundColor: '#F1EEE8', borderRadius: 18, padding: 16, gap: 8 },
+  limitsCard: { backgroundColor: '#EEF4E7', borderRadius: 18, padding: 16, gap: 8 },
   limitsHead: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
   limitsBody: { lineHeight: 16 },
   pressed: { opacity: 0.85 },

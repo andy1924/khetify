@@ -27,7 +27,7 @@ export const profileCopy = {
 
   'profile.consentHeading': 'Consent',
   'profile.consentNote':
-    'These switches only change this in-memory demo. No notification service, upload or live location is used.',
+    'Choose what you want to share.',
   'profile.consent.locationDetail': 'Used only for the distance label on demo reports.',
   'profile.consent.communityDetail': 'Reports you submit appear only in this demo feed.',
   'profile.consent.notificationsDetail': 'Reminders stay inside this demo while it is open.',
@@ -52,10 +52,10 @@ export const profileCopy = {
   'profile.freshness.farmValue': 'Saved on this device only',
 
   'profile.about.body':
-    'Khetify demonstrates a seed-to-grain plan and six independent tools. Every value, price and result is sample data. It does not diagnose crops or soil, and it does not recommend pesticide doses.',
+    'Khetify helps you plan farm work, understand soil tests and compare market prices. This version includes sample data.',
   'profile.about.simulated': 'Simulated in this demo',
   'profile.about.simulatedBody':
-    'Sign-in, soil interpretation, market prices, forecasts and community posting are local simulations. Nothing is sent to a server.',
+    'Sample results help you explore the app. Check your own reports and current market prices before making farm decisions.',
   'profile.about.resetTitle': 'Demo controls',
   'profile.about.resetBody': 'Reset restores every sample value. Sign out clears the demo session.',
 

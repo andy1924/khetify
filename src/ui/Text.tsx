@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, type TextProps as RNTextProps, type StyleProp, type TextStyle } from 'react-native';
-import { colors, fonts, textColors, typography, type TextVariant } from './tokens';
+import { colors, textColors, typography, type TextVariant } from './tokens';
 
 /** Reference variants. `primary`/`secondary`/`muted` are accepted colour shorthands. */
 export type TextTone =
@@ -39,6 +39,13 @@ const toneColors: Record<TextTone, string> = {
   brand: colors.chipInk,
 };
 
+const weights = {
+  regular: '400',
+  medium: '500',
+  semiBold: '600',
+  bold: '700',
+} as const;
+
 export function Text({ variant = 'body', color, tone, weight, align, style, ...rest }: TextProps) {
   const token = typography[variant];
   return (
@@ -46,7 +53,8 @@ export function Text({ variant = 'body', color, tone, weight, align, style, ...r
       {...rest}
       style={[
         {
-          fontFamily: weight ? fonts[weight] : token.fontFamily,
+          fontFamily: token.fontFamily,
+          fontWeight: weight ? weights[weight] : ['display', 'heading', 'title', 'subtitle', 'label'].includes(variant) ? '600' : variant === 'strong' ? '500' : '400',
           fontSize: token.fontSize,
           lineHeight: token.lineHeight,
           letterSpacing: token.letterSpacing,

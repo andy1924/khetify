@@ -20,7 +20,7 @@ test('capture tiles use complete daily intervals without duplicates and preserve
       if (value === undefined) delete process.env[key]; else process.env[key] = value;
     }
   });
-  let cloud = 0.1, clearPixels = 50, observedPixels = 55, empty = false, calls = 0;
+  let cloud = 0.1, clearPixels = 50, observedPixels = 55, empty = false, calls = 0, imageCalls = 0, imageFails = false;
   const capturedAt = '2026-10-22T05:43:32.768Z';
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     if (url.includes('/token')) return Response.json({ access_token: 'test-token', expires_in: 3600 });
@@ -28,6 +28,15 @@ test('capture tiles use complete daily intervals without duplicates and preserve
       { properties: { datetime: '2026-10-22T05:43:29.336Z' } },
       { properties: { datetime: capturedAt } },
     ] });
+    if (url.endsWith('/process/v1')) {
+      imageCalls++;
+      const body = JSON.parse(options.body);
+      assert.deepEqual(body.input.data[0].dataFilter.timeRange, {
+        from: '2026-10-22T00:00:00.000Z', to: '2026-10-23T00:00:00.000Z',
+      });
+      assert.equal(options.headers.Accept, 'image/png');
+      return imageFails ? new Response(null, { status: 503 }) : new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'Content-Type': 'image/png' } });
+    }
     assert.ok(url.endsWith('/statistics/v1'));
     const body = JSON.parse(options.body), { timeRange, aggregationInterval } = body.aggregation;
     assert.equal(timeRange.from, '2026-10-22T00:00:00.000Z');
@@ -63,6 +72,13 @@ test('capture tiles use complete daily intervals without duplicates and preserve
   assert.equal(clear.cloudPercent, 10);
   assert.equal(clear.fieldCoveragePercent, 100);
   assert.equal(clear.confidence, 'moderate');
+  assert.equal(clear.imageUrl, 'data:image/png;base64,iVBORw==');
+  imageFails = true;
+  const noImage = await read();
+  assert.equal(noImage.ndvi, 0.64);
+  assert.equal(noImage.imageUrl, undefined);
+  assert.ok(noImage.imageError);
+  imageFails = false;
   cloud = 0.8;
   assert.equal((await read()).ndvi, null);
   cloud = 0.1; clearPixels = 4;
@@ -76,7 +92,8 @@ test('capture tiles use complete daily intervals without duplicates and preserve
   assert.equal(missing.ndvi, null);
   assert.equal(missing.fieldCoveragePercent, null);
   assert.equal(missing.confidence, 'low');
-  assert.equal(calls, 5);
+  assert.equal(calls, 6);
+  assert.equal(imageCalls, 6);
 });
 test('only reviewed, consented, nearby opted-in fields receive redacted alerts', async () => {
   const now = Date.now(), location = {latitude:20,longitude:75};

@@ -14,6 +14,18 @@ async function post(path, body) {
   if (!response.ok) throw new Error('Copernicus request failed.');
   return response.json();
 }
+const imageScript = `//VERSION=3
+function setup() { return { input: ['B02','B03','B04','dataMask'], output: { bands: 4 } }; }
+function evaluatePixel(s) { return [2.5*s.B04, 2.5*s.B03, 2.5*s.B02, s.dataMask]; }`;
+async function fieldImage(geometry, from, to) {
+  const response = await fetch(`${base}/process/v1`, {
+    method: 'POST', headers: { Authorization: `Bearer ${await accessToken()}`, 'Content-Type': 'application/json', Accept: 'image/png' },
+    body: JSON.stringify({ input: { bounds: { geometry }, data: [{ type: 'sentinel-2-l2a', dataFilter: { timeRange: { from, to } } }] }, output: { width: 256, height: 256, responses: [{ identifier: 'default', format: { type: 'image/png' } }] }, evalscript: imageScript }),
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!response.ok) throw new Error('Satellite image could not be loaded. Please retry.');
+  return `data:image/png;base64,${Buffer.from(await response.arrayBuffer()).toString('base64')}`;
+}
 export function geometryFor(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3 || polygon.length > 50 || polygon.some(p => !p || !Number.isFinite(p.latitude) || !Number.isFinite(p.longitude) || p.latitude < 6 || p.latitude > 38 || p.longitude < 68 || p.longitude > 98)) throw Object.assign(new Error('Supply 3–50 field corners in the India service envelope (6–38 N, 68–98 E).'), { status: 400 });
   const coordinates = polygon.map(p => [p.longitude, p.latitude]);
@@ -42,7 +54,7 @@ export const copernicusProvider = {
     }
     const scenes = [...days.values()].slice(0, 3);
     if (!scenes.length) return { status: 'no-coverage', observations: [] };
-    const observations = await Promise.all(scenes.map(async scene => {
+    const observations = await Promise.all(scenes.map(async (scene, index) => {
       const capturedAt = scene.properties.datetime;
       const start = `${capturedAt.slice(0, 10)}T00:00:00.000Z`, end = new Date(Date.parse(start) + 86400000).toISOString();
       // A complete UTC day matches P1D and includes the actual pixel acquisition
@@ -58,7 +70,9 @@ export const copernicusProvider = {
         ? Math.max(0, Math.min(100, 100 * observedPixels / fieldPixels)) : null;
       const cloud = Number.isFinite(q?.mean) ? q.mean * 100 : null;
       const usable = coverage !== null && coverage >= 80 && cloud !== null && cloud < 30 && n?.sampleCount - n?.noDataCount >= 5;
-      return { capturedAt, source: 'Copernicus Sentinel-2 L2A · ~10 m sampling', cloudPercent: cloud, fieldCoveragePercent: coverage,
+      // Render the latest capture only; the remaining captures supply dated comparisons.
+      const image = index === 0 ? await fieldImage(geometry, start, end).then(imageUrl => ({ imageUrl }), () => ({ imageError: 'Image could not be loaded. Refresh to retry.' })) : {};
+      return { ...image, capturedAt, source: 'Copernicus Sentinel-2 L2A · ~10 m sampling', cloudPercent: cloud, fieldCoveragePercent: coverage,
         confidence: usable ? 'moderate' : 'low', ndvi: usable && Number.isFinite(n?.mean) ? n.mean : null,
         summary: usable ? 'Vegetation signal for this capture. Compare dated values alongside field inspection; crop stage and soil background affect NDVI.' : 'Cloudy image, insufficient clear pixels or incomplete coverage. No reliable vegetation signal available.' };
     }));
