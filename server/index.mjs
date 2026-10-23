@@ -7,6 +7,11 @@ import { lookupPlace } from './osm.mjs';
 import { enrichComparison } from './comparison.mjs';
 import { analysisTokens, cropScope, identifyCrop, PHOTO_BODY_LIMIT, PHOTO_LIMITATIONS } from './crop-vision.mjs';
 import { photoPrices } from './photo-prices.mjs';
+import { grainScreening, reviewGrainScreening } from './grain-screening.mjs';
+import { ARCHIVE_SOURCE, localPriceRows } from './local-prices.mjs';
+import { marketCropScope, sourceCatalog } from './market-crops.mjs';
+import { grainPrices } from './grain-prices.mjs';
+import { createHistorySession, grainHistory } from './grain-history.mjs';
 
 const refreshes = new Map();
 async function refresh(query) {
@@ -44,6 +49,13 @@ function originFrom(params) {
 
 async function priceResult(query, origin, radius, suppliedLocations = []) {
   if (!query.state || !query.commodity) throw fail('Choose a state and crop.');
+  if (process.env.PRICE_PROVIDER === 'local') {
+    const rows = compare(await localPriceRows(query), query, [...suppliedLocations, ...await readJson('markets.json', [])], origin, radius);
+    const provenance = await readJson('local-price-provenance.json', null);
+    return { rows: rows.slice(0, 100), total: rows.length, truncated: rows.length > 100, source: ARCHIVE_SOURCE, sync: null,
+      warning: rows.length ? 'Historical sourced archive. Check each report date; these are not current offers.' : 'No sourced archive records match this crop and area.',
+      servedAt: new Date().toISOString(), cached: true, providerMode: 'local_archive', locationCoverage: `${rows.filter(r => r.location).length}/${rows.length}`, archiveCollectedAt: provenance?.collectedAt ?? null };
+  }
   let warning = null, sync = null;
   try { sync = await refresh(query); } catch (error) { warning = error.message; }
   const stored = await readJson('prices.json', []);
@@ -69,7 +81,7 @@ async function readBody(req, limit = 32768) {
 }
 
 async function forecastResult(query, horizon) {
-  const rows = (await readJson('prices.json', [])).filter(r => matches(r, query));
+  const rows = process.env.PRICE_PROVIDER === 'local' ? await localPriceRows(query) : (await readJson('prices.json', [])).filter(r => matches(r, query));
   const policies = await readJson('policies.json', []);
   const seriesKey = rows[0] ? keyOf(rows[0]) : null;
   const policy = policies.find(p => p.seriesKey === seriesKey && p.horizonDays === horizon);
@@ -119,8 +131,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     const send = (code, body) => { res.writeHead(code); res.end(JSON.stringify(body)); };
-    if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); return send(204, null); }
-    if (req.method !== 'GET' && !(req.method === 'POST' && ['/api/compare', '/api/photo-prices'].includes(req.url))) return send(405, { error: 'Use GET, POST /api/compare or POST /api/photo-prices.' });
+    if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); return send(204, null); }
     try {
       const address = req.socket.remoteAddress;
       const current = rate.get(address);
@@ -130,7 +141,38 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       if (rate.size > 10000) for (const [ip, value] of rate) if (Date.now() - value.at > 60000) rate.delete(ip);
       const url = new URL(req.url, 'http://localhost');
       const params = url.searchParams;
-      if (url.pathname === '/api/photo-prices/capabilities') return send(200, { supportedCrops: await cropScope(), recognitionConfigured: Boolean(process.env.OPENAI_API_KEY && process.env.CROP_VISION_MODEL),
+      const posts = ['/api/compare', '/api/photo-prices', '/api/grain-screening', '/api/grain-screening/review', '/api/grain-screening/prices', '/api/grain-history', '/api/grain-history/session'];
+      const historyPath = url.pathname === '/api/grain-history' || /^\/api\/grain-history\/[a-f0-9-]{36}$/.test(url.pathname);
+      if (req.method !== 'GET' && !(req.method === 'POST' && posts.includes(url.pathname)) && !(req.method === 'DELETE' && historyPath)) return send(405, { error: 'Use a supported read, screening or history endpoint.' });
+      if (url.pathname === '/api/grain-history/session') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST with explicit storage consent.' });
+        return send(201, await createHistorySession(await readBody(req)));
+      }
+      if (historyPath) {
+        const recordId = url.pathname === '/api/grain-history' ? undefined : url.pathname.split('/').at(-1);
+        if (recordId && req.method !== 'DELETE') return send(405, { error: 'Use DELETE to remove a history record.' });
+        return send(req.method === 'POST' ? 201 : 200, await grainHistory(req.headers.authorization, req.method,
+          req.method === 'POST' ? await readBody(req) : undefined, recordId));
+      }
+      if (url.pathname === '/api/grain-screening/prices') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST with reviewed observations and a confirmed source commodity.' });
+        return send(200, await grainPrices(await readBody(req), { parseInput: comparisonInput, priceResult, forecastResult, locate }));
+      }
+      if (url.pathname === '/api/crops') return send(200, { crops: await marketCropScope(queryFrom(params)),
+        automaticIdentificationCrops: await cropScope(), automaticGrainScreeningConfigured: Boolean(process.env.GRAIN_DETECTOR_URL),
+        limitation: 'Source catalog coverage is not validated detector coverage. Each crop needs its own detector validation manifest.' });
+      if (url.pathname === '/api/grain-screening/review') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST with explicitly reviewed observations.' });
+        return send(200, reviewGrainScreening(await readBody(req)));
+      }
+      if (url.pathname === '/api/grain-screening') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST with a supported grain photo and upload consent.' });
+        if (activePhotos >= 2) return send(429, { error: 'Photo processing is busy. Please retry shortly.' });
+        activePhotos++;
+        try { return send(200, await grainScreening(await readBody(req, PHOTO_BODY_LIMIT))); }
+        finally { activePhotos--; }
+      }
+      if (url.pathname === '/api/photo-prices/capabilities') return send(200, { supportedCrops: await cropScope(), priceCrops: await marketCropScope(), manualPriceLookupWithoutPhoto: true, recognitionConfigured: Boolean(process.env.OPENAI_API_KEY && process.env.CROP_VISION_MODEL),
         maxPhotoBytes: 5 * 1024 * 1024, acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'], farmerConfirmationRequired: true, limitations: PHOTO_LIMITATIONS });
       if (url.pathname === '/api/photo-prices') {
         if (req.method !== 'POST') return send(405, { error: 'Use POST with a crop photo or analysis token.' });
@@ -158,9 +200,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       if (!['/api/prices', '/api/catalog', '/api/forecast'].includes(url.pathname)) return send(404, { error: 'Not found.' });
       const query = queryFrom(params);
       if (url.pathname === '/api/catalog') {
-        const rows = (await readJson('prices.json', [])).filter(r => matches(r, query));
-        const series = [...new Map(rows.map(r => [keyOf(r), { state: r.state, district: r.district, market: r.market, commodity: r.commodity, variety: r.variety, grade: r.grade, unit: r.unit }])).values()];
-        return send(200, { series });
+        return send(200, { series: await sourceCatalog(query) });
       }
       if (!query.state || !query.commodity) throw fail('Choose a state and crop.');
       if (url.pathname === '/api/forecast') {

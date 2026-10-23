@@ -10,7 +10,8 @@
     "start": "node --env-file-if-exists=.env.local index.mjs",
     "test": "node --test *.test.mjs",
     "import:history": "node --env-file-if-exists=.env.local import-history.mjs",
-    "sync": "node --env-file-if-exists=.env.local sync.mjs"
+    "sync": "node --env-file-if-exists=.env.local sync.mjs",
+    "collect:public-prices": "node --env-file-if-exists=.env.local collect-public-prices.mjs"
   },
   "dependencies": {
     "sharp": "^0.35.5"
