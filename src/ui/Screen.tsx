@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, contentPadding, sectionGap } from './tokens';
+import { useNavigationInset } from './NavigationInset';
 
 export type ScreenProps = {
   children: React.ReactNode;
@@ -51,7 +52,9 @@ export function Screen({
   testID,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigationInset = useNavigationInset();
   const bottomInset = bottom ? Math.max(insets.bottom, 12) : 0;
+  const contentBottomInset = footer ? bottomInset : Math.max(bottomInset, navigationInset);
   const topInset = 8;
 
   const body = scroll ? (
@@ -59,7 +62,7 @@ export function Screen({
       style={styles.flex}
       contentContainerStyle={[
         styles.content,
-        { gap, paddingTop: topInset, paddingBottom: 24 + bottomInset },
+        { gap, paddingTop: topInset, paddingBottom: 24 + contentBottomInset },
         contentStyle,
       ]}
       showsVerticalScrollIndicator={false}
@@ -74,7 +77,7 @@ export function Screen({
       style={[
         styles.flex,
         styles.content,
-        { gap, paddingTop: topInset, paddingBottom: 24 + bottomInset },
+        { gap, paddingTop: topInset, paddingBottom: 24 + contentBottomInset },
         contentStyle,
       ]}
     >
@@ -91,14 +94,14 @@ export function Screen({
         >
           {body}
           {footer ? (
-            <View style={[styles.footer, { paddingBottom: Math.max(bottomInset, 16) }]}>{footer}</View>
+            <View style={[styles.footer, { paddingBottom: Math.max(bottomInset, navigationInset, 16) }]}>{footer}</View>
           ) : null}
         </KeyboardAvoidingView>
       ) : (
         <>
           {body}
           {footer ? (
-            <View style={[styles.footer, { paddingBottom: Math.max(bottomInset, 16) }]}>{footer}</View>
+            <View style={[styles.footer, { paddingBottom: Math.max(bottomInset, navigationInset, 16) }]}>{footer}</View>
           ) : null}
         </>
       )}

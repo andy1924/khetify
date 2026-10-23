@@ -25,23 +25,37 @@ export function geometryFor(polygon) {
   return { type: 'Polygon', coordinates: [coordinates] };
 }
 const evalscript = `//VERSION=3
-function setup() { return { input: [{ bands: ['B04','B08','SCL','dataMask'] }], output: [{ id:'ndvi', bands:1 },{ id:'quality', bands:1 },{ id:'dataMask', bands:1 }] }; }
-function evaluatePixel(s) { let bad = [0,1,3,8,9,10,11].includes(s.SCL); return { ndvi: [bad || s.B08+s.B04===0 ? NaN : (s.B08-s.B04)/(s.B08+s.B04)], quality:[bad ? 1 : 0], dataMask:[s.dataMask] }; }`;
+function setup() { return { input: [{ bands: ['B04','B08','SCL','dataMask'] }], output: [{ id:'ndvi', bands:1 },{ id:'quality', bands:1 },{ id:'dataMask', bands:['ndvi','quality'] }] }; }
+function evaluatePixel(s) { let bad = [0,1,3,8,9,10,11].includes(s.SCL), valid = !bad && s.B08+s.B04>0; return { ndvi: [valid ? (s.B08-s.B04)/(s.B08+s.B04) : 0], quality:[bad ? 1 : 0], dataMask:[s.dataMask * (valid ? 1 : 0), s.dataMask] }; }`;
 export const copernicusProvider = {
   async getObservations(polygon) {
     const geometry = geometryFor(polygon);
     if (!process.env.CDSE_CLIENT_ID || !process.env.CDSE_CLIENT_SECRET) return { status: 'unconfigured', observations: [] };
     const to = new Date(), from = new Date(to.getTime() - 30 * 86400000);
     const catalog = await post('/catalog/v1/search', { collections: ['sentinel-2-l2a'], intersects: geometry, datetime: `${from.toISOString()}/${to.toISOString()}`, limit: 100 });
-    const scenes = [...new Map((catalog.features || []).sort((a,b) => b.properties.datetime.localeCompare(a.properties.datetime)).map(f => [f.properties.datetime, f])).values()].slice(0, 3);
+    // Adjacent catalog tiles can describe the same pass with timestamps seconds
+    // apart. Request one daily mosaic instead of treating each tile as a capture.
+    const days = new Map();
+    for (const scene of (catalog.features || []).sort((a,b) => b.properties.datetime.localeCompare(a.properties.datetime))) {
+      const day = scene.properties.datetime.slice(0, 10);
+      if (!days.has(day)) days.set(day, scene);
+    }
+    const scenes = [...days.values()].slice(0, 3);
     if (!scenes.length) return { status: 'no-coverage', observations: [] };
     const observations = await Promise.all(scenes.map(async scene => {
       const capturedAt = scene.properties.datetime;
-      const start = new Date(Date.parse(capturedAt) - 1000).toISOString(), end = new Date(Date.parse(capturedAt) + 1000).toISOString();
+      const start = `${capturedAt.slice(0, 10)}T00:00:00.000Z`, end = new Date(Date.parse(start) + 86400000).toISOString();
+      // A complete UTC day matches P1D and includes the actual pixel acquisition
+      // times, which can differ from a catalog tile's nominal timestamp.
       const stats = await post('/statistics/v1', { input: { bounds: { geometry }, data: [{ type: 'sentinel-2-l2a' }] }, aggregation: { timeRange: { from: start, to: end }, aggregationInterval: { of: 'P1D' }, resx: 0.0001, resy: 0.0001, evalscript } });
       const outputs = stats.data?.[0]?.outputs;
       const n = outputs?.ndvi?.bands?.B0?.stats, q = outputs?.quality?.bands?.B0?.stats;
-      const coverage = q?.sampleCount > 0 ? 100 * (1 - q.noDataCount / q.sampleCount) : null;
+      // sampleCount includes the enclosing raster rectangle; noDataCount also
+      // includes pixels outside the polygon. Only field pixels belong below.
+      const fieldPixels = stats.geometryPixelCount;
+      const observedPixels = q?.sampleCount - q?.noDataCount;
+      const coverage = Number.isFinite(fieldPixels) && fieldPixels > 0 && Number.isFinite(observedPixels)
+        ? Math.max(0, Math.min(100, 100 * observedPixels / fieldPixels)) : null;
       const cloud = Number.isFinite(q?.mean) ? q.mean * 100 : null;
       const usable = coverage !== null && coverage >= 80 && cloud !== null && cloud < 30 && n?.sampleCount - n?.noDataCount >= 5;
       return { capturedAt, source: 'Copernicus Sentinel-2 L2A · ~10 m sampling', cloudPercent: cloud, fieldCoveragePercent: coverage,

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { runInNewContext } from 'node:vm';
 import { geometryFor, copernicusProvider } from './satellite.mjs';
 import { deliverReviewedAlerts } from './pest-alerts.mjs';
 test('invalid and oversized field requests rejected', () => {
@@ -9,6 +10,73 @@ test('invalid and oversized field requests rejected', () => {
 test('missing credentials never produces observations', async () => {
   if (process.env.CDSE_CLIENT_ID || process.env.CDSE_CLIENT_SECRET) return;
   assert.deepEqual(await copernicusProvider.getObservations([{latitude:20,longitude:75},{latitude:20.001,longitude:75},{latitude:20,longitude:75.001}]), {status:'unconfigured',observations:[]});
+});
+test('capture tiles use complete daily intervals without duplicates and preserve NDVI quality gates', async t => {
+  const previous = { CDSE_CLIENT_ID: process.env.CDSE_CLIENT_ID, CDSE_CLIENT_SECRET: process.env.CDSE_CLIENT_SECRET };
+  process.env.CDSE_CLIENT_ID = 'test-client';
+  process.env.CDSE_CLIENT_SECRET = 'test-secret';
+  t.after(() => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  });
+  let cloud = 0.1, clearPixels = 50, observedPixels = 55, empty = false, calls = 0;
+  const capturedAt = '2026-10-22T05:43:32.768Z';
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (url.includes('/token')) return Response.json({ access_token: 'test-token', expires_in: 3600 });
+    if (url.includes('/catalog/')) return Response.json({ features: [
+      { properties: { datetime: '2026-10-22T05:43:29.336Z' } },
+      { properties: { datetime: capturedAt } },
+    ] });
+    assert.ok(url.endsWith('/statistics/v1'));
+    const body = JSON.parse(options.body), { timeRange, aggregationInterval } = body.aggregation;
+    assert.equal(timeRange.from, '2026-10-22T00:00:00.000Z');
+    assert.equal(timeRange.to, '2026-10-23T00:00:00.000Z');
+    assert.ok(Date.parse(timeRange.from) < Date.parse(capturedAt));
+    assert.ok(Date.parse(timeRange.to) > Date.parse(capturedAt));
+    assert.equal(aggregationInterval.of, 'P1D');
+    const script = runInNewContext(body.aggregation.evalscript + '; ({ setup, evaluatePixel })');
+    assert.deepEqual(Array.from(script.setup().output[2].bands), ['ndvi', 'quality']);
+    const cloudy = script.evaluatePixel({ B04: 0.1, B08: 0.5, SCL: 9, dataMask: 1 });
+    assert.deepEqual(Array.from(cloudy.dataMask), [0, 1]);
+    assert.equal(cloudy.quality[0], 1);
+    const clear = script.evaluatePixel({ B04: 0.1, B08: 0.5, SCL: 4, dataMask: 1 });
+    assert.deepEqual(Array.from(clear.dataMask), [1, 1]);
+    assert.ok(Math.abs(clear.ndvi[0] - 2 / 3) < 1e-6);
+    assert.equal(script.evaluatePixel({ B04: 0, B08: 0, SCL: 4, dataMask: 1 }).dataMask[0], 0);
+    calls++;
+    return Response.json({ status: 'OK', geometryPixelCount: 55, data: empty ? [] : [{ outputs: {
+      ndvi: { bands: { B0: { stats: { mean: 0.64, sampleCount: 100, noDataCount: 100 - clearPixels } } } },
+      quality: { bands: { B0: { stats: { mean: cloud, sampleCount: 100, noDataCount: 100 - observedPixels } } } },
+    } }] });
+  });
+  const { copernicusProvider: provider } = await import('./satellite.mjs?partial-interval-test');
+  const polygon = [{ latitude: 20, longitude: 75 }, { latitude: 20.001, longitude: 75 }, { latitude: 20, longitude: 75.001 }];
+  const read = async () => {
+    const result = await provider.getObservations(polygon);
+    assert.equal(result.observations.length, 1);
+    assert.equal(result.observations[0].capturedAt, capturedAt);
+    return result.observations[0];
+  };
+  const clear = await read();
+  assert.equal(clear.ndvi, 0.64);
+  assert.equal(clear.cloudPercent, 10);
+  assert.equal(clear.fieldCoveragePercent, 100);
+  assert.equal(clear.confidence, 'moderate');
+  cloud = 0.8;
+  assert.equal((await read()).ndvi, null);
+  cloud = 0.1; clearPixels = 4;
+  assert.equal((await read()).ndvi, null);
+  clearPixels = 40; observedPixels = 40;
+  const partial = await read();
+  assert.equal(partial.ndvi, null);
+  assert.ok(partial.fieldCoveragePercent < 80);
+  empty = true;
+  const missing = await read();
+  assert.equal(missing.ndvi, null);
+  assert.equal(missing.fieldCoveragePercent, null);
+  assert.equal(missing.confidence, 'low');
+  assert.equal(calls, 5);
 });
 test('only reviewed, consented, nearby opted-in fields receive redacted alerts', async () => {
   const now = Date.now(), location = {latitude:20,longitude:75};
