@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Khetify",
+    "slug": "khetify",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "khetify",
+    "userInterfaceStyle": "light",
+    "android": { "package": "com.khetify.demo", "predictiveBackGestureEnabled": true, "softwareKeyboardLayoutMode": "resize" },
+    "web": { "output": "single" },
+    "plugins": ["expo-router", ["expo-splash-screen", { "backgroundColor": "#FBFCF9" }]],
+    "experiments": { "typedRoutes": false }
+  }
+}

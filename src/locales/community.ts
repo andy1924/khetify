@@ -1,0 +1,60 @@
+export const communityCopy = {
+  'community.filterSheet': 'Filter reports',
+  'community.filterNote':
+    'Filters use sample distances, crops and times from the demo feed. Nothing leaves this device.',
+  'community.filter.done': 'Show reports',
+  'community.time.justNow': 'Just now',
+  'community.dismiss': 'Dismiss',
+
+  'community.photo.fixture': 'Fixture photo selected',
+  'community.photo.remove': 'Remove photo',
+  'community.photo.change': 'Change photo',
+  'community.photo.pickerTitle': 'Choose a demo photo',
+  'community.photo.cameraTitle': 'Camera · demo fixtures',
+  'community.photo.galleryTitle': 'Gallery · demo fixtures',
+  'community.photo.pickerNote':
+    'Illustrated demo images only. No camera, gallery permission or upload is used.',
+  'community.photo.badge': 'Fixture',
+  'community.photo.a11y': 'Demo photo',
+
+  'compose.typeSheet': 'Observation type',
+  'compose.type.pest': 'Pest sighting',
+  'compose.type.water': 'Water stress',
+  'compose.type.other': 'Other observation',
+  'compose.observedRequired': 'Add when you noticed this.',
+  'compose.districtRequired': 'Add your district.',
+  'compose.districtApproximate': 'Using the approximate demo location.',
+  'compose.locationOn': 'Approximate location · On',
+  'compose.photoAddA11y': 'Add a demo photo',
+
+  'detail.back': 'Community',
+  'detail.notFound': 'This report is not in the demo feed.',
+  'detail.notFoundBody': 'Reports are kept only in memory while this demo is open.',
+  'detail.backToFeed': 'Back to feed',
+  'detail.summary': 'What was reported',
+  'detail.meta': 'Report details',
+  'detail.status': 'Status',
+  'detail.evidence': 'Evidence & limitations',
+  'detail.evidenceSheetTitle': 'Evidence & limitations',
+  'detail.evidenceSheetBody':
+    'Statuses are sample states in this demo. Reported means a farmer observation was entered, Reviewed means someone checked it for relevance, and Confirmed means it matched evidence in the demo. None of these is a diagnosis or treatment advice.',
+  'detail.evidenceReported': 'Reported · entered by a farmer',
+  'detail.evidenceReviewed': 'Reviewed · checked for relevance only',
+  'detail.evidenceConfirmed': 'Confirmed · verified against demo evidence',
+  'detail.privacyTitle': 'Privacy',
+  'detail.privacyBody':
+    'Exact farm locations are never displayed. Only district-level location is shown, and reports stay in this in-app demo feed.',
+  'detail.limitsTitle': 'Limitations',
+  'detail.limitsBody':
+    'A nearby report may not describe conditions on your farm. This demo does not diagnose crops and does not recommend treatment.',
+  'detail.source': 'Source',
+  'detail.sourceValue': 'Local demo feed',
+  'detail.observed': 'Observed',
+  'detail.distance': 'Distance',
+  'detail.cropLabel': 'Crop',
+  'detail.districtLabel': 'District',
+  'detail.reportedLabel': 'Reported',
+  'detail.noPhoto': 'No photo attached.',
+  'detail.footer': 'Demo report · In-app feed only.',
+} as const;
+export type CommunityCopyKey = keyof typeof communityCopy;

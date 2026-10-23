@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+@import 'uniwind';
+@import 'heroui-native/styles';
+
+@layer theme {
+  :root {
+    @variant light {
+      --background: #FBFCF9;
+      --foreground: #263B29;
+      --accent: #BEDDA7;
+      --accent-foreground: #263B29;
+      --surface: #EEF4E7;
+      --muted: #657360;
+      --border: #DFE6D8;
+    }
+  }
+}
