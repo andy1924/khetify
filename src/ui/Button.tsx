@@ -1,9 +1,9 @@
 import React from 'react';
+import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
-  View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -80,6 +80,8 @@ export function Button({
   testID,
 }: ButtonProps) {
   const text = title ?? label ?? '';
+  const pressScale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: pressScale.get() }] }));
   const inactive = disabled || loading;
   const iconColor = inactive ? colors.disabled : labelColors[variant];
 
@@ -100,6 +102,8 @@ export function Button({
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}
       onPress={onPress}
+      onPressIn={() => { pressScale.set(withTiming(0.97, { duration: 120, reduceMotion: ReduceMotion.System })); }}
+      onPressOut={() => { pressScale.set(withTiming(1, { duration: 180, reduceMotion: ReduceMotion.System })); }}
       testID={testID}
       android_ripple={{ color: 'rgba(38, 59, 41, 0.10)', borderless: false }}
       style={({ pressed }) => [
@@ -118,7 +122,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator size="small" color={labelColors[variant]} />
       ) : (
-        <View style={styles.content}>
+        <Animated.View style={[styles.content, pressStyle]}>
           {renderIcon(icon)}
           {children ?? (
             <Text
@@ -132,7 +136,7 @@ export function Button({
           )}
           {trailingIcon ? renderIcon(trailingIcon) : null}
           {!trailingIcon && trailingArrow && !inactive && !children ? renderIcon(undefined, 'arrow-right') : null}
-        </View>
+        </Animated.View>
       )}
     </Pressable>
   );

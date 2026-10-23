@@ -39,11 +39,11 @@ const toneColors: Record<TextTone, string> = {
   brand: colors.chipInk,
 };
 
-const weightFonts = {
-  regular: 'Inter_400Regular',
-  medium: 'Inter_500Medium',
-  semiBold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
+const weights = {
+  regular: '400',
+  medium: '500',
+  semiBold: '600',
+  bold: '700',
 } as const;
 
 export function Text({ variant = 'body', color, tone, weight, align, style, ...rest }: TextProps) {
@@ -53,7 +53,8 @@ export function Text({ variant = 'body', color, tone, weight, align, style, ...r
       {...rest}
       style={[
         {
-          fontFamily: weight ? weightFonts[weight] : token.fontFamily,
+          fontFamily: token.fontFamily,
+          fontWeight: weight ? weights[weight] : ['display', 'heading', 'title', 'subtitle', 'label'].includes(variant) ? '600' : variant === 'strong' ? '500' : '400',
           fontSize: token.fontSize,
           lineHeight: token.lineHeight,
           letterSpacing: token.letterSpacing,

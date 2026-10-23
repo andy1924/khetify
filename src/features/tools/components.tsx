@@ -6,9 +6,7 @@ import { Button, Icon, Text, colors, radii, type IconName } from './ui';
 
 export function ScreenHeading({
   title,
-  subtitle,
   titleColor = colors.heading,
-  subtitleSize = 13,
 }: {
   title: string;
   subtitle?: string;
@@ -22,16 +20,6 @@ export function ScreenHeading({
       <Text style={[styles.headingTitle, { color: titleColor }]} accessibilityRole="header">
         {title}
       </Text>
-      {subtitle ? (
-        <Text
-          style={[
-            styles.headingSubtitle,
-            subtitleSize !== 13 && { fontSize: subtitleSize, lineHeight: subtitleSize * 1.4 },
-          ]}
-        >
-          {subtitle}
-        </Text>
-      ) : null}
     </View>
   );
 }
@@ -235,12 +223,12 @@ export function TwoButtonRow({
 
 export { Button };
 
-const hairline = { borderBottomWidth: 1, borderBottomColor: '#DFE6D8' } as const;
+const hairline = { borderBottomWidth: 0, borderBottomColor: '#DFE6D8' } as const;
 
 const styles = StyleSheet.create({
   heading: { gap: 6 },
-  headingTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 28, lineHeight: 39.2 },
-  headingSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18.2, color: '#6a7667' },
+  headingTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 28, lineHeight: 39.2 },
+  headingSubtitle: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#6a7667' },
 
   chip: {
     minHeight: 25,
@@ -251,15 +239,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
-  chipLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 14 },
+  chipLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 14 },
 
   banner: { borderRadius: 18, padding: 12, gap: 6 },
   bannerHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  bannerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, lineHeight: 18 },
-  bannerBody: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17 },
+  bannerTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18 },
+  bannerBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17 },
 
   infoStrip: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#657360' },
+  infoText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#657360' },
 
 
   hairlineRow: {
@@ -274,8 +262,8 @@ const styles = StyleSheet.create({
   noHairline: { borderBottomWidth: 0 },
 
   keyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7 },
-  keyLabel: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#6a7560' },
-  keyValue: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 17, color: '#526D43', textAlign: 'right' },
+  keyLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
+  keyValue: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#526D43', textAlign: 'right' },
 
   circle: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   circleOn: { backgroundColor: '#C4DEA9' },
@@ -291,9 +279,9 @@ const styles = StyleSheet.create({
     gap: 4,
     justifyContent: 'center',
   },
-  pickerLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#666f63' },
+  pickerLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#666f63' },
   pickerValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  pickerValue: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 19, color: '#243527' },
+  pickerValue: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 14, lineHeight: 19, color: '#243527' },
 
   textField: {
     minHeight: 54,
@@ -306,7 +294,7 @@ const styles = StyleSheet.create({
   textFieldInput: {
     padding: 0,
     margin: 0,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'System', fontWeight: '500',
     fontSize: 15,
     lineHeight: 21,
     color: '#243527',

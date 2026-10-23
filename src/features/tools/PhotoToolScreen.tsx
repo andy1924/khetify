@@ -340,8 +340,8 @@ function GrainCloseArt() {
 
 const styles = StyleSheet.create({
   unavailableBlock: { gap: 10, paddingVertical: 8 },
-  body: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18.2, color: '#697460' },
-  footnote: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
+  body: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#697460' },
+  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
 
   previewCard: {
     borderRadius: 18,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   previewEmptyText: {
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'System', fontWeight: '400',
     fontSize: 13,
     lineHeight: 18,
     color: '#657360',
@@ -373,19 +373,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  artBadgeText: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 14, color: '#4A693D' },
+  artBadgeText: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: '#4A693D' },
 
   previewMeta: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   previewMetaText: { flex: 1, gap: 3 },
-  previewTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 15, lineHeight: 21, color: '#263B29' },
+  previewTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: '#263B29' },
 
   limitsCard: { backgroundColor: '#F4F7EF', borderRadius: 18, padding: 16, gap: 8 },
-  limitsTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, lineHeight: 18, color: '#5A714C' },
+  limitsTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: '#5A714C' },
   attributeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  attribute: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#687560' },
+  attribute: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#687560' },
 
   actions: { gap: 10 },
-  contextLine: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
+  contextLine: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
   recordedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 
   fixtureGrid: { flexDirection: 'row', gap: 10 },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   fixtureCellActive: { borderColor: '#9DBA82' },
   fixtureLabel: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'System', fontWeight: '500',
     fontSize: 11,
     lineHeight: 15,
     color: '#4A693D',

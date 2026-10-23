@@ -402,19 +402,19 @@ export function AssessmentScreen() {
 const styles = StyleSheet.create({
   screenContent: { gap: 20 },
   card: { backgroundColor: '#F2F5EE', borderRadius: 18, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 8, gap: 8 },
-  cardTitle: { fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20, color: '#30432B' },
-  cardBody: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#6a7560' },
-  cardNote: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462', paddingBottom: 6 },
+  cardTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
+  cardBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
+  cardNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462', paddingBottom: 6 },
 
   pairRow: { flexDirection: 'row', gap: 16 },
   pairCell: { flex: 1, gap: 4, paddingVertical: 10 },
   fullRow: { paddingVertical: 10, gap: 4 },
-  fieldLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#66705d' },
+  fieldLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#66705d' },
   input: {
     padding: 0,
     margin: 0,
     minHeight: 24,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'System', fontWeight: '500',
     fontSize: 15,
     lineHeight: 21,
     color: '#30432B',
@@ -431,12 +431,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  unitLabel: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 14, color: '#4A693D' },
+  unitLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: '#4A693D' },
 
   budgetRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  currency: { fontFamily: 'Inter_500Medium', fontSize: 15, lineHeight: 21, color: '#30432B' },
+  currency: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 21, color: '#30432B' },
   budgetInput: { flex: 1 },
-  budgetHint: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
+  budgetHint: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
 
   seasonRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 2 },
   seasonChip: {
@@ -448,8 +448,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   seasonChipSelected: { backgroundColor: '#D4E7BE' },
-  seasonText: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 15, color: '#4A693D' },
-  seasonTextSelected: { color: '#3D5C30', fontFamily: 'Inter_600SemiBold' },
+  seasonText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#4A693D' },
+  seasonTextSelected: { color: '#3D5C30', fontFamily: 'System', fontWeight: '600' },
 
   waterRow: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
   waterChip: {
@@ -461,21 +461,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   waterChipSelected: { backgroundColor: '#D4E7BE' },
-  waterText: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 15, color: '#4A693D' },
+  waterText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#4A693D' },
 
-  error: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
+  error: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
 
   summaryCard: { backgroundColor: '#EFF5E7', borderRadius: 18, padding: 14 },
   summaryHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  summaryText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#526D43' },
+  summaryText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#526D43' },
 
   choiceList: { gap: 8, marginTop: 2 },
 
   stepActions: { gap: 12 },
   skipButton: { minHeight: 48, alignItems: 'center', justifyContent: 'center' },
-  skipText: { fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 18, color: '#526C43' },
+  skipText: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#526C43' },
 
   sheetActions: { flexDirection: 'row', gap: 12 },
   sheetCell: { flex: 1 },
-  sheetText: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, color: '#687560' },
+  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: '#687560' },
 });

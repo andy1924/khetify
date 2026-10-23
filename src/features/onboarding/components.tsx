@@ -15,7 +15,6 @@ export function OnboardingHeader({ showSelector = true }: { showSelector?: boole
   return (
     <View style={styles.header}>
       <View style={styles.brand}>
-        <Icon name="sprout" size={24} color={colors.ink} />
         <Text variant="heading" weight="semiBold" color={colors.ink} style={styles.wordmark}>
           {t('common.brand.name')}
         </Text>
@@ -89,7 +88,6 @@ export function SelectionDot({ selected }: { selected: boolean }) {
 export function StepHeading({
   step,
   title,
-  description,
 }: {
   step: string;
   title: string;
@@ -102,9 +100,6 @@ export function StepHeading({
       </Text>
       <Text variant="display" weight="semiBold" color={colors.ink} style={styles.title}>
         {title}
-      </Text>
-      <Text variant="body" color={colors.muted} style={styles.description}>
-        {description}
       </Text>
     </View>
   );

@@ -85,11 +85,12 @@ export const radii = {
 } as const;
 
 export const fonts = {
-  regular: 'Inter_400Regular',
-  medium: 'Inter_500Medium',
-  semiBold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
-  fallback: 'Inter',
+  // Use the platform's native system face (SF Pro on iOS, system sans-serif elsewhere).
+  regular: 'System',
+  medium: 'System',
+  semiBold: 'System',
+  bold: 'System',
+  fallback: 'System',
 } as const;
 
 export type TextVariant =
@@ -120,15 +121,15 @@ export const typography: Record<TextVariant, TextStyleToken> = {
   // 16/600 — list titles
   subtitle: { fontFamily: fonts.semiBold, fontSize: 16, lineHeight: 22 },
   // 14/400 — body copy
-  body: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 20 },
+  body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 24 },
   // 14/500 — emphasised inline text
-  strong: { fontFamily: fonts.medium, fontSize: 14, lineHeight: 20 },
+  strong: { fontFamily: fonts.medium, fontSize: 16, lineHeight: 24 },
   // 12/400 — supporting copy
-  caption: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 17 },
+  caption: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 20 },
   // 11/400 — footnotes, demo notes
   meta: { fontFamily: fonts.regular, fontSize: 11, lineHeight: 15 },
   // 10/600 — section labels (SEED TO GRAIN, YOUR NEXT STEP)
-  label: { fontFamily: fonts.semiBold, fontSize: 10, lineHeight: 14, letterSpacing: 0.4 },
+  label: { fontFamily: fonts.semiBold, fontSize: 12, lineHeight: 18, letterSpacing: 0.2 },
 };
 
 /** Default text colour per variant, matching the reference hierarchy. */
@@ -145,7 +146,7 @@ export const textColors: Record<TextVariant, string> = {
 };
 
 /** Minimum accessible touch target. */
-export const touchTarget = 48;
+export const touchTarget = 56;
 
 export const contentPadding = 24;
 export const sectionGap = 20;

@@ -73,31 +73,28 @@ export function ToolsScreen() {
       />
 
       <View>
-        {TOOLS.map(tool => {
+        {TOOLS.filter(tool => tool.route && tool.kind !== 'forecast').map(tool => {
           const usable = tool.status !== 'unavailable';
           return (
             <Pressable
               key={tool.titleKey}
               accessibilityRole="button"
-              accessibilityLabel={`${t(tool.titleKey)}. ${t(tool.detailKey)}. ${t(statusLabel[tool.status])}.`}
+              accessibilityLabel={`${t(tool.titleKey)}. ${t(tool.detailKey)}.`}
               onPress={() => open(tool)}
               android_ripple={{ color: 'rgba(38, 59, 41, 0.05)' }}
-              style={({ pressed }) => [styles.row, styles.rowHairline, pressed && styles.pressed]}
+              style={({ pressed }) => [styles.row, pressed && styles.pressed]}
             >
               <View style={styles.iconCell}>
                 <Icon name={tool.icon} size={24} color={usable ? '#6B8C52' : '#A3AF99'} strokeWidth={1.6} />
               </View>
               <View style={styles.labels}>
                 <Text style={styles.title}>{t(tool.titleKey)}</Text>
-                <Text style={styles.sub}>{t(tool.detailKey)}</Text>
               </View>
-              <StatusChip label={t(statusLabel[tool.status])} tone={statusTone[tool.status]} />
+              {tool.status === 'ready' ? <Icon name="arrow-right" size={18} color="#7C8C72" /> : null}
             </Pressable>
           );
         })}
       </View>
-
-      <Text style={styles.note}>{t('tools.importNote')}</Text>
 
       {history.length > 0 ? (
         <View style={styles.history}>
@@ -132,7 +129,7 @@ export function ToolsScreen() {
           <View style={styles.sheetBody}>
             <StatusChip label={t(statusLabel[sheetTool.status])} tone={statusTone[sheetTool.status]} />
             <Text style={styles.body13}>{t(sheetTool.detailKey)}</Text>
-            <Text style={styles.body13}>{t('tools.unavailableNote')}</Text>
+            <Text style={styles.body13}>This feature is being prepared.</Text>
             {sheetTool.kind === 'grainId' ? (
               <Text style={styles.meta}>{toolCopy('tools.grainId.sheetBody')}</Text>
             ) : null}
@@ -151,18 +148,17 @@ function isoDay(timestamp: number): string {
 }
 
 const styles = StyleSheet.create({
-  row: { minHeight: 86, flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-  rowHairline: { borderBottomWidth: 1, borderBottomColor: '#DFE6D8' },
+  row: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, marginBottom: 10, borderRadius: 18, backgroundColor: '#F2F5EE' },
   pressed: { backgroundColor: 'rgba(38, 59, 41, 0.03)' },
   iconCell: { width: 26, height: 24, justifyContent: 'center' },
   labels: { flex: 1, gap: 5 },
-  title: { fontFamily: 'Inter_600SemiBold', fontSize: 16, lineHeight: 22, color: '#263B29' },
-  sub: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#657360' },
-  subStrong: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 17, color: '#263B29' },
-  meta: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
-  eyebrow: { fontFamily: 'Inter_600SemiBold', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: '#657360' },
-  body13: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18, color: '#687560' },
-  note: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 18, color: '#657360' },
+  title: { fontFamily: 'System', fontSize: 17, lineHeight: 23, color: '#263B29', fontWeight: '600' },
+  sub: { fontFamily: 'System', fontSize: 14, lineHeight: 20, color: '#52604D' },
+  subStrong: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#263B29' },
+  meta: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  eyebrow: { fontFamily: 'System', fontWeight: '600', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: '#657360' },
+  body13: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
+  note: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 18, color: '#657360' },
   history: { gap: 12, paddingTop: 4 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   historyLabel: { flex: 1, gap: 2 },

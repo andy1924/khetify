@@ -1,10 +1,9 @@
 import '../../global.css';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Stack, router, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useKeepAwake } from 'expo-keep-awake';
-import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HeroUINativeProvider } from 'heroui-native/provider';
@@ -54,8 +53,6 @@ function Navigation() {
 
 export default function RootLayout() {
   useKeepAwake('khetify-ui-demo');
-  const [loaded, error] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter: Inter_400Regular });
-  if (!loaded && !error) return <View style={[styles.root, styles.loading]}><ActivityIndicator color="#263B29" /></View>;
   return <GestureHandlerRootView style={styles.root}><SafeAreaProvider><HeroUINativeProvider><DemoProvider><Navigation /></DemoProvider></HeroUINativeProvider></SafeAreaProvider></GestureHandlerRootView>;
 }
 
@@ -66,6 +63,6 @@ const styles = StyleSheet.create({
   navigation: { minHeight: 66, flexDirection: 'row', backgroundColor: '#EEF4E7', padding: 6, borderRadius: 34 },
   tab: { flex: 1, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 3, borderRadius: 22 },
   selected: { backgroundColor: '#D4E7BE' },
-  tabLabel: { color: '#657360', fontFamily: 'Inter_400Regular', fontSize: 10 },
-  selectedLabel: { color: '#263B29', fontFamily: 'Inter_600SemiBold' },
+  tabLabel: { color: '#657360', fontFamily: 'System', fontWeight: '400', fontSize: 13 },
+  selectedLabel: { color: '#263B29', fontFamily: 'System', fontWeight: '600' },
 });

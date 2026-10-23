@@ -9,17 +9,12 @@ import {
 import { colors, Icon, Text, type IconName } from '../../ui';
 
 /** Screen title block used by the plan screens (28/600 + 13/400 muted line). */
-export function ScreenHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+export function ScreenHeading({ title }: { title: string; subtitle?: string }) {
   return (
     <View style={styles.heading}>
       <Text variant="heading" color="#213827" accessibilityRole="header">
         {title}
       </Text>
-      {subtitle ? (
-        <Text style={styles.headingSubtitle} numberOfLines={2}>
-          {subtitle}
-        </Text>
-      ) : null}
     </View>
   );
 }
@@ -188,31 +183,31 @@ export { colors };
 
 const styles = StyleSheet.create({
   heading: { gap: 6 },
-  headingSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18.2, color: '#6a7667' },
+  headingSubtitle: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#6a7667' },
 
   banner: { backgroundColor: '#F6F0DF', borderRadius: 18, padding: 12, gap: 6 },
   bannerHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  bannerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, lineHeight: 18, color: '#78643A' },
-  bannerBody: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#76694C' },
+  bannerTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: '#78643A' },
+  bannerBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#76694C' },
 
   infoStrip: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#657360' },
+  infoText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#657360' },
 
   hairline: { height: 1, backgroundColor: '#DFE6D8' },
   flex: { flex: 1 },
 
   groupedField: { paddingVertical: 12, gap: 4 },
-  groupedLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#66705d' },
-  groupedValue: { fontFamily: 'Inter_500Medium', fontSize: 15, lineHeight: 21, color: '#30432B' },
+  groupedLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#66705d' },
+  groupedValue: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 21, color: '#30432B' },
 
   editRow: {
     paddingVertical: 10,
     gap: 4,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderBottomColor: '#DFE6D8',
   },
   noHairline: { borderBottomWidth: 0 },
-  errorText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
+  errorText: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
 
   choice: {
     minHeight: 52,
@@ -228,9 +223,9 @@ const styles = StyleSheet.create({
   },
   choiceSelected: { backgroundColor: '#EEF4E7', borderColor: '#C4DEA9' },
   choiceCopy: { flex: 1, gap: 2 },
-  choiceLabel: { fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20, color: '#30432B' },
+  choiceLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
   choiceLabelSelected: { color: '#263B29' },
-  choiceCaption: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#6c7562' },
+  choiceCaption: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#6c7562' },
 
   circle: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   circleOn: { backgroundColor: '#C4DEA9' },
@@ -240,7 +235,7 @@ const styles = StyleSheet.create({
   indicatorDone: { backgroundColor: '#F2F5EE' },
   indicatorCurrent: { backgroundColor: '#D6E8C2' },
   indicatorLocked: { backgroundColor: '#F4F7EF' },
-  indicatorText: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 15, color: '#A1AC96' },
+  indicatorText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#A1AC96' },
   indicatorTextCurrent: { color: '#586351' },
 
   pressed: { opacity: 0.85 },

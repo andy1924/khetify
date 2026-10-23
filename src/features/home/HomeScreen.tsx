@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useDemo } from '../../demo';
 import { useT } from '../../locales';
 import { homeText } from './strings';
-import { Avatar, Button, DemoBadge, Icon, IconSurface, Screen, SectionLabel, Text } from '../../ui';
+import { Avatar, Button, Icon, IconSurface, Screen, SectionLabel, Text } from '../../ui';
 
 const QUICK_TOOLS = [
   { key: 'soil', icon: 'flask-conical', labelKey: 'home.quick.soil', route: '/tools/soil' },
@@ -44,7 +44,6 @@ export function HomeScreen() {
             })}
           </Text>
         </View>
-        <DemoBadge label={t('common.demo')} />
       </View>
 
       <View style={styles.hero}>
@@ -52,7 +51,6 @@ export function HomeScreen() {
         <Text variant="display" style={styles.heroTitle}>
           {t('home.hero.title')}
         </Text>
-        <Text style={styles.heroBody}>{t('home.hero.body')}</Text>
         <Button
           title={t('home.hero.cta')}
           onPress={() => router.push('/(tabs)/plan')}
@@ -74,9 +72,8 @@ export function HomeScreen() {
           <Text variant="title" style={styles.nextTitle}>
             {t('home.next.title')}
           </Text>
-          <Text style={styles.nextCopy}>{t('home.next.body')}</Text>
           {soilTested ? (
-            <Text style={styles.nextMeta}>{homeText('home.next.imported')}</Text>
+          <Text style={styles.nextMeta}>{homeText('home.next.imported')}</Text>
           ) : null}
         </Pressable>
       </View>
@@ -96,7 +93,6 @@ export function HomeScreen() {
         ))}
       </View>
 
-      <Text style={styles.footer}>{t('home.footer')}</Text>
     </Screen>
   );
 }
@@ -108,32 +104,30 @@ const styles = StyleSheet.create({
 
   farmRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: -8 },
   farmSummary: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  farmText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18, color: '#6B7964' },
+  farmText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#6B7964' },
 
-  hero: { backgroundColor: '#EEF4E7', borderRadius: 20, padding: 20, gap: 14 },
+  hero: { backgroundColor: '#E8F0DE', borderRadius: 28, padding: 24, gap: 16 },
   heroTitle: { color: '#263B29', lineHeight: 37.5 },
-  heroBody: { fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 20, color: '#657360' },
+  heroBody: { fontFamily: 'System', fontWeight: '400', fontSize: 16, lineHeight: 24, color: '#52634B' },
   heroButton: { marginTop: 2 },
 
   nextBlock: {
-    paddingTop: 4,
-    paddingBottom: 18,
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DFE6D8',
+    padding: 20,
+    borderRadius: 24,
+    backgroundColor: '#F1F5EB',
+    gap: 12,
   },
   nextHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  nextToday: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#5C7950' },
+  nextToday: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#4E6B3C' },
   nextBody: { gap: 4 },
   nextTitle: { color: '#26392B' },
-  nextCopy: { fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 20, color: '#6c7667' },
+  nextCopy: { fontFamily: 'System', fontWeight: '400', fontSize: 16, lineHeight: 24, color: '#52634B' },
 
-  quickRow: { flexDirection: 'row', gap: 16 },
-  quickCell: { flex: 1, alignItems: 'center', gap: 8, minHeight: 48, paddingVertical: 2 },
-  quickLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#607057' },
+  quickRow: { flexDirection: 'row', gap: 10 },
+  quickCell: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 112, padding: 10, borderRadius: 22, backgroundColor: '#F2F5EE' },
+  quickLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#334B2C', textAlign: 'center' },
 
-  nextMeta: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#5A714C' },
-  planNote: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
-  footer: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#6c7564' },
+  nextMeta: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#5A714C' },
+  planNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
   pressed: { opacity: 0.85 },
 });

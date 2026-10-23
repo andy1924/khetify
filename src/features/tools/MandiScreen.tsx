@@ -238,20 +238,20 @@ export function MandiScreen() {
 
 const styles = StyleSheet.create({
   stale: { backgroundColor: '#F6F0E0', borderRadius: 18, padding: 12, gap: 6 },
-  staleTitle: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 17, color: '#7c6a3e' },
-  staleBody: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#756a4c' },
+  staleTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#7c6a3e' },
+  staleBody: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#756a4c' },
   sortRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 18 },
-  sortLabel: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#637656' },
+  sortLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#637656' },
 
   marketCard: { borderRadius: 18, padding: 14, gap: 8 },
   bestCard: { backgroundColor: '#EAF2DE' },
   otherCard: { backgroundColor: '#F4F7EF' },
   marketHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  marketName: { fontFamily: 'Inter_600SemiBold', fontSize: 15, lineHeight: 21, color: '#4B673D' },
+  marketName: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: '#4B673D' },
   priceNetRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  price: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18, color: '#626c56' },
+  price: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#626c56' },
   net: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'System', fontWeight: '600',
     fontSize: 21,
     lineHeight: 29,
     color: '#4B6A3A',
@@ -259,11 +259,11 @@ const styles = StyleSheet.create({
   },
   netUnknown: { color: '#4B6A3A' },
   costRow: { minHeight: 32, justifyContent: 'center' },
-  costText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#646e5a' },
+  costText: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#646e5a' },
 
-  footer: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697560' },
+  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697560' },
   recordedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  recordedText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#687560' },
+  recordedText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#687560' },
 
   costFieldRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   costField: { flex: 1 },
@@ -276,5 +276,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   noteRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  noteText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#687560' },
+  noteText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#687560' },
 });

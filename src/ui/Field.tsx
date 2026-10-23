@@ -4,6 +4,7 @@ import {
   TextInput,
   View,
   type KeyboardTypeOptions,
+  type TextInputProps,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -33,6 +34,8 @@ export type FieldProps = {
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
   autoFocus?: boolean;
+  autoCapitalize?: TextInputProps['autoCapitalize'];
+  autoComplete?: TextInputProps['autoComplete'];
   maxLength?: number;
   accessibilityLabel?: string;
   testID?: string;
@@ -63,6 +66,8 @@ export function Field({
   style,
   inputStyle,
   autoFocus,
+  autoCapitalize,
+  autoComplete,
   maxLength,
   accessibilityLabel,
   testID,
@@ -88,7 +93,7 @@ export function Field({
       >
         <View style={styles.labels}>
           {label ? (
-            <Text variant="caption" color={colors.muted} style={styles.label} numberOfLines={1}>
+            <Text variant="caption" color={colors.muted} style={styles.label}>
               {label}
             </Text>
           ) : null}
@@ -102,6 +107,9 @@ export function Field({
                 keyboardType={keyboardType as KeyboardTypeOptions}
                 multiline={multiline}
                 autoFocus={autoFocus}
+                autoCapitalize={autoCapitalize}
+                autoComplete={autoComplete}
+                underlineColorAndroid="transparent"
                 maxLength={maxLength}
                 onBlur={onBlur}
                 onFocus={onFocus}
@@ -110,6 +118,7 @@ export function Field({
                 testID={testID}
                 selectionColor={colors.accentDeep}
                 style={[
+                  styles.editableInput,
                   large ? styles.largeValue : styles.value,
                   multiline && styles.multiline,
                   inputStyle,
@@ -160,15 +169,20 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fonts.regular,
-    fontSize: 11,
-    lineHeight: 13,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  editableInput: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 44,
   },
   value: {
     padding: 0,
     margin: 0,
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 17,
+    fontSize: 16,
+    lineHeight: 24,
     color: colors.ink,
     includeFontPadding: false,
   },
@@ -182,8 +196,8 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   valueText: {
-    fontSize: 14,
-    lineHeight: 17,
+    fontSize: 16,
+    lineHeight: 24,
   },
   largeValueText: {
     fontSize: 22,

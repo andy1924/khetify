@@ -58,9 +58,6 @@ export function ProfileScreen() {
         <Text variant="heading" color={colors.heading} accessibilityRole="header">
           {t('profile.title')}
         </Text>
-        <Text variant="caption" color={colors.mutedSoft}>
-          {t('profile.subtitle')}
-        </Text>
       </View>
 
       <View
@@ -114,14 +111,7 @@ export function ProfileScreen() {
           onPress={() => setSheet('consent')}
           style={styles.settingsRow}
         />
-        <ListRow
-          icon="book-open"
-          title={t('profile.evidence')}
-          description={t('profile.evidenceBody')}
-          onPress={() => setSheet('evidence')}
-          style={styles.settingsRow}
-        />
-        <ListRow
+<ListRow
           icon="refresh-cw"
           title={t('profile.freshness')}
           description={t('profile.freshnessBody')}
@@ -146,22 +136,7 @@ export function ProfileScreen() {
 
       {/* Demo controls sit below the reference content, not inside it. */}
       <View style={styles.demoBlock}>
-        <Text variant="label" color={colors.muted}>
-          {profileCopy['profile.demoControls']}
-        </Text>
-        <Text variant="meta" color={colors.faint}>
-          {profileCopy['profile.demoNote']}
-        </Text>
-
-<DemoRow
-          icon="refresh-cw"
-          title={t('profile.reset')}
-          body={t('profile.resetBody')}
-          accessibilityLabel={profileCopy['profile.resetA11y']}
-          onPress={() => setSheet('reset')}
-        />
-        <DemoRow
-          icon="log-out"
+        <DemoRow icon="log-out"
           title={t('profile.signOut')}
           body={t('profile.signOutBody')}
           accessibilityLabel={profileCopy['profile.signOutA11y']}
@@ -333,6 +308,9 @@ export function ProfileScreen() {
           <View style={styles.form}>
             <Field
               label={profileCopy['profile.field.name']}
+              placeholder="Enter your name"
+              autoCapitalize="words"
+              autoComplete="name"
               value={draft.farmerName}
               onChangeText={farmerName => actions.updateProfileDraft({ farmerName })}
               error={attempted && !draft.farmerName.trim() ? t('profile.error.name') : undefined}
@@ -601,7 +579,7 @@ const styles = StyleSheet.create({
   farmHead: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   resourceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 17 },
 
-  settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#E7EDE0' },
+  settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: 0, borderBottomColor: '#E7EDE0' },
 
   demoBlock: { gap: 10, paddingTop: 8 },
   demoRow: {
@@ -610,7 +588,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
     borderBottomColor: '#E7EDE0',
   },
   pressed: { opacity: 0.8 },
@@ -647,7 +625,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
     borderBottomColor: '#E7EDE0',
   },
   sourceList: { gap: 8, paddingVertical: 4 },

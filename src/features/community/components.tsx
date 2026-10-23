@@ -14,7 +14,6 @@ import type { ObservationStatus } from '../../demo';
  */
 export function CommunityHeading({
   title,
-  subtitle,
   action,
   back,
 }: {
@@ -31,11 +30,6 @@ export function CommunityHeading({
           <Text variant="heading" color={colors.heading} accessibilityRole="header">
             {title}
           </Text>
-          {subtitle ? (
-            <Text variant="caption" color={colors.mutedSoft} style={styles.headingSubtitle}>
-              {subtitle}
-            </Text>
-          ) : null}
         </View>
         {action}
       </View>
@@ -248,7 +242,7 @@ const styles = StyleSheet.create({
     minHeight: 136,
     paddingVertical: 14,
     gap: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
     borderBottomColor: colors.borderSoft,
   },
   pressed: { opacity: 0.85 },

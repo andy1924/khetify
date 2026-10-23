@@ -40,7 +40,6 @@ export function Sheet({
   visible,
   onClose,
   title,
-  subtitle,
   children,
   footer,
   onBack,
@@ -93,11 +92,6 @@ export function Sheet({
               <Text variant="title" color={colors.ink} accessibilityRole="header">
                 {title}
               </Text>
-              {subtitle ? (
-                <Text variant="caption" color={colors.mutedSoft}>
-                  {subtitle}
-                </Text>
-              ) : null}
             </View>
             <Pressable
               onPress={onClose}

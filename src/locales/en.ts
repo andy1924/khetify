@@ -107,9 +107,9 @@ export const en = {
 
   'home.greeting': 'Good morning, {name}',
   'home.farmSummary': '{farm} · {area} acres · {season} {crop}',
-  'home.hero.label': 'SEED TO GRAIN',
-  'home.hero.title': 'Your season,\none step at a time.',
-  'home.hero.body': 'A practical plan from seed to sale.',
+  'home.hero.label': 'YOUR FARM PLAN',
+  'home.hero.title': 'A good season\nstarts here.',
+  'home.hero.body': 'See what to do next on your farm.',
   'home.hero.cta': 'Continue my plan',
   'home.next.label': 'YOUR NEXT STEP',
   'home.next.today': 'Today',
@@ -225,14 +225,14 @@ export const en = {
   'revision.confirmed': 'Plan v{version} saved on this device.',
 
   'tools.title': 'Tools for your farm',
-  'tools.subtitle': 'Choose what you need. No plan required.',
+  'tools.subtitle': 'How can we help your farm today?',
   'tools.status.ready': 'Ready',
   'tools.status.limited': 'Limited',
   'tools.status.unavailable': 'Unavailable',
   'tools.soil.title': 'Soil analysis',
-  'tools.soil.detail': 'Interpret your test',
+  'tools.soil.detail': 'Understand your soil test',
   'tools.cropPhoto.title': 'Crop photo',
-  'tools.cropPhoto.detail': 'Visible symptom triage',
+  'tools.cropPhoto.detail': 'Look at a crop photo',
   'tools.grainQuality.title': 'Grain quality',
   'tools.grainQuality.detail': 'Needs validated data',
   'tools.grainId.title': 'Grain ID',
@@ -240,7 +240,7 @@ export const en = {
   'tools.forecast.title': 'Price forecast',
   'tools.forecast.detail': 'Needs a complete series',
   'tools.mandi.title': 'Mandi comparison',
-  'tools.mandi.detail': 'Compare net proceeds',
+  'tools.mandi.detail': 'Compare prices after costs',
   'tools.importNote': 'Nothing is added to your plan until you confirm.',
   'tools.unavailableNote': 'This tool needs validated data. No result is shown.',
 
@@ -283,7 +283,7 @@ export const en = {
     'A full lab report and agronomist review are needed for recommendations.',
   'soilResult.evidence': 'Evidence & sources',
   'soilResult.evidenceBody':
-    'Demo values only. No laboratory, extension service or agronomy review is connected to this app.',
+    'These are sample values. Use your own lab report when planning farm inputs.',
   'soilResult.import': 'Add test values to plan',
   'soilResult.importNote': 'You will review the import before applying it.',
 
@@ -424,7 +424,7 @@ export const en = {
   'profile.signOut': 'Sign out',
   'profile.signOutConfirm': 'Sign out of the demo?',
   'profile.signOutBody': 'Your sample plan stays on this device.',
-  'profile.version': 'UI demo · No data leaves this device',
+  'profile.version': 'Khetify · 1.0',
 } as const;
 
 export type StringKey = keyof typeof en;

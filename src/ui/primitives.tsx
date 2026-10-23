@@ -577,7 +577,7 @@ export function LinkText({
 export { SectionLabel };
 
 const styles = StyleSheet.create({
-  divider: { height: StyleSheet.hairlineWidth, width: '100%' },
+  divider: { height: 0, width: '100%' },
   notice: {
     borderRadius: radii.xl,
     paddingHorizontal: 12,

@@ -1,4 +1,5 @@
 import React from 'react';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -83,7 +84,7 @@ export function Screen({
   );
 
   return (
-    <View style={[{ flex: 1, backgroundColor, paddingTop: insets.top }, style]} testID={testID}>
+    <Animated.View entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)} style={[{ flex: 1, backgroundColor, paddingTop: insets.top }, style]} testID={testID}>
       {keyboard ? (
         <KeyboardAvoidingView
           style={styles.flex}
@@ -102,7 +103,7 @@ export function Screen({
           ) : null}
         </>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
