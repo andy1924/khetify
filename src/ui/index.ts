@@ -58,7 +58,6 @@ export {
   Divider,
   Notice,
   KeyValue,
-  DemoBadge,
   IconSurface,
   IconButton,
   LinkText,

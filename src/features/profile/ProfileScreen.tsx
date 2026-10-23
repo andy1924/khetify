@@ -71,9 +71,9 @@ export function ProfileScreen() {
           .replace('{name}', state.farm.farmerName)
           .replace('{location}', fullLocation)}
       >
-        <Avatar initials={state.farm.initials} size={48} background="#E6F0DA" color="#567043" />
+        <Avatar initials={state.farm.initials} size={48} background={colors.surface} color={colors.ink} />
         <View style={styles.identityText}>
-          <Text variant="title" color="#405E33">
+          <Text variant="title" color={colors.ink}>
             {state.farm.farmerName}
           </Text>
           <Text variant="caption" color="#697560">
@@ -92,7 +92,7 @@ export function ProfileScreen() {
           }}
           style={styles.farmHead}
         >
-          <Text variant="title" color="#4D6E3C" style={styles.flex}>
+          <Text variant="title" color={colors.ink} style={styles.flex}>
             {state.farm.farmName}
           </Text>
           <Icon name="pencil" size={17} color={colors.icon} />
@@ -628,11 +628,11 @@ const styles = StyleSheet.create({
   identity: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 51 },
   identityText: { flex: 1, gap: 4 },
 
-  farmCard: { backgroundColor: '#EEF4E7', borderRadius: 18, padding: 16, gap: 10 },
+  farmCard: { backgroundColor: '#F1EEE8', borderRadius: 18, padding: 16, gap: 10 },
   farmHead: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   resourceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 17 },
 
-  settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#E7EDE0' },
+  settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#E8E4DC' },
 
   demoBlock: { gap: 10, paddingTop: 8 },
   demoRow: {
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E7EDE0',
+    borderBottomColor: '#E8E4DC',
   },
   pressed: { opacity: 0.8 },
 
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 16,
-    backgroundColor: '#F2F5EC',
+    backgroundColor: '#F2EFE9',
   },
   languageRowSelected: { backgroundColor: '#E8F0DE' },
   dot: {
@@ -665,12 +665,12 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: '#D6DFD0',
-    backgroundColor: '#FEFFFC',
+    borderColor: '#DEDAD2',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotSelected: { backgroundColor: '#C4DEA9', borderColor: '#C4DEA9' },
+  dotSelected: { backgroundColor: '#D7E5D8', borderColor: '#D7E5D8' },
 
   consentRow: {
     minHeight: 64,
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E7EDE0',
+    borderBottomColor: '#E8E4DC',
   },
   sourceList: { gap: 8, paddingVertical: 4 },
   sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
@@ -694,8 +694,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 99,
-    backgroundColor: '#EBF2E4',
+    backgroundColor: '#ECEFE9',
   },
-  waterChipSelected: { backgroundColor: '#D4E7BE' },
+  waterChipSelected: { backgroundColor: '#E4ECE4' },
   confirmActions: { gap: 10 },
 });

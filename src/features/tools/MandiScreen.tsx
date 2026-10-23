@@ -122,7 +122,7 @@ export function MandiScreen() {
       </View>
 
       <View style={styles.sortRow}>
-        <Icon name="arrow-down-wide-narrow" size={18} color="#52664D" />
+        <Icon name="arrow-down-wide-narrow" size={18} color="#565F59" />
         <Text style={styles.sortLabel}>
           {t('mandi.sorted', { quantity: state.market.quantityQuintals })}
         </Text>
@@ -174,7 +174,7 @@ export function MandiScreen() {
 
       {recorded ? (
         <View style={styles.recordedRow}>
-          <Icon name="check" size={15} color="#52664D" />
+          <Icon name="check" size={15} color="#565F59" />
           <Text style={styles.recordedText}>{toolCopy('mandi.recorded')}</Text>
         </View>
       ) : null}
@@ -217,7 +217,7 @@ export function MandiScreen() {
                 hitSlop={8}
                 style={styles.clearButton}
               >
-                <Icon name="minus" size={16} color="#657360" />
+                <Icon name="minus" size={16} color="#64665F" />
               </Pressable>
             ) : null}
           </View>
@@ -238,20 +238,20 @@ export function MandiScreen() {
 
 const styles = StyleSheet.create({
   stale: { backgroundColor: '#F6F0E0', borderRadius: 18, padding: 12, gap: 6 },
-  staleTitle: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 17, color: '#7c6a3e' },
-  staleBody: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#756a4c' },
+  staleTitle: { fontFamily: 'DMSans_500Medium', fontSize: 13, lineHeight: 18, color: '#7c6a3e' },
+  staleBody: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#756a4c' },
   sortRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 18 },
-  sortLabel: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#637656' },
+  sortLabel: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#637656' },
 
   marketCard: { borderRadius: 18, padding: 14, gap: 8 },
   bestCard: { backgroundColor: '#EAF2DE' },
-  otherCard: { backgroundColor: '#F4F7EF' },
+  otherCard: { backgroundColor: '#EDF2F7' },
   marketHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  marketName: { fontFamily: 'Inter_600SemiBold', fontSize: 15, lineHeight: 21, color: '#4B673D' },
+  marketName: { fontFamily: 'DMSans_600SemiBold', fontSize: 15, lineHeight: 21, color: '#4B673D' },
   priceNetRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  price: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18, color: '#626c56' },
+  price: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#626c56' },
   net: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'DMSans_600SemiBold',
     fontSize: 21,
     lineHeight: 29,
     color: '#4B6A3A',
@@ -259,11 +259,11 @@ const styles = StyleSheet.create({
   },
   netUnknown: { color: '#4B6A3A' },
   costRow: { minHeight: 32, justifyContent: 'center' },
-  costText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#646e5a' },
+  costText: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#646e5a' },
 
-  footer: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697560' },
+  footer: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#697560' },
   recordedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  recordedText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#687560' },
+  recordedText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#646861' },
 
   costFieldRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   costField: { flex: 1 },
@@ -271,10 +271,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#F4F7EF',
+    backgroundColor: '#EDF2F7',
     alignItems: 'center',
     justifyContent: 'center',
   },
   noteRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  noteText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#687560' },
+  noteText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#646861' },
 });

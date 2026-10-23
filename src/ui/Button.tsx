@@ -48,13 +48,13 @@ const backgrounds: Record<ButtonVariant, string> = {
 
 const labelColors: Record<ButtonVariant, string> = {
   primary: colors.accentInk,
-  secondary: colors.accentInk,
+  secondary: colors.ink,
   ghost: colors.accentDeep,
   outline: colors.ink,
   danger: colors.danger,
 };
 
-const heights = { sm: 40, md: touchTarget, lg: 52 } as const;
+const heights = { sm: touchTarget, md: 52, lg: 56 } as const;
 
 /**
  * Filled pill button, 48dp tall with a 24 radius, matching the HeroUI-based
@@ -140,7 +140,8 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radii.xxxl,
+    borderRadius: radii.lg,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -154,5 +155,6 @@ const styles = StyleSheet.create({
   },
   label: {
     flexShrink: 1,
+    textAlign: 'center',
   },
 });

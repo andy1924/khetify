@@ -91,14 +91,14 @@ export function SoilResultScreen() {
         onPress={() => setEvidenceOpen(true)}
         style={styles.evidenceRow}
       >
-        <Icon name="book-open" size={18} color="#52664D" />
+        <Icon name="book-open" size={18} color="#565F59" />
         <Text style={styles.evidenceLabel}>{t('soilResult.evidence')}</Text>
-        <Icon name="chevron-down" size={16} color="#52664D" />
+        <Icon name="chevron-down" size={16} color="#565F59" />
       </Pressable>
 
       {state.soil.imported ? (
         <View style={styles.importedNote}>
-          <Icon name="check" size={16} color="#52664D" />
+          <Icon name="check" size={16} color="#565F59" />
           <Text style={styles.importedText}>
             {toolCopy('soil.imported')} · {toolCopy('soil.importedNote')}
           </Text>
@@ -142,44 +142,44 @@ function EvidenceRow({ label, value, muted }: { label: string; value: string; mu
 
 const styles = StyleSheet.create({
   valuesCard: {
-    backgroundColor: '#EDF4E4',
+    backgroundColor: '#F2EEE5',
     borderRadius: 18,
     padding: 16,
     gap: 8,
   },
-  captured: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#607052' },
+  captured: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#607052' },
   valueGrid: { flexDirection: 'row', gap: 18, flexWrap: 'wrap' },
   valueCell: { flexBasis: '44%', flexGrow: 1, minWidth: 0, gap: 5 },
-  valueBig: { fontFamily: 'Inter_600SemiBold', fontSize: 36, lineHeight: 45, color: '#3D5C30' },
-  valueLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#637058' },
-  explain: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18.2, color: '#687560' },
+  valueBig: { fontFamily: 'DMSans_600SemiBold', fontSize: 36, lineHeight: 49, color: '#3D5C30' },
+  valueLabel: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#637058' },
+  explain: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#646861' },
   limitations: { backgroundColor: '#F6F0E0', borderRadius: 18, padding: 16, gap: 8 },
-  limitationsTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, lineHeight: 18, color: '#7b683a' },
-  limitationsBody: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#77694b' },
+  limitationsTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 14, lineHeight: 19, color: '#7b683a' },
+  limitationsBody: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#77694b' },
   evidenceRow: {
     minHeight: 50,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#F4F7EF',
+    backgroundColor: '#EDF2F7',
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
   evidenceLabel: {
     flex: 1,
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 13,
-    lineHeight: 18,
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 14,
+    lineHeight: 19,
     color: '#5A714C',
   },
   importedNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  importedText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#687560' },
+  importedText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#646861' },
   actions: { gap: 8 },
-  footnote: { fontFamily: 'Inter_400Regular', fontSize: 10, lineHeight: 14, color: '#697462' },
-  sheetBody: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18, color: '#687560' },
-  evidenceList: { backgroundColor: '#F4F7EF', borderRadius: 14, paddingHorizontal: 14 },
+  footnote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
+  sheetBody: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#646861' },
+  evidenceList: { backgroundColor: '#EDF2F7', borderRadius: 14, paddingHorizontal: 14 },
   evidenceItem: { paddingVertical: 10, gap: 3 },
-  evidenceItemLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#6a7560' },
-  evidenceItemValue: { fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 18, color: '#526D43' },
+  evidenceItemLabel: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#6a7560' },
+  evidenceItemValue: { fontFamily: 'DMSans_500Medium', fontSize: 14, lineHeight: 19, color: '#526D43' },
 });

@@ -79,7 +79,7 @@ export function CommunityScreen() {
             style={({ pressed }) => [styles.composeTarget, pressed && styles.pressed]}
           >
             <View style={styles.composeButton}>
-              <Icon name="plus" size={20} color={colors.icon} />
+              <Icon name="plus" size={20} color={colors.white} />
             </View>
           </Pressable>
         }
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: '#D5E7BD',
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#E9F1DF',
   },
-  filterRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 48 },
+  filterRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, minHeight: 48 },
   chipTarget: { minHeight: 48, justifyContent: 'center' },
   filterSpacer: { flex: 1 },
   filterButton: {
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 16,
-    backgroundColor: '#F2F5EC',
+    backgroundColor: '#F2EFE9',
   },
   sheetRowSelected: { backgroundColor: '#E8F0DE' },
   sheetRowText: { flex: 1, gap: 3 },
@@ -268,10 +268,10 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: '#D6DFD0',
-    backgroundColor: '#FEFFFC',
+    borderColor: '#DEDAD2',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotSelected: { backgroundColor: '#C4DEA9', borderColor: '#C4DEA9' },
+  dotSelected: { backgroundColor: '#D7E5D8', borderColor: '#D7E5D8' },
 });

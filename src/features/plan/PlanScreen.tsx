@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import {
   formatRupees,
@@ -27,15 +27,13 @@ export function PlanScreen() {
         <ScreenHeading title={t('plan.empty.title')} subtitle={t('plan.empty.subtitle')} />
 
         <View style={styles.emptyBody}>
-          <View style={styles.emptyCircle}>
-            <Icon name="sprout" size={42} color="#718F58" strokeWidth={1.5} />
-          </View>
+          <Image source={require('../../../assets/images/wheat-field.jpg')} style={styles.emptyImage} resizeMode="cover" accessible={false} />
           <Text style={styles.emptyHeading}>{t('plan.empty.heading')}</Text>
           <Text style={styles.emptyCopy}>{t('plan.empty.body')}</Text>
           <View style={styles.emptyPanel}>
             {EMPTY_FEATURES.map(key => (
               <View key={key} style={styles.emptyFeature}>
-                <Icon name="check" size={16} color="#52664D" strokeWidth={1.8} />
+                <Icon name="check" size={16} color="#565F59" strokeWidth={1.8} />
                 <Text style={styles.emptyFeatureText}>{t(key)}</Text>
               </View>
             ))}
@@ -141,7 +139,7 @@ export function PlanScreen() {
               {locked ? (
                 <Icon name="lock-keyhole" size={14} color="#A1AC96" strokeWidth={1.7} />
               ) : stage.status === 'current' ? (
-                <Icon name="chevron-right" size={18} color="#52664D" strokeWidth={1.8} />
+                <Icon name="chevron-right" size={18} color="#565F59" strokeWidth={1.8} />
               ) : (
                 <Icon name="chevron-right" size={16} color="#A1AC96" strokeWidth={1.8} />
               )}
@@ -224,26 +222,19 @@ function AssumptionRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   emptyBody: { alignItems: 'center', gap: 12, paddingTop: 8 },
-  emptyCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#EBF2E1',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  emptyImage: { width: '100%', height: 144, borderRadius: 22, marginBottom: 8 },
   emptyHeading: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'DMSans_600SemiBold',
     fontSize: 25,
-    lineHeight: 31,
+    lineHeight: 34,
     color: '#2A412B',
     textAlign: 'center',
     marginTop: 8,
   },
   emptyCopy: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 20,
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 16,
+    lineHeight: 22,
     color: '#6c7766',
     textAlign: 'center',
   },
@@ -256,22 +247,22 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   emptyFeature: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  emptyFeatureText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#64745A' },
+  emptyFeatureText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#64745A' },
   emptyActions: { gap: 12 },
 
-  budgetCard: { backgroundColor: '#E9F1DF', borderRadius: 18, padding: 16, gap: 8 },
-  budgetLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: '#5e6f50' },
-  budgetValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  budgetValue: { flex: 1, fontFamily: 'Inter_600SemiBold', fontSize: 32, lineHeight: 38, color: '#2E452B' },
+  budgetCard: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E9E5DD', borderRadius: 22, padding: 20, gap: 8 },
+  budgetLabel: { fontFamily: 'DMSans_600SemiBold', fontSize: 12, lineHeight: 16, letterSpacing: 0.4, color: '#5e6f50' },
+  budgetValueRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12 },
+  budgetValue: { flex: 1, minWidth: 180, fontFamily: 'DMSans_600SemiBold', fontSize: 32, lineHeight: 43, color: '#292C29' },
   reviseChip: {
-    borderRadius: 99,
-    backgroundColor: '#F4F8EE',
+    borderRadius: 12,
+    backgroundColor: '#F1EEE8',
     paddingHorizontal: 12,
     paddingVertical: 7,
-    minHeight: 30,
+    minHeight: 48,
     justifyContent: 'center',
   },
-  reviseLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 15, color: '#526C43' },
+  reviseLabel: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16, color: '#526C43' },
   budgetChips: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
   constraintChip: {
     borderRadius: 99,
@@ -279,20 +270,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
-  constraintText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#5C7350' },
+  constraintText: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#5C7350' },
 
   stageRow: { minHeight: 59, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
   stageHairline: { borderBottomWidth: 1, borderBottomColor: '#E7EBE1' },
   stageCopy: { flex: 1, gap: 3 },
-  stageTitle: { fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20, color: '#30432B' },
-  stageCaption: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#6c7562' },
+  stageTitle: { fontFamily: 'DMSans_500Medium', fontSize: 16, lineHeight: 22, color: '#343A33' },
+  stageCaption: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#6c7562' },
 
   footerRow: { paddingVertical: 8, minHeight: 36, justifyContent: 'center' },
-  footerText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
+  footerText: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
 
   sheetBody: { gap: 12 },
-  sheetText: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, color: '#687560' },
-  sheetNote: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#697462' },
+  sheetText: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 20, color: '#646861' },
+  sheetNote: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#686A63' },
   assumptionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -300,9 +291,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 9,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6EBE1',
+    borderBottomColor: '#E9E5DD',
   },
-  assumptionLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#6a7560' },
-  assumptionValue: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 17, color: '#526D43' },
+  assumptionLabel: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#6a7560' },
+  assumptionValue: { fontFamily: 'DMSans_500Medium', fontSize: 13, lineHeight: 18, color: '#526D43' },
   pressed: { opacity: 0.85 },
 });

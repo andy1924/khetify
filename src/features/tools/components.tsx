@@ -12,7 +12,7 @@ export function ScreenHeading({
 }: {
   title: string;
   subtitle?: string;
-  /** Tools uses `#263B29`; every other reference screen uses `#213827`. */
+  /** Tools uses `#292C29`; every other reference screen uses `#242824`. */
   titleColor?: string;
   /** Tools and Soil use a 14/400 subtitle; other screens use 13/400. */
   subtitleSize?: number;
@@ -46,7 +46,7 @@ const chipTones: Record<ChipTone, { bg: string; ink: string }> = {
   unavailable: { bg: '#EAEDE5', ink: '#606d56' },
   partial: { bg: '#F5EFDE', ink: '#7a693c' },
   gold: { bg: '#F1EDDF', ink: '#74653f' },
-  best: { bg: '#EBF2E4', ink: '#4A693D' },
+  best: { bg: '#ECEFE9', ink: '#4A693D' },
 };
 
 export function StatusChip({ label, tone }: { label: string; tone: ChipTone }) {
@@ -146,7 +146,7 @@ export function SelectCircle({
       hitSlop={10}
       style={[styles.circle, selected ? styles.circleOn : styles.circleOff]}
     >
-      {selected ? <Icon name="check" size={14} color="#243527" strokeWidth={2} /> : null}
+      {selected ? <Icon name="check" size={14} color="#292D29" strokeWidth={2} /> : null}
     </Pressable>
   );
 }
@@ -235,12 +235,12 @@ export function TwoButtonRow({
 
 export { Button };
 
-const hairline = { borderBottomWidth: 1, borderBottomColor: '#DFE6D8' } as const;
+const hairline = { borderBottomWidth: 1, borderBottomColor: '#DEDAD2' } as const;
 
 const styles = StyleSheet.create({
   heading: { gap: 6 },
-  headingTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 28, lineHeight: 39.2 },
-  headingSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18.2, color: '#6a7667' },
+  headingTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 28, lineHeight: 39 },
+  headingSubtitle: { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 19, color: '#6a7667' },
 
   chip: {
     minHeight: 25,
@@ -251,15 +251,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
-  chipLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 14 },
+  chipLabel: { fontFamily: 'DMSans_500Medium', fontSize: 12, lineHeight: 16 },
 
   banner: { borderRadius: 18, padding: 12, gap: 6 },
   bannerHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  bannerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, lineHeight: 18 },
-  bannerBody: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17 },
+  bannerTitle: { fontFamily: 'DMSans_600SemiBold', fontSize: 14, lineHeight: 19 },
+  bannerBody: { fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18 },
 
   infoStrip: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#657360' },
+  infoText: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#64665F' },
 
 
   hairlineRow: {
@@ -274,31 +274,31 @@ const styles = StyleSheet.create({
   noHairline: { borderBottomWidth: 0 },
 
   keyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7 },
-  keyLabel: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, color: '#6a7560' },
-  keyValue: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 17, color: '#526D43', textAlign: 'right' },
+  keyLabel: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 13, lineHeight: 18, color: '#6a7560' },
+  keyValue: { fontFamily: 'DMSans_500Medium', fontSize: 13, lineHeight: 18, color: '#526D43', textAlign: 'right' },
 
   circle: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  circleOn: { backgroundColor: '#C4DEA9' },
-  circleOff: { backgroundColor: '#FEFFFC', borderWidth: 1, borderColor: '#D6DFD0' },
+  circleOn: { backgroundColor: '#D7E5D8' },
+  circleOff: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#DEDAD2' },
 
   pickerField: {
     flex: 1,
     minHeight: 54,
     borderRadius: 12,
-    backgroundColor: '#F6F8F3',
+    backgroundColor: '#F6F3ED',
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 4,
     justifyContent: 'center',
   },
-  pickerLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 15, color: '#666f63' },
+  pickerLabel: { fontFamily: 'DMSans_400Regular', fontSize: 12, lineHeight: 16, color: '#666f63' },
   pickerValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  pickerValue: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 19, color: '#243527' },
+  pickerValue: { flex: 1, fontFamily: 'DMSans_400Regular', fontSize: 16, lineHeight: 22, color: '#292D29' },
 
   textField: {
     minHeight: 54,
     borderRadius: 12,
-    backgroundColor: '#F6F8F3',
+    backgroundColor: '#F6F3ED',
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 4,
@@ -306,10 +306,10 @@ const styles = StyleSheet.create({
   textFieldInput: {
     padding: 0,
     margin: 0,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'DMSans_500Medium',
     fontSize: 15,
     lineHeight: 21,
-    color: '#243527',
+    color: '#292D29',
     includeFontPadding: false,
   },
   twoButtons: { flexDirection: 'row', gap: 12 },

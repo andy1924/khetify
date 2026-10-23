@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "android": { "package": "com.khetify.demo", "predictiveBackGestureEnabled": true, "softwareKeyboardLayoutMode": "resize" },
     "web": { "output": "single" },
-    "plugins": ["expo-router", ["expo-splash-screen", { "backgroundColor": "#FBFCF9" }]],
+    "plugins": ["expo-router", ["expo-splash-screen", { "backgroundColor": "#FAF8F4" }]],
     "experiments": { "typedRoutes": false }
   }
 }

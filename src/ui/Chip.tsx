@@ -51,7 +51,7 @@ const toneStyles: Record<ChipTone, { bg: string; ink: string }> = {
   warning: { bg: colors.warningBg, ink: colors.warningInk },
   danger: { bg: colors.dangerBg, ink: colors.danger },
   reported: { bg: '#F0ECDC', ink: '#76663C' },
-  reviewed: { bg: '#E8EDE3', ink: '#556D44' },
+  reviewed: { bg: '#E9E6DF', ink: '#556D44' },
   confirmed: { bg: '#DCECCF', ink: '#556D44' },
 };
 

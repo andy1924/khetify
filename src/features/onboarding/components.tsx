@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingHorizontal: 12,
     borderRadius: 14,
-    backgroundColor: '#EFF4E8',
+    backgroundColor: '#EEEDE6',
   },
   sheetList: { gap: 6 },
   sheetRow: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     backgroundColor: colors.surfacePlain,
   },
-  optionSelected: { backgroundColor: '#EFF4E8' },
+  optionSelected: { backgroundColor: '#EEEDE6' },
   dot: {
     width: 22,
     height: 22,
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotSelected: { backgroundColor: '#C4DEA9' },
-  dotIdle: { backgroundColor: '#FEFFFC', borderWidth: 1, borderColor: colors.border },
+  dotSelected: { backgroundColor: '#D7E5D8' },
+  dotIdle: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
   headingBlock: { gap: 4 },
   step: { letterSpacing: 0.4 },
   title: { marginTop: 6 },

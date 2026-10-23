@@ -97,7 +97,7 @@ export function FeedPost({
       <View style={styles.badgeRow}>
         <StatusChip status={status} label={statusLabel} />
       </View>
-      <Text variant="subtitle" color="#47603B">
+      <Text variant="subtitle" color={colors.ink}>
         {title}
       </Text>
       <Text variant="caption" color="#68715C" style={styles.postDetail}>
@@ -154,11 +154,11 @@ export function FixtureArt({
   return (
     <View style={[styles.art, { height }]} accessible={false}>
       <Svg width="100%" height="100%" viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
-        <Rect x="0" y="0" width="320" height="150" fill="#F1F6EA" />
+        <Rect x="0" y="0" width="320" height="150" fill="#F4F1EA" />
         {id === 'fixture-leaf-spots' ? <LeafSpotsArt /> : null}
         {id === 'fixture-waterlogging' ? <WaterloggingArt /> : null}
         {id === 'fixture-sprout' ? <SproutRowsArt /> : null}
-        <Rect x="0" y="0" width="320" height="150" fill="none" stroke="#DFE6D8" strokeWidth="2" />
+        <Rect x="0" y="0" width="320" height="150" fill="none" stroke="#DEDAD2" strokeWidth="2" />
       </Svg>
       {!compact ? (
         <View style={styles.artBadge}>
@@ -255,9 +255,9 @@ const styles = StyleSheet.create({
   postMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 20 },
   postMetaText: { flex: 1 },
   badgeRow: { flexDirection: 'row', minHeight: 25, alignItems: 'center' },
-  postDetail: { lineHeight: 17 },
+  postDetail: { lineHeight: 20 },
 
-  art: { width: '100%', backgroundColor: '#F1F6EA', overflow: 'hidden' },
+  art: { width: '100%', backgroundColor: '#F4F1EA', overflow: 'hidden' },
   artBadge: {
     position: 'absolute',
     left: 12,
