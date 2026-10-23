@@ -32,7 +32,6 @@ type SheetId =
   | 'edit'
   | 'reset'
   | 'signOut'
-  | 'firstVisit'
   | null;
 
 /** 15 · Farm profile & privacy — fixture identity, resources, settings and demo controls. */
@@ -154,14 +153,7 @@ export function ProfileScreen() {
           {profileCopy['profile.demoNote']}
         </Text>
 
-        <DemoRow
-          icon="replace"
-          title={profileCopy['profile.firstVisit']}
-          body={profileCopy['profile.firstVisitBody']}
-          accessibilityLabel={profileCopy['profile.firstVisitA11y']}
-          onPress={() => setSheet('firstVisit')}
-        />
-        <DemoRow
+<DemoRow
           icon="refresh-cw"
           title={t('profile.reset')}
           body={t('profile.resetBody')}
@@ -506,30 +498,7 @@ export function ProfileScreen() {
         </Text>
       </Sheet>
 
-      <Sheet
-        visible={sheet === 'firstVisit'}
-        onClose={close}
-        title={profileCopy['profile.firstVisit']}
-        footer={
-          <View style={styles.confirmActions}>
-            <Button title={t('common.cancel')} variant="secondary" trailingArrow={false} onPress={close} />
-            <Button
-              title={t('common.continue')}
-              trailingArrow={false}
-              onPress={() => {
-                actions.startFirstVisit();
-                close();
-                router.navigate('/(tabs)/plan');
-              }}
-            />
-          </View>
-        }
-      >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
-          {profileCopy['profile.firstVisitBody']}
-        </Text>
-      </Sheet>
-    </Screen>
+</Screen>
   );
 }
 

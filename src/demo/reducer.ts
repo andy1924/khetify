@@ -85,6 +85,18 @@ function submittedObservation(draft: ObservationDraft, id: string): Observation 
 
 export function demoReducer(state: DemoState, action: DemoAction): DemoState {
   switch (action.type) {
+    case 'onboarding/details':
+      return { ...state, farm: { ...state.farm, farmerName: action.name.trim(), initials: action.name.trim().split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase(), district: action.district.trim(), stateName: action.stateName.trim(), crop: action.crop.trim(), farmName: '', areaAcres: 0 } };
+    case 'onboarding/location':
+      return { ...state, deviceLocation: action.location };
+
+    case 'monitoring/field':
+      return { ...state, monitoring: { ...state.monitoring, fields: [action.field, ...state.monitoring.fields.filter(f => f.id !== action.field.id)] } };
+    case 'monitoring/report':
+      return { ...state, monitoring: { ...state.monitoring, reports: [action.report, ...state.monitoring.reports] } };
+    case 'monitoring/withdraw':
+      return { ...state, monitoring: { ...state.monitoring, reports: state.monitoring.reports.map(r => r.id === action.id ? { ...r, status: 'withdrawn' as const } : r) } };
+
     case 'locale/set':
       return { ...state, locale: action.locale };
 
@@ -139,6 +151,8 @@ export function demoReducer(state: DemoState, action: DemoAction): DemoState {
     case 'onboarding/signOut':
       return {
         ...clearDrafts(state),
+        deviceLocation: null,
+        monitoring: { fields: [], reports: [] },
         onboarding: {
           mobile: '',
           otpStatus: 'idle',

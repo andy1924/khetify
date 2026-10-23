@@ -1,4 +1,5 @@
 import React from 'react';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, colors, Screen, Text } from '../../ui';
 import { languageLabel, localeOptions, useT } from '../../locales';
@@ -9,7 +10,6 @@ import {
   OnboardingHeader,
   SelectionDot,
   StepHeading,
-  useOnboardingNav,
 } from './components';
 
 /**
@@ -20,7 +20,7 @@ import {
 export function LanguageScreen() {
   const t = useT();
   const { state, actions } = useDemo();
-  const nav = useOnboardingNav();
+
 
   return (
     <Screen
@@ -32,7 +32,7 @@ export function LanguageScreen() {
         <OnboardingFooter>
           <Button
             title={t('language.continue', { language: languageLabel(state.locale) })}
-            onPress={nav.toMobile}
+            onPress={() => router.push('/details')}
             accessibilityLabel={t('language.continue', { language: languageLabel(state.locale) })}
           />
           <FooterNote>{t('language.footer')}</FooterNote>
@@ -41,7 +41,7 @@ export function LanguageScreen() {
     >
       <OnboardingHeader />
       <View style={styles.content}>
-        <StepHeading step={t('language.step')} title={t('language.title')} description={t('language.description')} />
+        <StepHeading step={'Step 1 of 3'} title={t('language.title')} description={t('language.description')} />
         <View style={styles.options} accessibilityRole="radiogroup">
           {localeOptions.map(option => {
             const selected = state.locale === option.code;

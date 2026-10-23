@@ -1,3 +1,4 @@
+import { copernicusProvider } from './satellite.mjs';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { SOURCE, compare, forecast, keyOf, matches } from './prices.mjs';
@@ -120,7 +121,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
     res.setHeader('X-Content-Type-Options', 'nosniff');
     const send = (code, body) => { res.writeHead(code); res.end(JSON.stringify(body)); };
     if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); return send(204, null); }
-    if (req.method !== 'GET' && !(req.method === 'POST' && ['/api/compare', '/api/photo-prices'].includes(req.url))) return send(405, { error: 'Use GET, POST /api/compare or POST /api/photo-prices.' });
+    if (req.method !== 'GET' && !(req.method === 'POST' && ['/api/compare', '/api/photo-prices', '/api/field-observations'].includes(req.url))) return send(405, { error: 'Use GET, POST /api/compare or POST /api/photo-prices.' });
     try {
       const address = req.socket.remoteAddress;
       const current = rate.get(address);
@@ -130,6 +131,10 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       if (rate.size > 10000) for (const [ip, value] of rate) if (Date.now() - value.at > 60000) rate.delete(ip);
       const url = new URL(req.url, 'http://localhost');
       const params = url.searchParams;
+      if (url.pathname === '/api/field-observations') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST.' });
+        return send(200, await copernicusProvider.getObservations((await readBody(req)).polygon));
+      }
       if (url.pathname === '/api/photo-prices/capabilities') return send(200, { supportedCrops: await cropScope(), recognitionConfigured: Boolean(process.env.OPENAI_API_KEY && process.env.CROP_VISION_MODEL),
         maxPhotoBytes: 5 * 1024 * 1024, acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'], farmerConfirmationRequired: true, limitations: PHOTO_LIMITATIONS });
       if (url.pathname === '/api/photo-prices') {

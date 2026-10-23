@@ -28,6 +28,7 @@ const TOOLS: ToolEntry[] = [
   { kind: 'grainId', titleKey: 'tools.grainId.title', detailKey: 'tools.grainId.detail', status: 'limited', icon: 'scan' },
   { kind: 'forecast', titleKey: 'tools.forecast.title', detailKey: 'tools.forecast.detail', status: 'unavailable', icon: 'chart-no-axes-combined', route: '/tools/forecast' },
   { kind: 'mandi', titleKey: 'tools.mandi.title', detailKey: 'tools.mandi.detail', status: 'ready', icon: 'store', route: '/tools/mandi' },
+  { kind: 'satellite', titleKey: 'tools.satellite.title', detailKey: 'tools.satellite.detail', status: 'limited', icon: 'satellite', route: '/tools/satellite' },
 ];
 
 const statusLabel: Record<ToolStatus, StringKey> = {
@@ -45,6 +46,7 @@ const KIND_LABEL: Record<ToolKind, StringKey> = {
   grainId: 'tools.grainId.title',
   forecast: 'tools.forecast.title',
   mandi: 'tools.mandi.title',
+  satellite: 'tools.satellite.title',
 };
 
 /** 07 · Independent tools — six entries with capability states and local history. */
@@ -75,7 +77,7 @@ export function ToolsScreen() {
           const usable = tool.status !== 'unavailable';
           return (
             <Pressable
-              key={tool.kind}
+              key={tool.titleKey}
               accessibilityRole="button"
               accessibilityLabel={`${t(tool.titleKey)}. ${t(tool.detailKey)}. ${t(statusLabel[tool.status])}.`}
               onPress={() => open(tool)}

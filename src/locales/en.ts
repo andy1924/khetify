@@ -99,6 +99,7 @@ export const en = {
   'otp.cancel': 'Cancel',
 
   'tabs.home': 'Home',
+  'tabs.prices': 'Prices',
   'tabs.plan': 'Farm Plan',
   'tabs.tools': 'Tools',
   'tabs.community': 'Community',

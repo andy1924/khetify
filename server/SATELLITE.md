@@ -1,0 +1,11 @@
+Satellite monitoring setup · India
+
+- Backend: set CDSE_CLIENT_ID and CDSE_CLIENT_SECRET from a registered Copernicus Data Space OAuth client. Never prefix secrets with EXPO_PUBLIC. Existing server startup: node server/index.mjs.
+- App: set EXPO_PUBLIC_FIELD_API_URL to the reachable HTTPS backend URL; configure PRICE_ALLOWED_ORIGIN for web. Credentials are never sent to the app.
+- Provider: Sentinel-2 L2A Catalog + Statistical APIs. Last 30 days, latest three captures; SCL cloud/unusable mask, NDVI, polygon pixel coverage. Signals only; no chemical soil estimates. No fixture observations or alerts.
+- Official access/coverage docs (checked 2026-10-24): https://documentation.dataspace.copernicus.eu/APIs/SentinelHub/Overview/Authentication.html and https://documentation.dataspace.copernicus.eu/APIs/SentinelHub/Data/S2L2A.html . Registered account, OAuth client, available quota and field-specific acquisitions required. Actual coverage is queried rather than assumed.
+- India: Nominatim searches use countrycodes=in. Coordinate requests are bounded to 6–38 N, 68–98 E (a service envelope, not cadastral/country verification). Sentinel-2 includes India; actual field acquisitions are checked at request time. KVK/extension review is required for pest concerns.
+- Maps: existing /api/places Nominatim lookup and OpenStreetMap tiles with attribution. No plot-number lookup. Public OSM services require policy-compliant usage; production volume needs suitable hosting/service agreement.
+- Fields and private pending reports use the existing session reducer; restart/reset clears them. Photos, authenticated persistence, expert review UI and push delivery are not connected. Do not deploy anonymous precise-field storage endpoints.
+- server/pest-alerts.mjs is an internal delivery boundary requiring a trusted review worker, authoritative current consent/withdrawal state, recipient fields and an idempotent send adapter. No public confirmation endpoint. Wire authentication, durable reports and notification delivery before enabling broadcast; recheck consent/status before dispatch. Payloads omit coordinates.
+- TypeScript/lint and focused provider validation/alert consent tests are available. Live imagery requires credentials and was not verified against a live account.
