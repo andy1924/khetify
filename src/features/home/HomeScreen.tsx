@@ -54,7 +54,7 @@ export function HomeScreen() {
 
       <View style={styles.hero}>
         <Image
-          source={require('../../../assets/images/wheat-field.jpg')}
+          source={require('../../../assets/images/farmer-phone-magic.jpg')}
           style={styles.heroImage}
           resizeMode="cover"
           accessible={false}
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   farmSummary: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: -12 },
   farmText: { flex: 1, fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.muted },
   hero: { backgroundColor: colors.white, borderRadius: 24, borderWidth: 1, borderColor: colors.borderSoft, overflow: 'hidden' },
-  heroImage: { width: '100%', height: 136 },
+  heroImage: { width: '100%', height: 192 },
   heroContent: { padding: 20, gap: 12 },
   heroTitle: { fontSize: 28, lineHeight: 35, letterSpacing: -0.7 },
   heroBody: { marginBottom: 4 },

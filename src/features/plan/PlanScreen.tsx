@@ -27,7 +27,7 @@ export function PlanScreen() {
         <ScreenHeading title={t('plan.empty.title')} subtitle={t('plan.empty.subtitle')} />
 
         <View style={styles.emptyBody}>
-          <Image source={require('../../../assets/images/wheat-field.jpg')} style={styles.emptyImage} resizeMode="cover" accessible={false} />
+          <Image source={require('../../../assets/images/farmer-phone-magic.jpg')} style={styles.emptyImage} resizeMode="cover" accessible={false} />
           <Text style={styles.emptyHeading}>{t('plan.empty.heading')}</Text>
           <Text style={styles.emptyCopy}>{t('plan.empty.body')}</Text>
           <View style={styles.emptyPanel}>
@@ -222,7 +222,7 @@ function AssumptionRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   emptyBody: { alignItems: 'center', gap: 12, paddingTop: 8 },
-  emptyImage: { width: '100%', height: 144, borderRadius: 22, marginBottom: 8 },
+  emptyImage: { width: '100%', height: 192, borderRadius: 22, marginBottom: 8 },
   emptyHeading: {
     fontFamily: 'DMSans_600SemiBold',
     fontSize: 25,
