@@ -77,6 +77,3 @@ The stack uses Expo SDK 58, React Native 0.88, React 19.3, TypeScript, Expo Rout
 
 Only Pencil frame `Qx0SG`, “4. Khetify — Final Mobile”, controls this implementation. Reference captures are in `docs/reference-images`; they are review material and are never rendered as app screens. Inter through `@expo-google-fonts/inter` uses the SIL Open Font License; Lucide icons use the ISC license. Bundled fixture artwork and assets are documented in [Asset provenance](docs/asset-provenance.md).
 
-## Demo limitations
-
-No agricultural recommendation, live price/forecast, diagnosis, public posting, real SMS, notification, payment, cloud storage or production release is implemented. Missing values remain unknown; unsupported tools show explicit limited/unavailable states. Camera/gallery actions use bundled fixtures and request no permissions. Android is the verified MVP target; iOS and web have not been acceptance-tested.
