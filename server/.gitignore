@@ -1,0 +1,4 @@
+.env.local
+.price-data/
+*.tmp
+node_modules/

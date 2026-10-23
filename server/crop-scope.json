@@ -1,0 +1,7 @@
+[
+  { "id": "wheat", "name": "Wheat", "commodity": "Wheat" },
+  { "id": "maize", "name": "Maize", "commodity": "Maize" },
+  { "id": "paddy", "name": "Paddy / rice plant", "commodity": "Paddy(Dhan)(Common)" },
+  { "id": "soybean", "name": "Soybean", "commodity": "Soyabean" },
+  { "id": "onion", "name": "Onion", "commodity": "Onion" }
+]
