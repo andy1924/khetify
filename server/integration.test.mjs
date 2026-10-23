@@ -11,6 +11,8 @@ test('backend integrations retain existing contracts and separate sourced data, 
   delete process.env.DATA_GOV_API_KEY;
   delete process.env.OPENAI_API_KEY;
   delete process.env.CROP_VISION_MODEL;
+  delete process.env.CDSE_CLIENT_ID;
+  delete process.env.CDSE_CLIENT_SECRET;
   const { createPriceServer } = await import('./index.mjs');
   const { normalize } = await import('./prices.mjs');
   const { writeJson } = await import('./store.mjs');
@@ -42,6 +44,19 @@ test('backend integrations retain existing contracts and separate sourced data, 
     quantity: 250, unit: 'kg', costs: { [millet.id]: { transport: 10, handling: 0, fees: 0 } } };
   let crop, review;
   try {
+    await t.test('satellite POST requests coexist with grain routes and history CORS permissions', async () => {
+      const polygon = [{ latitude: 20, longitude: 75 }, { latitude: 20.001, longitude: 75 }, { latitude: 20, longitude: 75.001 }];
+      const result = await request('/api/field-observations', { polygon });
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { status: 'unconfigured', observations: [] });
+      assert.equal((await request('/api/field-observations', { polygon: [] })).status, 400);
+      assert.equal((await request('/api/field-observations', undefined, undefined, 'GET')).status, 405);
+      const preflight = await fetch(base + '/api/field-observations', { method: 'OPTIONS' });
+      assert.equal(preflight.status, 204);
+      assert.match(preflight.headers.get('access-control-allow-methods'), /POST/);
+      assert.match(preflight.headers.get('access-control-allow-methods'), /DELETE/);
+      assert.match(preflight.headers.get('access-control-allow-headers'), /Authorization/);
+    });
     await t.test('source catalog expands manual price coverage without claiming automatic recognition', async () => {
       const result = await request('/api/crops', undefined, undefined, 'GET');
       assert.equal(result.status, 200);

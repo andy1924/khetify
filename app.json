@@ -6,9 +6,33 @@
     "orientation": "portrait",
     "scheme": "khetify",
     "userInterfaceStyle": "light",
-    "android": { "package": "com.khetify.demo", "predictiveBackGestureEnabled": true, "softwareKeyboardLayoutMode": "resize" },
-    "web": { "output": "single" },
-    "plugins": ["expo-router", ["expo-splash-screen", { "backgroundColor": "#FAF8F4" }]],
-    "experiments": { "typedRoutes": false }
+    "android": {
+      "package": "com.khetify.demo",
+      "predictiveBackGestureEnabled": true,
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "web": {
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FAF8F4"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Khetify to use your location to help you find and draw your field on the map.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
   }
 }

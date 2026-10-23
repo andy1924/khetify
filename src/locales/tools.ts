@@ -1,4 +1,6 @@
 export const toolsCopy = {
+  'tools.satellite.title': 'Satellite field monitoring',
+  'tools.satellite.detail': 'Field setup and dated crop signals',
   'tools.recent': 'RECENT',
   'tools.recentNote': 'Tools you use appear here on this device.',
   'tools.grainId.sheetBody':

@@ -13,11 +13,11 @@ import { DemoProvider } from '../demo';
 import { useT } from '../locales';
 
 const tabs = [
-  { name: 'home', label: 'Home', Icon: House },
-  { name: 'plan', label: 'Farm Plan', Icon: Sprout },
-  { name: 'tools', label: 'Tools', Icon: LayoutGrid },
-  { name: 'community', label: 'Community', Icon: Users },
-  { name: 'profile', label: 'Profile', Icon: UserRound },
+  { name: 'home', labelKey: 'tabs.home', Icon: House },
+  { name: 'plan', labelKey: 'tabs.plan', Icon: Sprout },
+  { name: 'tools', labelKey: 'tabs.tools', Icon: LayoutGrid },
+  { name: 'community', labelKey: 'tabs.community', Icon: Users },
+  { name: 'profile', labelKey: 'tabs.profile', Icon: UserRound },
 ] as const;
 
 function Navigation() {
@@ -30,8 +30,8 @@ function Navigation() {
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardOpen(false));
     return () => { show.remove(); hide.remove(); };
   }, []);
-  const onboarding = ['/', '/language', '/mobile', '/otp'].includes(pathname);
-  const active = tabs.find(tab => pathname === `/${tab.name}` || pathname.startsWith(`/${tab.name}/`))?.name ?? 'home';
+  const onboarding = ['/', '/language', '/details', '/location', '/mobile', '/otp'].includes(pathname);
+  const active = pathname === '/prices' ? 'tools' : tabs.find(tab => pathname === `/${tab.name}` || pathname.startsWith(`/${tab.name}/`))?.name ?? 'home';
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
@@ -39,9 +39,9 @@ function Navigation() {
       {!onboarding && !keyboardOpen && (
         <View style={[styles.navigationInset, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           <View style={styles.navigation} accessibilityRole="tablist">
-            {tabs.map(({name, Icon}) => {
+            {tabs.map(({name, labelKey, Icon}) => {
               const selected = active === name;
-              const title = t(`tabs.${name}`);
+              const title = t(labelKey);
               return <Pressable key={name} accessibilityRole="tab" accessibilityLabel={title} accessibilityState={{selected}} onPress={() => router.navigate(`/(tabs)/${name}`)} style={[styles.tab, selected && styles.selected]}>
                 <Icon size={20} strokeWidth={1.6} color={selected ? '#292C29' : '#64665F'} />
                 <Text style={[styles.tabLabel, selected && styles.selectedLabel]}>{title}</Text>

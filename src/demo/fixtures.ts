@@ -157,6 +157,7 @@ const feed = (): Observation[] => [
 /** Every fixture in the reference board. Everything else derives from this. */
 export function createInitialState(): DemoState {
   return {
+    deviceLocation: null,
     locale: 'en',
     onboarding: {
       mobile: '9876526448',
@@ -217,6 +218,7 @@ export function createInitialState(): DemoState {
       communitySharing: false,
       notifications: false,
     },
+    monitoring: { fields: [], reports: [] },
     toolHistory: [],
   };
 }

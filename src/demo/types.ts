@@ -1,3 +1,4 @@
+import type { RegisteredField, PestReport } from '../features/tools/satelliteProvider';
 import type { StringKey } from '../locales/en';
 
 export type { StringKey };
@@ -18,7 +19,7 @@ export type CommunityFilter = 'nearby' | 'crop' | 'week';
 
 export type ConsentKey = 'approximateLocation' | 'communitySharing' | 'notifications';
 
-export type ToolKind = 'soil' | 'cropPhoto' | 'grainQuality' | 'grainId' | 'forecast' | 'mandi';
+export type ToolKind = 'soil' | 'cropPhoto' | 'grainQuality' | 'grainId' | 'forecast' | 'mandi' | 'satellite';
 
 export type SoilParamKey =
   | 'ph'
@@ -159,6 +160,7 @@ export interface FarmSoilTest {
 }
 
 export interface DemoState {
+  deviceLocation: { latitude: number; longitude: number; accuracy: number | null; capturedAt: number } | null;
   locale: Locale;
   onboarding: {
     mobile: string;
@@ -201,10 +203,16 @@ export interface DemoState {
     lastSubmittedId: string | null;
   };
   consents: Record<ConsentKey, boolean>;
+  monitoring: { fields: RegisteredField[]; reports: PestReport[] };
   toolHistory: ToolHistoryEntry[];
 }
 
 export type DemoAction =
+  | { type: 'onboarding/details'; name: string; district: string; stateName: string; crop: string }
+  | { type: 'onboarding/location'; location: DemoState['deviceLocation'] }
+  | { type: 'monitoring/field'; field: RegisteredField }
+  | { type: 'monitoring/report'; report: PestReport }
+  | { type: 'monitoring/withdraw'; id: string }
   | { type: 'locale/set'; locale: Locale }
   | { type: 'onboarding/mobile'; digits: string }
   | { type: 'onboarding/otpSending' }

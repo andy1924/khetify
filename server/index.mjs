@@ -1,3 +1,4 @@
+import { copernicusProvider } from './satellite.mjs';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { SOURCE, compare, forecast, keyOf, matches } from './prices.mjs';
@@ -141,7 +142,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       if (rate.size > 10000) for (const [ip, value] of rate) if (Date.now() - value.at > 60000) rate.delete(ip);
       const url = new URL(req.url, 'http://localhost');
       const params = url.searchParams;
-      const posts = ['/api/compare', '/api/photo-prices', '/api/grain-screening', '/api/grain-screening/review', '/api/grain-screening/prices', '/api/grain-history', '/api/grain-history/session'];
+      const posts = ['/api/compare', '/api/photo-prices', '/api/grain-screening', '/api/grain-screening/review', '/api/grain-screening/prices', '/api/grain-history', '/api/grain-history/session', '/api/field-observations'];
       const historyPath = url.pathname === '/api/grain-history' || /^\/api\/grain-history\/[a-f0-9-]{36}$/.test(url.pathname);
       if (req.method !== 'GET' && !(req.method === 'POST' && posts.includes(url.pathname)) && !(req.method === 'DELETE' && historyPath)) return send(405, { error: 'Use a supported read, screening or history endpoint.' });
       if (url.pathname === '/api/grain-history/session') {
@@ -171,6 +172,10 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
         activePhotos++;
         try { return send(200, await grainScreening(await readBody(req, PHOTO_BODY_LIMIT))); }
         finally { activePhotos--; }
+      }
+      if (url.pathname === '/api/field-observations') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST.' });
+        return send(200, await copernicusProvider.getObservations((await readBody(req)).polygon));
       }
       if (url.pathname === '/api/photo-prices/capabilities') return send(200, { supportedCrops: await cropScope(), priceCrops: await marketCropScope(), manualPriceLookupWithoutPhoto: true, recognitionConfigured: Boolean(process.env.OPENAI_API_KEY && process.env.CROP_VISION_MODEL),
         maxPhotoBytes: 5 * 1024 * 1024, acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'], farmerConfirmationRequired: true, limitations: PHOTO_LIMITATIONS });
