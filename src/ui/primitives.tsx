@@ -89,6 +89,25 @@ const noticePalettes: Record<NoticeTone, { bg: string; ink: string; title: strin
  */
 export function Notice({ title, children, tone = 'neutral', icon, style, plain = false }: NoticeProps) {
   const palette = noticePalettes[tone];
+  // JSX interpolation creates arrays of text children. Native Views cannot
+  // render those strings (or numbers) directly, including inside fragments.
+  const body: React.ReactNode[] = [];
+  let text: (string | number)[] = [];
+  const flushText = () => {
+    if (text.length === 0) return;
+    body.push(<Text key={`text-${body.length}`} variant="meta" color={palette.ink} style={styles.noticeBody}>{text}</Text>);
+    text = [];
+  };
+  const append = (nodes: React.ReactNode) => React.Children.forEach(nodes, child => {
+    if (typeof child === 'string' || typeof child === 'number') text.push(child);
+    else if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.type === React.Fragment) append(child.props.children);
+    else if (child != null && typeof child !== 'boolean') {
+      flushText();
+      body.push(<React.Fragment key={`node-${body.length}`}>{child}</React.Fragment>);
+    }
+  });
+  append(children);
+  flushText();
   return (
     <View style={[styles.notice, !plain && { backgroundColor: palette.bg }, style]}>
       {title ? (
@@ -99,15 +118,7 @@ export function Notice({ title, children, tone = 'neutral', icon, style, plain =
           </Text>
         </Row>
       ) : null}
-      {children ? (
-        typeof children === 'string' ? (
-          <Text variant="meta" color={palette.ink} style={styles.noticeBody}>
-            {children}
-          </Text>
-        ) : (
-          children
-        )
-      ) : null}
+      {body}
     </View>
   );
 }

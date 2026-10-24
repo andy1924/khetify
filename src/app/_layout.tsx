@@ -8,7 +8,7 @@ import { BlurTargetView, BlurView } from 'expo-blur';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HeroUINativeProvider } from 'heroui-native/provider';
-import { House, ChartNoAxesCombined, UserRound } from 'lucide-react-native';
+import { House, ChartNoAxesCombined, Bell, UserRound } from 'lucide-react-native';
 import { DemoProvider } from '../demo';
 import { useT } from '../locales';
 import { NavigationInsetContext } from '../ui/NavigationInset';
@@ -16,6 +16,7 @@ import { NavigationInsetContext } from '../ui/NavigationInset';
 const tabs = [
   { name: 'home', labelKey: 'tabs.home', Icon: House },
   { name: 'prices', labelKey: 'tabs.prices', Icon: ChartNoAxesCombined },
+  { name: 'alerts', labelKey: 'tabs.alerts', Icon: Bell },
   { name: 'profile', labelKey: 'tabs.profile', Icon: UserRound },
 ] as const;
 
@@ -32,7 +33,7 @@ function Navigation() {
     return () => { show.remove(); hide.remove(); };
   }, []);
   const onboarding = ['/', '/language', '/details', '/location', '/mobile', '/otp'].includes(pathname);
-  const active = pathname === '/tools/mandi' || pathname === '/tools/forecast' ? 'prices' : tabs.find(tab => pathname === `/${tab.name}` || pathname.startsWith(`/${tab.name}/`))?.name ?? 'home';
+  const active = pathname.startsWith('/community') ? 'alerts' : pathname === '/tools/mandi' || pathname === '/tools/forecast' ? 'prices' : tabs.find(tab => pathname === `/${tab.name}` || pathname.startsWith(`/${tab.name}/`))?.name ?? 'home';
   const showNavigation = !onboarding && !keyboardOpen;
   const bottomSpacing = Math.max(insets.bottom, 12);
   return (

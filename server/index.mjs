@@ -1,4 +1,5 @@
 import { copernicusProvider } from './satellite.mjs';
+import { areaAlerts } from './area-alerts.mjs';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { SOURCE, compare, forecast, keyOf, matches } from './prices.mjs';
@@ -122,7 +123,7 @@ function comparisonInput(body) {
   return { query, origin, radius, quantity: body.quantity, unit, costs, locations: locations.map(loc => ({ ...loc, verifiedOn: new Date().toISOString().slice(0, 10), basis: 'Caller-confirmed OSM pin; not independently verified' })) };
 }
 
-export function createPriceServer({ recognize = identifyCrop, locate = lookupPlace } = {}) {
+export function createPriceServer({ recognize = identifyCrop, locate = lookupPlace, alerts = areaAlerts } = {}) {
   const rate = new Map();
   const tokens = analysisTokens();
   let activePhotos = 0;
@@ -142,6 +143,10 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       if (rate.size > 10000) for (const [ip, value] of rate) if (Date.now() - value.at > 60000) rate.delete(ip);
       const url = new URL(req.url, 'http://localhost');
       const params = url.searchParams;
+      if (url.pathname === '/api/area-alerts') {
+        if (req.method !== 'GET') return send(405, { error: 'Use GET.' });
+        return send(200, await alerts(params));
+      }
       const posts = ['/api/compare', '/api/photo-prices', '/api/grain-screening', '/api/grain-screening/review', '/api/grain-screening/prices', '/api/grain-history', '/api/grain-history/session', '/api/field-observations'];
       const historyPath = url.pathname === '/api/grain-history' || /^\/api\/grain-history\/[a-f0-9-]{36}$/.test(url.pathname);
       if (req.method !== 'GET' && !(req.method === 'POST' && posts.includes(url.pathname)) && !(req.method === 'DELETE' && historyPath)) return send(405, { error: 'Use a supported read, screening or history endpoint.' });

@@ -1,3 +1,6 @@
+import { apiBase, connectionError } from '../../lib/api';
+export { apiBase } from '../../lib/api';
+
 export type Point = { latitude: number; longitude: number };
 export type FieldPolygon = Point[];
 export type RegisteredField = { id: string; name: string; polygon: FieldPolygon; crop: string; sowingDate: string; alertsOptIn: boolean; shareApproximate: boolean; radiusKm: number };
@@ -10,13 +13,15 @@ export interface SatelliteObservation {
 }
 export type ObservationResult = { status: 'ready' | 'unconfigured' | 'no-coverage'; observations: SatelliteObservation[] };
 export interface FieldMonitoringProvider { readonly id: string; getObservations(polygon: FieldPolygon): Promise<ObservationResult> }
-export const apiBase = (process.env.EXPO_PUBLIC_FIELD_API_URL || '').replace(/\/$/, '');
 export const fieldMonitoringProvider: FieldMonitoringProvider = {
   id: 'copernicus-sentinel-2',
   async getObservations(polygon) {
     if (!apiBase) return { status: 'unconfigured', observations: [] };
-    const response = await fetch(`${apiBase}/api/field-observations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ polygon }), signal: AbortSignal.timeout(90000) });
-    if (!response.ok) throw new Error('Observation provider unavailable. Please retry.');
+    let response: Response;
+    try {
+      response = await fetch(`${apiBase}/api/field-observations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ polygon }), signal: AbortSignal.timeout(90000) });
+    } catch { throw new Error(connectionError()); }
+    if (!response.ok) throw new Error(response.status === 400 ? 'The field boundary was rejected. Check its corners and try again.' : 'The satellite provider could not complete this request. Please retry shortly.');
     return response.json();
   },
 };
