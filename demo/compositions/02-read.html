@@ -1,0 +1,303 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #f3e9d6;
+      font-family: Inter, system-ui, sans-serif;
+    }
+    #s2-stage { position: absolute; inset: 0; }
+
+    /* ---------- full-frame leaf ---------- */
+    #s2-leafwrap {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1280px;
+      height: 1280px;
+      margin: -640px 0 0 -640px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 40px 90px rgba(38, 59, 41, 0.22);
+      background: #dfe8d2;
+    }
+    #s2-leaf { width: 100%; height: 100%; object-fit: cover; }
+    #s2-scan {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 210px;
+      background: linear-gradient(to bottom, rgba(190, 221, 167, 0) 0%, rgba(190, 221, 167, 0.42) 62%, rgba(246, 250, 240, 0.9) 96%, rgba(246, 250, 240, 0) 100%);
+      opacity: 0;
+    }
+    #s2-dim { position: absolute; inset: 0; background: #24361f; opacity: 0; }
+    .s2-mark {
+      position: absolute;
+      width: 104px; height: 104px;
+      margin: -52px 0 0 -52px;
+      border: 3px solid rgba(246, 250, 240, 0.95);
+      border-radius: 50%;
+      opacity: 0;
+      box-shadow: 0 0 0 1px rgba(38, 59, 41, 0.25);
+    }
+    .s2-mark::after {
+      content: "";
+      position: absolute;
+      inset: 24px;
+      border-radius: 50%;
+      background: rgba(246, 250, 240, 0.22);
+    }
+    .s2-tag {
+      position: absolute;
+      padding: 15px 22px;
+      border-radius: 14px;
+      background: rgba(251, 252, 249, 0.97);
+      color: #263b29;
+      font: 500 29px/1.25 Inter, sans-serif;
+      box-shadow: 0 14px 32px rgba(31, 50, 32, 0.26);
+      white-space: nowrap;
+      opacity: 0;
+    }
+    .s2-tag b { font-weight: 600; }
+
+    /* ---------- the phone, rebuilt at ~1.9x so the real screen is legible ---------- */
+    #s2-phone {
+      position: absolute;
+      left: 956px;
+      top: 34px;
+      width: 760px;
+      height: 1600px;
+      border-radius: 92px;
+      background: linear-gradient(148deg, #5c6a60 0%, #2c392f 26%, #202b23 62%, #46524a 100%);
+      padding: 6px;
+      box-shadow:
+        0 60px 110px rgba(38, 59, 41, 0.38),
+        0 16px 32px rgba(38, 59, 41, 0.22),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+      transform-origin: 50% 42%;
+      opacity: 0;
+    }
+    #s2-bezel {
+      position: relative;
+      width: 100%; height: 100%;
+      border-radius: 88px;
+      background: #10170f;
+      padding: 14px;
+    }
+    #s2-screen {
+      position: relative;
+      width: 100%; height: 100%;
+      border-radius: 76px;
+      overflow: hidden;
+      background: #fbfcf9;
+    }
+    #s2-glass {
+      position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      background:
+        linear-gradient(118deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 16%, rgba(255,255,255,0) 32%),
+        linear-gradient(300deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 24%);
+      mix-blend-mode: screen;
+    }
+    #s2-page {
+      position: absolute;
+      left: 0; top: 0;
+      width: 734px;
+    }
+    #s2-page img { width: 100%; display: block; }
+    #s2-soil {
+      position: absolute;
+      inset: 0;
+      background: #fbfcf9;
+      opacity: 0;
+    }
+    #s2-soil img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+
+    /* ---------- the left column ---------- */
+    .s2-label {
+      position: absolute;
+      left: 106px;
+      font: italic 400 30px/1 "EB Garamond", Georgia, serif;
+      color: #6f7d67;
+      opacity: 0;
+    }
+    .s2-line {
+      position: absolute;
+      left: 104px;
+      width: 700px;
+      font: 600 68px/1.08 Inter, sans-serif;
+      letter-spacing: -0.026em;
+      color: #263b29;
+      opacity: 0;
+    }
+    #s2-lbl-2, #s2-lbl-3 { top: 150px; }
+    #s2-line-2, #s2-line-3 { top: 196px; }
+    #s2-note {
+      position: absolute;
+      left: 106px;
+      top: 470px;
+      width: 620px;
+      font: 400 30px/1.5 Inter, sans-serif;
+      color: #4f6150;
+      opacity: 0;
+    }
+
+    /* ---------- real result fields, typeset in the left column ---------- */
+    #s2-panel {
+      position: absolute;
+      left: 106px;
+      top: 420px;
+      width: 620px;
+      opacity: 0;
+    }
+    .s2-row {
+      padding: 26px 0;
+      border-bottom: 1px solid rgba(38, 59, 41, 0.13);
+      opacity: 0;
+    }
+    .s2-row:last-child { border-bottom: 0; }
+    .s2-k {
+      font: italic 400 28px/1 "EB Garamond", Georgia, serif;
+      color: #6f7d67;
+      margin-bottom: 12px;
+    }
+    .s2-v {
+      font: 600 34px/1.2 Inter, sans-serif;
+      color: #263b29;
+      letter-spacing: -0.014em;
+    }
+    .s2-v small {
+      display: block;
+      font: 400 29px/1.4 Inter, sans-serif;
+      color: #5c6b57;
+      margin-top: 9px;
+      letter-spacing: 0;
+    }
+
+    #grain2 {
+      position: absolute;
+      inset: 0;
+      background-image: url("../assets/grain.png");
+      background-size: 256px 256px;
+      opacity: 0.05;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+  </style>
+
+  <div data-hf-id="hf-u16y" id="root" data-composition-id="s2" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-pmtr" id="s2-stage">
+      <div data-hf-id="hf-huq0" id="s2-leafwrap" data-layout-allow-overflow>
+        <img data-hf-id="hf-g788" id="s2-leaf" src="../assets/photos/wheat-leaf.jpg" alt="" />
+        <div data-hf-id="hf-5y00" id="s2-scan"></div>
+        <div data-hf-id="hf-ldj7" id="s2-dim"></div>
+        <div data-hf-id="hf-tiu4" id="s2-mark-a" class="s2-mark" style="left: 790px; top: 470px"></div>
+        <div data-hf-id="hf-21ga" id="s2-mark-b" class="s2-mark" style="left: 470px; top: 760px"></div>
+        <div data-hf-id="hf-ssc7" id="s2-mark-c" class="s2-mark" style="left: 930px; top: 880px"></div>
+      </div>
+
+      <div data-hf-id="hf-g8hs" id="s2-phone" data-layout-allow-overflow>
+        <div data-hf-id="hf-bz02" id="s2-bezel">
+          <div data-hf-id="hf-nqpn" id="s2-screen">
+            <div data-hf-id="hf-d1hx" id="s2-page" data-layout-allow-overflow><img data-hf-id="hf-4r2b" src="../assets/screens/result-page.png" alt="" /></div>
+            <div data-hf-id="hf-bg6e" id="s2-soil"><img data-hf-id="hf-z0jb" src="../assets/screens/soil-result.png" alt="" /></div>
+            <div data-hf-id="hf-gl02" id="s2-glass"></div>
+          </div>
+        </div>
+      </div>
+
+      <div data-hf-id="hf-15fr" id="s2-tag-a" class="s2-tag" style="left: 1180px; top: 448px"><b data-hf-id="hf-wbtp">Tan spots, dark rim</b></div>
+      <div data-hf-id="hf-6men" id="s2-tag-b" class="s2-tag" style="left: 700px; top: 800px"><b data-hf-id="hf-vimn">Yellowing from the tip</b></div>
+      <div data-hf-id="hf-394x" id="s2-tag-c" class="s2-tag" style="left: 1160px; top: 918px"><b data-hf-id="hf-z7n0">Lower leaves first</b></div>
+
+      <div data-hf-id="hf-1g9a" id="s2-lbl-2" class="s2-label">Khetify result</div>
+      <div data-hf-id="hf-jbd2" id="s2-line-2" class="s2-line">Possible causes,<br data-hf-id="hf-x5px" />never a verdict.</div>
+
+      <div data-hf-id="hf-26cn" id="s2-panel">
+        <div data-hf-id="hf-dy6g" class="s2-row">
+          <div data-hf-id="hf-1osz" class="s2-k">confidence</div>
+          <div data-hf-id="hf-a6mx" class="s2-v">medium <small data-hf-id="hf-mr6r">An AI estimate, not calibrated</small></div>
+        </div>
+        <div data-hf-id="hf-j0e8" class="s2-row">
+          <div data-hf-id="hf-bjk0" class="s2-k">next step</div>
+          <div data-hf-id="hf-xpss" class="s2-v">Inspect leaf undersides <small data-hf-id="hf-str5">Record when the symptoms started</small></div>
+        </div>
+        <div data-hf-id="hf-hth5" class="s2-row">
+          <div data-hf-id="hf-wik9" class="s2-k">chemical options</div>
+          <div data-hf-id="hf-f6hg" class="s2-v">Unavailable <small data-hf-id="hf-gmox">No reviewed label matches this crop and state</small></div>
+        </div>
+      </div>
+
+      <div data-hf-id="hf-1dg6" id="s2-lbl-3" class="s2-label">Soil result</div>
+      <div data-hf-id="hf-sp9z" id="s2-line-3" class="s2-line">Seven point four.<br data-hf-id="hf-rsrt" />Zero point six.</div>
+      <div data-hf-id="hf-tpfq" id="s2-note">Two values the lab can report. The rest stays unknown.</div>
+
+      <div data-hf-id="hf-jusk" id="grain2"></div>
+    </div>
+
+    <script>const F = 0.8;                       // whole-film speed-up
+      const T = (x) => +(x * F).toFixed(3);  // scale an authored beat time
+
+      const tl = gsap.timeline({ paused: true });
+
+      gsap.set("#s2-leafwrap", { scale: 1.08, opacity: 0 });
+      gsap.set("#s2-phone", { opacity: 0, scale: 0.94, y: 26 });
+      gsap.set("#s2-page", { y: 0 });
+      gsap.set(".s2-row", { opacity: 0, y: 20 });
+      gsap.set("#s2-panel", { opacity: 0 });
+
+      // ---------- 0.0 the real leaf, full frame ----------
+      tl.to("#s2-leafwrap", { scale: 1, opacity: 1, duration: T(1.1), ease: "expo.out" }, T(0));
+
+      // ---------- 0.5 the scan pass ----------
+      tl.fromTo("#s2-scan", { opacity: 0, y: -220 }, { opacity: 1, duration: T(0.25), ease: "power1.inOut" }, T(0.5));
+      tl.to("#s2-scan", { y: 1180, duration: T(1.75), ease: "power2.inOut" }, T(0.6));
+      tl.to("#s2-scan", { opacity: 0, duration: T(0.35), ease: "power2.out" }, T(2.1));
+
+      // ---------- marks land on the lesions, tags follow ----------
+      tl.fromTo("#s2-mark-a", { opacity: 0, scale: 1.7 }, { opacity: 1, scale: 1, duration: T(0.4), ease: "power3.out" }, T(1.2));
+      tl.fromTo("#s2-mark-b", { opacity: 0, scale: 1.7 }, { opacity: 1, scale: 1, duration: T(0.4), ease: "power3.out" }, T(1.6));
+      tl.fromTo("#s2-mark-c", { opacity: 0, scale: 1.7 }, { opacity: 1, scale: 1, duration: T(0.4), ease: "power3.out" }, T(2.0));
+
+      tl.fromTo("#s2-tag-a", { opacity: 0, x: -28 }, { opacity: 1, x: 0, duration: T(0.4), ease: "power3.out" }, T(1.32));
+      tl.fromTo("#s2-tag-b", { opacity: 0, x: -28 }, { opacity: 1, x: 0, duration: T(0.4), ease: "power3.out" }, T(1.72));
+      tl.fromTo("#s2-tag-c", { opacity: 0, x: -28 }, { opacity: 1, x: 0, duration: T(0.4), ease: "power3.out" }, T(2.12));
+
+      // ---------- 3.4 dissolve into the phone ----------
+      tl.to(".s2-tag, .s2-mark", { opacity: 0, duration: T(0.35), ease: "power2.in" }, T(3.4));
+      tl.to("#s2-leafwrap", { scale: 1.12, opacity: 0, duration: T(0.9), ease: "power2.in" }, T(3.45));
+      tl.to("#s2-phone", { opacity: 1, scale: 1, y: 0, duration: T(0.95), ease: "expo.out" }, T(3.9));
+
+      // ---------- 4.4 the real result page reads down ----------
+      tl.fromTo("#s2-lbl-2", { opacity: 0 }, { opacity: 1, duration: T(0.4) }, T(4.45));
+      tl.fromTo("#s2-line-2", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: T(0.7), ease: "power3.out" }, T(4.55));
+      tl.to("#s2-panel", { opacity: 1, duration: T(0.3) }, T(4.65));
+      tl.to(".s2-row", { opacity: 1, y: 0, duration: T(0.55), stagger: T(0.22), ease: "power3.out" }, T(4.8));
+
+      tl.fromTo("#s2-page", { y: 0 }, { y: -520, duration: T(1.0), ease: "power2.inOut" }, T(4.7));
+      tl.to("#s2-page", { y: -1320, duration: T(1.35), ease: "power2.inOut" }, T(5.8));
+      tl.to("#s2-page", { y: -2180, duration: T(1.35), ease: "power2.inOut" }, T(7.2));
+      tl.to("#s2-page", { y: -2900, duration: T(1.2), ease: "power2.inOut" }, T(8.6));
+
+      // ---------- 9.3 the same phone turns to the soil result ----------
+      tl.to("#s2-line-2, #s2-lbl-2", { opacity: 0, y: -16, duration: T(0.5), ease: "power2.in" }, T(8.85));
+      tl.to("#s2-panel", { opacity: 0, y: -14, duration: T(0.5), ease: "power2.in" }, T(8.95));
+      tl.to("#s2-page", { opacity: 0, duration: T(0.45) }, T(9.4));
+      tl.to("#s2-soil", { opacity: 1, duration: T(0.5) }, T(9.5));
+      tl.fromTo("#s2-soil", { scale: 1.08 }, { scale: 1, duration: T(1.1), ease: "expo.out" }, T(9.5));
+
+      // ---------- 9.9 the soil read-out, real numbers ----------
+      tl.fromTo("#s2-lbl-3", { opacity: 0 }, { opacity: 1, duration: T(0.4) }, T(9.95));
+      tl.fromTo("#s2-line-3", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: T(0.7), ease: "power3.out" }, T(10.05));
+      tl.fromTo("#s2-note", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: T(0.7), ease: "power3.out" }, T(10.7));
+
+      // the phone keeps breathing so the hold is never dead
+      tl.to("#s2-phone", { scale: 1.045, duration: T(3.4), ease: "power1.inOut" }, T(11.1));
+
+      // ---------- 14.3 hand off: the phone swallows the frame ----------
+      tl.to("#s2-line-3, #s2-lbl-3, #s2-note", { opacity: 0, duration: T(0.45), ease: "power2.in" }, T(14.3));
+      tl.to("#s2-phone", { scale: 1.6, opacity: 0, duration: T(1.2), ease: "power3.in" }, T(14.5));
+
+      window.__timelines["s2"] = tl;
+    </script>
+  </div>
+</template>

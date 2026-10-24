@@ -49,3 +49,10 @@ example
 # local scratch
 .scratch/
 tsc.out
+
+# HyperFrames demo build artefacts
+demo/renders/
+demo/.hyperframes/
+demo/check.json
+demo/.thumbnails/
+demo/.waveform-cache/
