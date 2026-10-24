@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Khetify app icon: a two-leaf sprout rising from a field line with a warm seed accent</title>
+  <!-- Background: warm cream, Khetify `surface` family -->
+  <rect width="1024" height="1024" fill="#F1E8D6"/>
+  <!-- Field: sage arc, low and wide, reads as soil/crop row -->
+  <path d="M212 760 Q512 700 812 760" fill="none" stroke="#BEDDA7" stroke-width="62" stroke-linecap="round"/>
+  <!-- Stem: forest, dominant vertical anchor -->
+  <path d="M512 702 L512 340" fill="none" stroke="#35512C" stroke-width="72" stroke-linecap="round"/>
+  <!-- Left leaf: drops down and out, keeps the silhouette asymmetric -->
+  <path d="M480 606 C418 522 314 460 188 442 C258 566 356 622 480 606 Z" fill="#35512C"/>
+  <!-- Right leaf: rises up and out -->
+  <path d="M546 474 C610 378 708 326 820 314 C794 452 700 520 546 474 Z" fill="#35512C"/>
+  <!-- Warm accent: single ochre seed resting on the field line -->
+  <circle cx="320" cy="730" r="34" fill="#C98A3E"/>
+</svg>

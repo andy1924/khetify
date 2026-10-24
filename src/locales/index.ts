@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { en, type StringKey } from './en';
-import { useDemoState } from '../demo';
+import { useLocale } from '../demo';
 import type { Locale } from '../demo/types';
 
 export type { StringKey };
@@ -47,9 +47,15 @@ export function translate(locale: Locale, key: StringKey, params?: TranslatePara
   );
 }
 
-/** Locale chosen in the demo store. */
+/**
+ * Locale chosen in the demo store.
+ *
+ * Subscribes to the `locale` slice only: a dispatch that changes any other
+ * part of the demo state re-renders nothing here, so translated labels are not
+ * rebuilt on every keystroke and timer tick elsewhere in the app.
+ */
 export function useT(): Translate {
-  const locale = useDemoState().locale;
+  const locale = useLocale();
   return useCallback<Translate>((key, params) => translate(locale, key, params), [locale]);
 }
 

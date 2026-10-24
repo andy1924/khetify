@@ -2,15 +2,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { router } from 'expo-router';
-import { useDemo } from '../../demo';
-import { Button, Card, Chip, colors, Header, Icon, Notice, Screen, Text } from '../../ui';
+import { useDemoSlices, useDemoDispatch } from '../../demo';
+import { Button, Card, Chip, Header, Icon, Notice, Screen, Text } from '../../ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { FieldSetup } from './FieldSetup';
+import { DummySatelliteMap } from './DummySatelliteMap';
 import { fieldMonitoringProvider, type ObservationResult, type RegisteredField } from './satelliteProvider';
 
 const captureDate = (value: string) => new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 
 export function SatelliteScreen() {
-  const { state, dispatch } = useDemo();
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
+  const state = useDemoSlices(['monitoring'] as const);
+  const dispatch = useDemoDispatch();
   const { fields } = state.monitoring;
   const [selected, setSelected] = useState<string | null>(fields[0]?.id ?? null);
   const [adding, setAdding] = useState(false);
@@ -53,7 +58,7 @@ export function SatelliteScreen() {
   const outline = bounds && active ? active.polygon.map(p => `${100 * (p.longitude - bounds.west) / (bounds.east - bounds.west)},${100 * (bounds.north - p.latitude) / (bounds.north - bounds.south)}`).join(' ') : '';
   return <Screen key={active?.id} gap={24}>
     <View style={styles.topRow}>
-      <View style={styles.heading}><Text variant="label" color={colors.accentDeep}>FIELD MONITORING</Text><Text variant="heading">Your fields</Text></View>
+      <View style={styles.heading}><Text variant="label" color={palette.deep}>FIELD MONITORING</Text><Text variant="heading">Your fields</Text></View>
       <Button title="Add field" icon="plus" variant="secondary" fullWidth={false} trailingArrow={false} onPress={() => setAdding(true)} />
     </View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fieldTabs}>
@@ -67,15 +72,19 @@ export function SatelliteScreen() {
       <View style={styles.imageCard}>
         {preview?.imageUrl && failedImage !== preview.imageUrl ? <View style={styles.imageFrame}>
           <Image source={{ uri: preview.imageUrl }} accessibilityLabel={`Satellite image of ${active.name}, ${captureDate(preview.capturedAt)}`} style={StyleSheet.absoluteFill} resizeMode="stretch" onError={() => setFailedImage(preview.imageUrl!)} />
-          {outline ? <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill} pointerEvents="none"><Polygon points={outline} fill="rgba(220,255,180,0.08)" stroke="#DFFF9B" strokeWidth="0.6" /></Svg> : null}
-        </View> : <View style={styles.imageEmpty}>
-          {loading ? <ActivityIndicator size="large" color={colors.accentDeep} /> : <Icon name="satellite" size={36} color={colors.accentDeep} />}
-          <Text variant="subtitle" align="center">{loading ? 'Finding your latest view…' : failedImage ? 'The preview could not display' : error ? 'Let’s reconnect' : 'Your next view starts here'}</Text>
-          <Text variant="caption" align="center">{loading ? 'Checking recent Sentinel-2 captures for this field.' : failedImage ? 'Refresh to reload the image. Available vegetation readings are still shown below.' : 'Refresh to check for a recent satellite image.'}</Text>
+          {outline ? <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill} pointerEvents="none"><Polygon points={outline} fill="rgba(220,255,180,0.08)" stroke={palette.iconFaint} strokeWidth="0.6" /></Svg> : null}
+        </View> : <View style={styles.imageFrame}>
+          <DummySatelliteMap
+            fieldId={active.id}
+            polygon={active.polygon}
+            outlineColor={palette.strong}
+            fieldColor={palette.strong}
+          />
+          {loading ? <View style={styles.mapLoading}><ActivityIndicator size="small" color={palette.deep} /></View> : null}
         </View>}
         <View style={styles.imageCaption}>
           <View style={styles.heading}><Text variant="strong">{preview ? `Captured ${captureDate(preview.capturedAt)}` : 'Satellite view'}</Text><Text variant="meta">Copernicus Sentinel-2 · approx. 10 m detail</Text></View>
-          <Icon name="satellite" size={20} color={colors.accentDeep} />
+          <Icon name="satellite" size={20} color={palette.deep} />
         </View>
       </View>
       <Text variant="meta">Field outline over a wider, contrast-adjusted view. Smoothing improves presentation, not the original 10 m detail. NDVI uses unaltered bands.</Text>
@@ -114,15 +123,15 @@ export function SatelliteScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
   heading: { gap: 5, flexShrink: 1 },
   fieldTabs: { gap: 8, paddingVertical: 4 },
-  imageCard: { borderRadius: 24, overflow: 'hidden', backgroundColor: '#E6EDE0', borderWidth: 1, borderColor: colors.border },
+  imageCard: { borderRadius: 24, overflow: 'hidden', backgroundColor: p.surfaceTile, borderWidth: 1, borderColor: p.border },
   imageFrame: { width: '100%', maxWidth: 520, aspectRatio: 1, alignSelf: 'center' },
-  imageEmpty: { minHeight: 240, padding: 28, alignItems: 'center', justifyContent: 'center', gap: 14 },
-  imageCaption: { padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, backgroundColor: colors.surfaceSoft },
-  outline: { borderWidth: 1, borderColor: colors.border },
+  mapLoading: { position: 'absolute', top: 12, right: 12, backgroundColor: 'rgba(255,255,255,0.82)', borderRadius: 999, padding: 7 },
+  imageCaption: { padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, backgroundColor: p.surfaceSoft },
+  outline: { borderWidth: 1, borderColor: p.border },
   metricRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  metric: { fontSize: 48, lineHeight: 58, fontWeight: '600', color: colors.accentDeep, letterSpacing: -2 },
+  metric: { fontSize: 48, lineHeight: 58, fontWeight: '600', color: p.deep, letterSpacing: -2 },
 });

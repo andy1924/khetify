@@ -1,9 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useDemo } from '../../demo';
+import { useDemoSlices, useDemoActions } from '../../demo';
 import { useT } from '../../locales';
-import { Button, Field, Icon, Sheet, Screen, Text, Toggle, colors } from '../../ui';
+import { Button, Field, Icon, Sheet, Screen, Text, Toggle } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
+import { useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import {
   CommunityHeading,
   FIXTURE_PHOTOS,
@@ -24,7 +26,10 @@ type PickerMode = 'camera' | 'gallery' | null;
 
 /** 14 · Share an observation — local draft, fixture photo, no permissions. */
 export function ComposeScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['community'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const draft = state.community.draft;
   const [typeSheet, setTypeSheet] = useState(false);
@@ -76,8 +81,8 @@ export function ComposeScreen() {
             hitSlop={8}
             style={styles.backRow}
           >
-            <Icon name="chevron-left" size={18} color={colors.icon} strokeWidth={1.8} />
-            <Text variant="caption" color={colors.mutedSoft}>
+            <Icon name="chevron-left" size={18} color={palette.icon} strokeWidth={1.8} />
+            <Text variant="caption" color={palette.muted}>
               {t('common.cancel')}
             </Text>
           </Pressable>
@@ -93,7 +98,7 @@ export function ComposeScreen() {
           label={t('compose.type')}
           value={typeLabel(draft.type)}
           editable={false}
-          right={<Icon name="chevron-down" size={16} color={colors.iconQuiet} />}
+          right={<Icon name="chevron-down" size={16} color={palette.icon} />}
         />
       </Pressable>
 
@@ -119,8 +124,8 @@ export function ComposeScreen() {
 
       <View style={styles.consentCard}>
         <View style={styles.consentHead}>
-          <Icon name="map-pin" size={18} color={colors.icon} />
-          <Text variant="caption" weight="semiBold" color="#597347" style={styles.consentTitle}>
+          <Icon name="map-pin" size={18} color={palette.icon} />
+          <Text variant="caption" weight="semiBold" color={palette.chipInk} style={styles.consentTitle}>
             {t('compose.location.title')}
           </Text>
           <Toggle
@@ -129,7 +134,7 @@ export function ComposeScreen() {
             accessibilityLabel={t('compose.location.title')}
           />
         </View>
-        <Text variant="meta" color="#646C59" style={styles.consentBody}>
+        <Text variant="meta" color={palette.faint} style={styles.consentBody}>
           {draft.useApproximateLocation
             ? communityCopy['compose.locationOn']
             : t('compose.location.body')}
@@ -152,10 +157,10 @@ export function ComposeScreen() {
             <FixtureArt id={photo.id as FixturePhotoId} height={148} />
             <View style={styles.photoPreviewMeta}>
               <View style={styles.photoPreviewText}>
-                <Text variant="strong" color="#637652">
+                <Text variant="strong" color={palette.chipInk}>
                   {photo.label}
                 </Text>
-                <Text variant="meta" color="#7A8574">
+                <Text variant="meta" color={palette.faint}>
                   {communityCopy['community.photo.fixture']}
                 </Text>
               </View>
@@ -166,14 +171,14 @@ export function ComposeScreen() {
                 hitSlop={10}
                 style={styles.removeButton}
               >
-                <Icon name="x" size={16} color={colors.icon} />
+                <Icon name="x" size={16} color={palette.icon} />
               </Pressable>
             </View>
           </View>
         ) : (
           <View style={styles.photoRow}>
-            <Icon name="camera" size={28} color="#94AA7D" strokeWidth={1.5} />
-            <Text variant="strong" color="#637652" style={styles.photoLabel}>
+            <Icon name="camera" size={28} color={palette.icon} strokeWidth={1.5} />
+            <Text variant="strong" color={palette.chipInk} style={styles.photoLabel}>
               {t('compose.photo')}
             </Text>
             <View style={styles.photoActions}>
@@ -184,7 +189,7 @@ export function ComposeScreen() {
                 hitSlop={4}
                 style={styles.photoChip}
               >
-                <Text variant="meta" weight="medium" color={colors.chipInk}>
+                <Text variant="meta" weight="medium" color={palette.chipInk}>
                   {t('compose.camera')}
                 </Text>
               </Pressable>
@@ -195,7 +200,7 @@ export function ComposeScreen() {
                 hitSlop={4}
                 style={styles.photoChip}
               >
-                <Text variant="meta" weight="medium" color={colors.chipInk}>
+                <Text variant="meta" weight="medium" color={palette.chipInk}>
                   {t('compose.gallery')}
                 </Text>
               </Pressable>
@@ -210,7 +215,7 @@ export function ComposeScreen() {
             hitSlop={6}
             style={styles.changeRow}
           >
-            <Text variant="meta" weight="medium" color={colors.chipInk}>
+            <Text variant="meta" weight="medium" color={palette.chipInk}>
               {communityCopy['community.photo.change']}
             </Text>
           </Pressable>
@@ -231,7 +236,7 @@ export function ComposeScreen() {
 
       <Button title={t('compose.submit')} onPress={submit} />
 
-      <Text variant="meta" color={colors.faint} style={styles.footnote}>
+      <Text variant="meta" color={palette.faint} style={styles.footnote}>
         {t('compose.photoNotice')}
       </Text>
 
@@ -251,10 +256,10 @@ export function ComposeScreen() {
                 }}
                 style={[styles.sheetRow, selected && styles.sheetRowSelected]}
               >
-                <Text variant="strong" color={colors.ink} style={styles.flex}>
+                <Text variant="strong" color={palette.ink} style={styles.flex}>
                   {typeLabel(option.id)}
                 </Text>
-                {selected ? <Icon name="check" size={16} color={colors.ink} strokeWidth={2} /> : null}
+                {selected ? <Icon name="check" size={16} color={palette.ink} strokeWidth={2} /> : null}
               </Pressable>
             );
           })}
@@ -270,9 +275,6 @@ export function ComposeScreen() {
             : communityCopy['community.photo.galleryTitle']
         }
       >
-        <Text variant="meta" color={colors.faint} style={styles.sheetNote}>
-          {communityCopy['community.photo.pickerNote']}
-        </Text>
         <View style={styles.fixtureList}>
           {FIXTURE_PHOTOS.map(item => {
             const selected = draft.photoId === item.id;
@@ -290,10 +292,10 @@ export function ComposeScreen() {
               >
                 <FixtureArt id={item.id} height={104} compact />
                 <View style={styles.fixtureText}>
-                  <Text variant="meta" weight="medium" color="#4A693D">
+                  <Text variant="meta" weight="medium" color={palette.chipInk}>
                     {item.label}
                   </Text>
-                  <Text variant="meta" color="#7A8574">
+                  <Text variant="meta" color={palette.faint}>
                     {item.note}
                   </Text>
                 </View>
@@ -306,7 +308,7 @@ export function ComposeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
   metaRow: { flexDirection: 'row', gap: 12 },
   metaCell: { flex: 1 },
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
     minWidth: 61,
     paddingHorizontal: 12,
     borderRadius: 99,
-    backgroundColor: '#EBF2E4',
+    backgroundColor: p.chip,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -351,11 +353,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EBF2E4',
+    backgroundColor: p.chip,
   },
   changeRow: { minHeight: 44, justifyContent: 'center' },
 
-  notesCard: { backgroundColor: '#F2F5EC', borderRadius: 18, padding: 14 },
+  notesCard: { backgroundColor: p.surfaceSoft, borderRadius: 18, padding: 14 },
   footnote: { lineHeight: 16 },
 
   sheetList: { gap: 8 },
@@ -366,9 +368,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 14,
     borderRadius: 16,
-    backgroundColor: '#F2F5EC',
+    backgroundColor: p.surfaceSoft,
   },
-  sheetRowSelected: { backgroundColor: '#E8F0DE' },
+  sheetRowSelected: { backgroundColor: p.surface },
   sheetNote: { lineHeight: 16 },
   fixtureList: { gap: 10 },
   fixtureCell: {

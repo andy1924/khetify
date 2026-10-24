@@ -1,21 +1,25 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { useDemo } from '../../demo';
+import { useDemoSlices } from '../../demo';
 import { useT } from '../../locales';
 import { homeText } from './strings';
-import { Avatar, Button, Icon, IconSurface, Screen, SectionLabel, Text } from '../../ui';
+import { Button, Icon, IconSurface, Screen, SectionLabel, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
 
 const QUICK_TOOLS = [
   { key: 'soil', icon: 'flask-conical', labelKey: 'home.quick.soil', route: '/tools/soil' },
   { key: 'cropPhoto', icon: 'scan-line', labelKey: 'home.quick.cropPhoto', route: '/tools/photo' },
-  { key: 'prices', icon: 'chart-no-axes-combined', labelKey: 'home.quick.prices', route: '/tools/mandi' },
+  { key: 'prices', icon: 'chart-no-axes-combined', labelKey: 'home.quick.prices', route: '/tools/market' },
 ] as const;
 
 /** 01 · Home — fixture summary, continued plan entry, next step and tool shortcuts. */
 export function HomeScreen() {
-  const { state } = useDemo();
+  // Only the farm slice is read here: soil/market/community actions no longer
+  // re-render this screen.
+  const state = useDemoSlices(['farm'] as const);
   const t = useT();
+  const palette = useAccentPalette();
 
   const firstName = state.farm.farmerName.split(' ')[0];
   const soilTested = state.farm.soilTest !== null;
@@ -24,17 +28,16 @@ export function HomeScreen() {
     <Screen>
       <View style={styles.topRow}>
         <View style={styles.topCopy}>
-          <SectionLabel color="#607755">{t('common.brand.upper')}</SectionLabel>
+          <SectionLabel color={palette.chipInk}>{t('common.brand.upper')}</SectionLabel>
           <Text variant="heading" style={styles.greeting}>
             {t('home.greeting', { name: firstName })}
           </Text>
         </View>
-        <Avatar initials={state.farm.initials} size={38} />
       </View>
 
       <View style={styles.farmRow}>
         <View style={styles.farmSummary}>
-          <Icon name="map-pin" size={14} color="#6B7964" />
+          <Icon name="map-pin" size={14} color={palette.icon} />
           <Text style={styles.farmText} numberOfLines={1}>
             {t('home.farmSummary', {
               farm: state.farm.farmName,
@@ -46,8 +49,8 @@ export function HomeScreen() {
         </View>
       </View>
 
-      <View style={styles.hero}>
-        <SectionLabel color="#657360">{t('home.hero.label')}</SectionLabel>
+      <View style={[styles.hero, { backgroundColor: palette.surface }]}>
+        <SectionLabel color={palette.icon}>{t('home.hero.label')}</SectionLabel>
         <Text variant="display" style={styles.heroTitle}>
           {t('home.hero.title')}
         </Text>
@@ -58,9 +61,9 @@ export function HomeScreen() {
         />
       </View>
 
-      <View style={styles.nextBlock}>
+      <View style={[styles.nextBlock, { backgroundColor: palette.surfaceSoft }]}>
         <View style={styles.nextHead}>
-          <SectionLabel color="#6c7764">{t('home.next.label')}</SectionLabel>
+          <SectionLabel color={palette.icon}>{t('home.next.label')}</SectionLabel>
           <Text style={styles.nextToday}>{t('home.next.today')}</Text>
         </View>
         <Pressable
@@ -85,9 +88,9 @@ export function HomeScreen() {
             accessibilityRole="button"
             accessibilityLabel={t(tool.labelKey)}
             onPress={() => router.push(tool.route as never)}
-            style={({ pressed }) => [styles.quickCell, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.quickCell, { backgroundColor: palette.surfaceSoft }, pressed && styles.pressed]}
           >
-            <IconSurface name={tool.icon} box={48} radius={16} background="#F0F4EB" color="#52664D" size={22} />
+            <IconSurface name={tool.icon} box={48} radius={16} background={palette.surfaceTile} color={palette.icon} size={22} />
             <Text style={styles.quickLabel}>{t(tool.labelKey)}</Text>
           </Pressable>
         ))}

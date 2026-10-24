@@ -2,10 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import Svg, { Circle, Ellipse, Line, Path, Rect } from 'react-native-svg';
-import { useDemo } from '../../demo';
+import { useDemoSlices } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Text } from './ui';
-import { Banner, ScreenHeading, Sheet, StatusChip } from './components';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
+import { ScreenHeading, Sheet, StatusChip } from './components';
 import { toolCopy } from './strings';
 import { useToolRecorder } from './history';
 import { PlantHealthScreen } from './PlantHealthScreen';
@@ -27,19 +28,19 @@ interface Fixture {
 const FIXTURES: Fixture[] = [
   {
     id: 'fixture-leaf',
-    title: 'Leaf · demo',
+    title: 'Leaf',
     kind: 'leaf',
     note: 'Illustrated leaf with pale spots. Not a photograph.',
   },
   {
     id: 'fixture-grain-lot',
-    title: 'Grain lot · demo',
+    title: 'Grain lot',
     kind: 'grain',
     note: 'Illustrated grain lot on a plain surface.',
   },
   {
     id: 'fixture-grain-close',
-    title: 'Single grain · demo',
+    title: 'Single grain',
     kind: 'grainClose',
     note: 'Illustrated single-grain close-up.',
   },
@@ -58,7 +59,9 @@ export function PhotoToolScreen() {
 }
 
 function DemoPhotoToolScreen() {
-  const { state } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['farm'] as const);
   const recordToolUse = useToolRecorder();
   const t = useT();
   const params = useLocalSearchParams<{ tool?: string }>();
@@ -101,7 +104,7 @@ function DemoPhotoToolScreen() {
     recordToolUse(
       tool,
       meta.titleKey,
-      tool === 'grainId' ? 'Demo fixture preview' : `${selected.title} · preview only`,
+      tool === 'grainId' ? 'Fixture preview' : `${selected.title} · preview only`,
     );
     setRecorded(true);
     setPickerOpen(false);
@@ -135,7 +138,7 @@ function DemoPhotoToolScreen() {
             <Icon
               name={tool === 'grainQuality' ? 'wheat' : 'camera'}
               size={42}
-              color="#A3AF99"
+              color={palette.iconFaint}
               strokeWidth={1.3}
             />
             <Text style={styles.previewEmptyText}>
@@ -148,9 +151,7 @@ function DemoPhotoToolScreen() {
       <View style={styles.previewMeta}>
         <View style={styles.previewMetaText}>
           <Text style={styles.previewTitle}>{selected ? selected.title : t('common.notAvailable')}</Text>
-          <Text style={styles.footnote}>
-            {selected ? toolCopy('photo.fixture') : t('tools.grainQuality.detail')}
-          </Text>
+          {selected ? null : <Text style={styles.footnote}>{t('tools.grainQuality.detail')}</Text>}
         </View>
         {tool !== 'grainQuality' ? (
           <Button
@@ -168,7 +169,7 @@ function DemoPhotoToolScreen() {
           <Text style={styles.limitsTitle}>{toolCopy('photo.limitedTitle')}</Text>
           <Text style={styles.body}>{toolCopy('photo.limitedBody')}</Text>
           <View style={styles.attributeRow}>
-            <Icon name="info" size={16} color="#8D9A81" />
+            <Icon name="info" size={16} color={palette.icon} />
             <Text style={styles.attribute}>
               {selected.kind === 'leaf'
                 ? toolCopy('photo.inspect.leaf')
@@ -180,15 +181,9 @@ function DemoPhotoToolScreen() {
         </View>
       ) : null}
 
-      {tool !== 'grainQuality' ? (
-        <Banner body={toolCopy('photo.noDiagnosis')} icon="shield-check" />
-      ) : null}
-
       {selected && tool !== 'grainQuality' ? (
         <View style={styles.actions}>
-          <Text style={styles.contextLine}>
-            {`${state.farm.crop} · ${state.farm.season} · ${toolCopy('photo.fixture')}`}
-          </Text>
+          <Text style={styles.contextLine}>{`${state.farm.crop} · ${state.farm.season}`}</Text>
           <Button
             title={toolCopy('photo.continue')}
             trailingArrow={false}
@@ -207,7 +202,7 @@ function DemoPhotoToolScreen() {
 
       {recorded ? (
         <View style={styles.recordedRow}>
-          <Icon name="check" size={15} color="#52664D" />
+          <Icon name="check" size={15} color={palette.icon} />
           <Text style={styles.footnote}>{toolCopy('photo.recorded')}</Text>
         </View>
       ) : null}
@@ -225,7 +220,6 @@ function DemoPhotoToolScreen() {
           />
         }
       >
-        <Text style={styles.footnote}>{toolCopy('photo.pickerNote')}</Text>
         <View style={styles.fixtureGrid}>
           {FIXTURES.map(fixture => {
             const active = fixture.id === draftId;
@@ -252,34 +246,41 @@ function DemoPhotoToolScreen() {
 
 /* ------------------------------------------------------- vector fixture art */
 
-function FixtureArt({ kind, compact }: { kind: Fixture['kind']; compact?: boolean }) {
+/** Memoised: the SVG fixtures are deep trees and never change for fixed props. */
+const FixtureArt = React.memo(function FixtureArt({
+  kind,
+  compact,
+}: {
+  kind: Fixture['kind'];
+  compact?: boolean;
+}) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   const height = compact ? 96 : 210;
   return (
     <View style={[styles.art, { height }]} accessible={false}>
       <Svg width="100%" height="100%" viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice">
-        <Rect x="0" y="0" width="320" height="210" fill="#F1F6EA" />
+        <Rect x="0" y="0" width="320" height="210" fill={palette.surfaceTile} />
         {kind === 'leaf' ? <LeafArt /> : kind === 'grain' ? <GrainLotArt /> : <GrainCloseArt />}
-        <Rect x="0" y="0" width="320" height="210" fill="none" stroke="#DFE6D8" strokeWidth="2" />
+        <Rect x="0" y="0" width="320" height="210" fill="none" stroke={palette.border} strokeWidth="2" />
       </Svg>
-      <View style={styles.artBadge}>
-        <Text style={styles.artBadgeText}>{toolCopy('photo.badge')}</Text>
-      </View>
     </View>
   );
-}
+});
 
 function LeafArt() {
+  const palette = useAccentPalette();
   return (
     <>
       <Path
         d="M60 170 C 80 90, 160 40, 262 44 C 268 120, 206 176, 118 178 Z"
-        fill="#CBDDBA"
-        stroke="#93A982"
+        fill={palette.soft}
+        stroke={palette.icon}
         strokeWidth="2"
       />
-      <Path d="M74 168 C 132 140, 196 96, 254 52" stroke="#8AA474" strokeWidth="2" fill="none" />
-      <Path d="M120 152 C 150 148, 168 132, 186 112" stroke="#A6B998" strokeWidth="1.5" fill="none" />
-      <Path d="M158 126 C 190 122, 210 106, 228 86" stroke="#A6B998" strokeWidth="1.5" fill="none" />
+      <Path d="M74 168 C 132 140, 196 96, 254 52" stroke={palette.icon} strokeWidth="2" fill="none" />
+      <Path d="M120 152 C 150 148, 168 132, 186 112" stroke={palette.iconFaint} strokeWidth="1.5" fill="none" />
+      <Path d="M158 126 C 190 122, 210 106, 228 86" stroke={palette.iconFaint} strokeWidth="1.5" fill="none" />
       <Circle cx="146" cy="104" r="7" fill="#D8C79A" opacity="0.9" />
       <Circle cx="190" cy="82" r="5" fill="#D8C79A" opacity="0.9" />
       <Circle cx="120" cy="132" r="4" fill="#D8C79A" opacity="0.9" />
@@ -289,6 +290,7 @@ function LeafArt() {
 }
 
 function GrainLotArt() {
+  const palette = useAccentPalette();
   const grains = [
     { x: 92, y: 108, r: -18 },
     { x: 128, y: 96, r: 12 },
@@ -303,7 +305,7 @@ function GrainLotArt() {
   ];
   return (
     <>
-      <Ellipse cx="172" cy="132" rx="118" ry="50" fill="#E4EDD8" />
+      <Ellipse cx="172" cy="132" rx="118" ry="50" fill={palette.surfaceTile} />
       {grains.map(grain => (
         <Ellipse
           key={`${grain.x}-${grain.y}`}
@@ -344,15 +346,15 @@ function GrainCloseArt() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   unavailableBlock: { gap: 10, paddingVertical: 8 },
-  body: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#697460' },
-  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  body: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: p.muted },
+  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.faint },
 
   previewCard: {
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: '#F1F6EA',
+    backgroundColor: p.surfaceTile,
     minHeight: 210,
   },
   previewEmpty: {
@@ -366,32 +368,21 @@ const styles = StyleSheet.create({
     fontFamily: 'System', fontWeight: '400',
     fontSize: 13,
     lineHeight: 18,
-    color: '#657360',
+    color: p.muted,
     textAlign: 'center',
   },
-  art: { width: '100%', backgroundColor: '#F1F6EA' },
-  artBadge: {
-    position: 'absolute',
-    left: 12,
-    top: 12,
-    backgroundColor: 'rgba(251, 252, 249, 0.92)',
-    borderRadius: 99,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  artBadgeText: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: '#4A693D' },
-
+  art: { width: '100%', backgroundColor: p.surfaceTile },
   previewMeta: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   previewMetaText: { flex: 1, gap: 3 },
-  previewTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: '#263B29' },
+  previewTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: p.ink },
 
-  limitsCard: { backgroundColor: '#F4F7EF', borderRadius: 18, padding: 16, gap: 8 },
-  limitsTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: '#5A714C' },
+  limitsCard: { backgroundColor: p.surfaceSoft, borderRadius: 18, padding: 16, gap: 8 },
+  limitsTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: p.deep },
   attributeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  attribute: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#687560' },
+  attribute: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
 
   actions: { gap: 10 },
-  contextLine: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  contextLine: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.faint },
   recordedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 
   fixtureGrid: { flexDirection: 'row', gap: 10 },
@@ -403,12 +394,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     gap: 6,
   },
-  fixtureCellActive: { borderColor: '#9DBA82' },
+  fixtureCellActive: { borderColor: p.icon },
   fixtureLabel: {
     fontFamily: 'System', fontWeight: '500',
     fontSize: 11,
     lineHeight: 15,
-    color: '#4A693D',
+    color: p.deep,
     paddingHorizontal: 4,
     paddingBottom: 4,
   },

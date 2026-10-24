@@ -1,5 +1,4 @@
 import React from 'react';
-import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,8 +9,9 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, contentPadding, sectionGap } from './tokens';
+import { contentPadding, sectionGap } from './tokens';
 import { useNavigationInset } from './NavigationInset';
+import { useAccentPalette, useStyles, type AccentPalette } from './AccentTheme';
 
 export type ScreenProps = {
   children: React.ReactNode;
@@ -49,10 +49,12 @@ export function Screen({
   footer,
   gap = sectionGap,
   keyboard = false,
-  backgroundColor = colors.background,
+  backgroundColor,
   testID,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   const navigationInset = useNavigationInset();
   const bottomInset = bottom ? Math.max(insets.bottom, 12) : 0;
   const contentBottomInset = footer ? bottomInset : Math.max(bottomInset, navigationInset);
@@ -87,7 +89,7 @@ export function Screen({
   );
 
   return (
-    <Animated.View entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)} style={[{ flex: 1, backgroundColor, paddingTop: insets.top }, style]} testID={testID}>
+    <View style={[{ flex: 1, backgroundColor: backgroundColor ?? palette.page, paddingTop: insets.top }, style]} testID={testID}>
       {keyboard ? (
         <KeyboardAvoidingView
           style={styles.flex}
@@ -95,22 +97,22 @@ export function Screen({
         >
           {body}
           {footer ? (
-            <View style={[styles.footer, { paddingBottom: Math.max(bottomInset, navigationInset, 16) }]}>{footer}</View>
+            <View style={[styles.footer, { backgroundColor: backgroundColor ?? palette.page, paddingBottom: Math.max(bottomInset, navigationInset, 16) }]}>{footer}</View>
           ) : null}
         </KeyboardAvoidingView>
       ) : (
         <>
           {body}
           {footer ? (
-            <View style={[styles.footer, { paddingBottom: Math.max(bottomInset, navigationInset, 16) }]}>{footer}</View>
+            <View style={[styles.footer, { backgroundColor: backgroundColor ?? palette.page, paddingBottom: Math.max(bottomInset, navigationInset, 16) }]}>{footer}</View>
           ) : null}
         </>
       )}
-    </Animated.View>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   flex: { flex: 1 },
   content: {
     paddingHorizontal: contentPadding,
@@ -118,6 +120,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: contentPadding,
     paddingTop: 12,
-    backgroundColor: colors.background,
+    backgroundColor: p.page,
   },
 });

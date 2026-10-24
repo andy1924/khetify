@@ -4,11 +4,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import {
   selectCurrentStage,
   selectStageIndex,
-  useDemo,
+  useDemoSlices,
+  useDemoActions,
   type StageId,
 } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Sheet, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
+import { useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { EstimateBanner, PressableRow, ScreenHeading } from './components';
 import { planText } from './strings';
 
@@ -27,7 +30,10 @@ function isStageId(value: unknown): value is StageId {
 
 /** 05 · Stage detail — seed choice, optional quote, mark done, source sheet. */
 export function StageScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['plan'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const params = useLocalSearchParams<{ stage?: string }>();
 
@@ -107,7 +113,7 @@ export function StageScreen() {
         onPress={() => router.back()}
         style={styles.backRow}
       >
-        <Icon name="arrow-left" size={20} color="#65775B" strokeWidth={1.8} />
+        <Icon name="arrow-left" size={20} color={palette.icon} strokeWidth={1.8} />
         <Text style={styles.backText}>{t('stage.back')}</Text>
       </PressableRow>
 
@@ -148,7 +154,7 @@ export function StageScreen() {
                 <Text style={styles.taskValue} numberOfLines={1}>
                   {selectedSeed ? planText(selectedSeed.labelKey) : t('stage.seed.awaiting')}
                 </Text>
-                <Icon name="chevron-right" size={14} color="#52664D" strokeWidth={1.8} />
+                <Icon name="chevron-right" size={14} color={palette.icon} strokeWidth={1.8} />
               </View>
             </PressableRow>
 
@@ -163,9 +169,9 @@ export function StageScreen() {
             onPress={() => setSourceSheet(true)}
             style={styles.evidenceRow}
           >
-            <Icon name="book-open" size={20} color="#52664D" strokeWidth={1.6} />
+            <Icon name="book-open" size={20} color={palette.icon} strokeWidth={1.6} />
             <Text style={styles.evidenceLabel}>{t('stage.evidence')}</Text>
-            <Icon name="chevron-right" size={16} color="#52664D" strokeWidth={1.8} />
+            <Icon name="chevron-right" size={16} color={palette.icon} strokeWidth={1.8} />
           </PressableRow>
 
           <View style={styles.quoteField}>
@@ -179,7 +185,7 @@ export function StageScreen() {
               }}
               keyboardType="decimal-pad"
               placeholder={t('stage.seed.quotePlaceholder')}
-              placeholderTextColor="#A3AF99"
+              placeholderTextColor={palette.iconFaint}
               accessibilityLabel={t('stage.quoteA11y')}
               selectionColor="#3D5C30"
               editable={!completed}
@@ -247,7 +253,7 @@ export function StageScreen() {
                 style={[styles.seedOption, selected && styles.seedOptionSelected]}
               >
                 <Text style={styles.seedOptionLabel}>{planText(option.labelKey)}</Text>
-                {selected ? <Icon name="check" size={16} color="#30432B" strokeWidth={2} /> : null}
+                {selected ? <Icon name="check" size={16} color={palette.ink} strokeWidth={2} /> : null}
               </PressableRow>
             );
           })}
@@ -286,7 +292,7 @@ export function StageScreen() {
                 {t(`plan.stage.${id}.title` as const)}
               </Text>
               {id === stageId ? (
-                <Icon name="check" size={14} color="#52664D" strokeWidth={2} />
+                <Icon name="check" size={14} color={palette.icon} strokeWidth={2} />
               ) : null}
             </View>
           ))}
@@ -326,11 +332,11 @@ export function StageScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24, alignSelf: 'flex-start' },
   backText: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#65775B' },
 
-  taskCard: { backgroundColor: '#F1F6EA', borderRadius: 18, padding: 16, gap: 10 },
+  taskCard: { backgroundColor: p.surfaceSoft, borderRadius: 18, padding: 16, gap: 10 },
   taskTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 21, lineHeight: 29, color: '#30472B' },
   taskBody: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#636f57' },
   taskRow: {
@@ -340,7 +346,7 @@ const styles = StyleSheet.create({
     gap: 12,
     minHeight: 40,
     borderTopWidth: 0,
-    borderTopColor: '#DFE6D8',
+    borderTopColor: p.border,
     paddingTop: 10,
   },
   taskRowPlain: {
@@ -351,7 +357,7 @@ const styles = StyleSheet.create({
     minHeight: 28,
     paddingBottom: 4,
   },
-  taskLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#66705d' },
+  taskLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.icon },
   taskValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
   taskValue: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#455C3C', textAlign: 'right' },
 
@@ -359,7 +365,7 @@ const styles = StyleSheet.create({
   evidenceLabel: { flex: 1, fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#4F6843' },
 
   quoteField: {
-    backgroundColor: '#F6F8F3',
+    backgroundColor: p.surfaceSoft,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -372,11 +378,11 @@ const styles = StyleSheet.create({
     fontFamily: 'System', fontWeight: '400',
     fontSize: 14,
     lineHeight: 19,
-    color: '#243527',
+    color: p.ink,
     includeFontPadding: false,
   },
   quoteError: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
-  savedNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#5A714C' },
+  savedNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
 
   actionsRow: { flexDirection: 'row', gap: 12 },
   actionCell: { flex: 1 },
@@ -390,8 +396,8 @@ const styles = StyleSheet.create({
   lockedBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#76694C' },
 
   sheetBody: { gap: 10 },
-  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: '#687560' },
-  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: p.icon },
+  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
 
   seedOption: {
     minHeight: 52,
@@ -399,15 +405,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    backgroundColor: '#FEFFFC',
+    backgroundColor: p.page,
     borderWidth: 1,
-    borderColor: '#DFE6D8',
+    borderColor: p.border,
     borderRadius: 12,
     paddingHorizontal: 14,
   },
-  seedOptionSelected: { backgroundColor: '#EEF4E7', borderColor: '#C4DEA9' },
-  seedOptionLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
-  seedClear: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
+  seedOptionSelected: { backgroundColor: p.surface, borderColor: p.active },
+  seedOptionLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: p.ink },
+  seedClear: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: p.icon },
 
   sourceRow: {
     flexDirection: 'row',
@@ -415,8 +421,8 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 9,
     borderBottomWidth: 0,
-    borderBottomColor: '#E6EBE1',
+    borderBottomColor: p.borderSoft,
   },
   sourceOrdinal: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#8A9A80', width: 20 },
-  sourceLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#30432B' },
+  sourceLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.ink },
 });

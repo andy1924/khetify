@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Animated,
   Pressable,
   StyleSheet,
   View,
@@ -10,6 +11,8 @@ import {
 import { Icon, type IconName, type LucideIcon } from './Icon';
 import { Text, SectionLabel } from './Text';
 import { colors, radii, touchTarget } from './tokens';
+import { motion, useReduceMotion } from './motion';
+import { useAccentPalette, useStyles, type AccentPalette } from './AccentTheme';
 
 /* ------------------------------------------------------------------ */
 /* Row                                                                 */
@@ -50,13 +53,15 @@ export function Row({ children, style, align = 'center', gap = 8, fill = false, 
 export function Divider({
   style,
   inset = 0,
-  color = colors.divider,
+  color,
 }: {
   style?: StyleProp<ViewStyle>;
   inset?: number;
   color?: string;
 }) {
-  return <View style={[styles.divider, { marginHorizontal: inset, backgroundColor: color }, style]} />;
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
+  return <View style={[styles.divider, { marginHorizontal: inset, backgroundColor: color ?? palette.borderSoft }, style]} />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -75,20 +80,24 @@ export type NoticeProps = {
   plain?: boolean;
 };
 
-const noticePalettes: Record<NoticeTone, { bg: string; ink: string; title: string }> = {
-  warning: { bg: colors.warningBg, ink: colors.warningBody, title: colors.warningInk },
-  info: { bg: colors.infoBg, ink: colors.infoInk, title: colors.infoInk },
-  neutral: { bg: colors.surfaceSoft, ink: colors.muted, title: colors.ink },
-  danger: { bg: colors.dangerBg, ink: colors.danger, title: colors.danger },
-  success: { bg: colors.successBg, ink: colors.successInk, title: colors.successInk },
-};
+function noticePalettes(p: AccentPalette): Record<NoticeTone, { bg: string; ink: string; title: string }> {
+  return {
+    warning: { bg: colors.warningBg, ink: colors.warningBody, title: colors.warningInk },
+    info: { bg: p.surfaceSoft, ink: p.chipInk, title: p.chipInk },
+    neutral: { bg: p.surfaceSoft, ink: p.muted, title: p.ink },
+    danger: { bg: colors.dangerBg, ink: colors.danger, title: colors.danger },
+    success: { bg: p.surface, ink: p.ink, title: p.ink },
+  };
+}
 
 /**
  * Quiet advisory panel used for estimate-incomplete, limitations and stale
  * data states. The design pairs a short title with one explanatory line.
  */
 export function Notice({ title, children, tone = 'neutral', icon, style, plain = false }: NoticeProps) {
-  const palette = noticePalettes[tone];
+  const accentPalette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const palette = noticePalettes(accentPalette)[tone];
   // JSX interpolation creates arrays of text children. Native Views cannot
   // render those strings (or numbers) directly, including inside fragments.
   const body: React.ReactNode[] = [];
@@ -140,22 +149,24 @@ export type KeyValueProps = {
 
 /** Label/value pair used in plan, forecast and import summaries. */
 export function KeyValue({ label, value, layout = 'stack', strong = false, style, onPress }: KeyValueProps) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   const content =
     layout === 'inline' ? (
       <Row justify="space-between" gap={12} style={styles.inlineRow}>
-        <Text variant="caption" color={colors.muted} style={styles.flexText}>
+        <Text variant="caption" color={palette.muted} style={styles.flexText}>
           {label}
         </Text>
-        <Text variant="caption" weight="medium" color={strong ? colors.ink : colors.chipInk}>
+        <Text variant="caption" weight="medium" color={strong ? palette.ink : palette.chipInk}>
           {value}
         </Text>
       </Row>
     ) : (
       <View style={styles.stack}>
-        <Text variant="caption" color={colors.muted}>
+        <Text variant="caption" color={palette.muted}>
           {label}
         </Text>
-        <Text variant="caption" weight={strong ? 'semiBold' : 'medium'} color={strong ? colors.ink : colors.chipInk}>
+        <Text variant="caption" weight={strong ? 'semiBold' : 'medium'} color={strong ? palette.ink : palette.chipInk}>
           {value}
         </Text>
       </View>
@@ -189,9 +200,11 @@ export function DemoBadge({
   label?: string;
   style?: StyleProp<ViewStyle>;
 }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <View style={[styles.demoBadge, style]} accessibilityLabel={`${label} data`}>
-      <Text variant="meta" weight="medium" color={colors.chipInk}>
+      <Text variant="meta" weight="medium" color={palette.chipInk}>
         {label}
       </Text>
     </View>
@@ -219,11 +232,14 @@ export function IconSurface({
   size = 20,
   box = 48,
   radius = radii.lg,
-  background = colors.surfaceAlt,
-  color = colors.icon,
+  background,
+  color,
   children,
   style,
 }: IconSurfaceProps) {
+  const palette = useAccentPalette();
+  background = background ?? palette.surfaceTile;
+  color = color ?? palette.icon;
   return (
     <View
       style={[
@@ -248,8 +264,8 @@ export function IconSurface({
 export function Avatar({
   initials,
   size = 38,
-  background = '#ECF2E5',
-  color = colors.chipInk,
+  background,
+  color,
   style,
 }: {
   initials: string;
@@ -258,6 +274,9 @@ export function Avatar({
   color?: string;
   style?: StyleProp<ViewStyle>;
 }) {
+  const palette = useAccentPalette();
+  background = background ?? palette.chip;
+  color = color ?? palette.chipInk;
   return (
     <View
       style={[
@@ -289,8 +308,8 @@ export function ProgressBar({
   progress,
   style,
   height = 4,
-  fill = colors.trackFill,
-  track = colors.track,
+  fill,
+  track,
 }: {
   /** 0–1 */
   progress: number;
@@ -299,14 +318,15 @@ export function ProgressBar({
   fill?: string;
   track?: string;
 }) {
+  const palette = useAccentPalette();
   const clamped = Math.max(0, Math.min(1, progress));
   return (
     <View
-      style={[{ height, borderRadius: height, backgroundColor: track, overflow: 'hidden' }, style]}
+      style={[{ height, borderRadius: height, backgroundColor: track ?? palette.border, overflow: 'hidden' }, style]}
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: Math.round(clamped * 100) }}
     >
-      <View style={{ width: `${clamped * 100}%`, height, borderRadius: height, backgroundColor: fill }} />
+      <View style={{ width: `${clamped * 100}%`, height, borderRadius: height, backgroundColor: fill ?? palette.active }} />
     </View>
   );
 }
@@ -330,6 +350,7 @@ export function SegmentedProgress({
   height?: number;
   gap?: number;
 }) {
+  const palette = useAccentPalette();
   return (
     <Row gap={gap} style={style}>
       {Array.from({ length: count }).map((_, index) => (
@@ -339,7 +360,7 @@ export function SegmentedProgress({
             flex: 1,
             height,
             borderRadius: height,
-            backgroundColor: index <= current ? colors.trackFill : colors.track,
+            backgroundColor: index <= current ? palette.active : palette.border,
           }}
         />
       ))}
@@ -362,6 +383,29 @@ export type ToggleProps = {
 
 /** 36×22 pill switch with a 16pt thumb, matching the consent control. */
 export function Toggle({ value, onValueChange, label, disabled = false, style, accessibilityLabel }: ToggleProps) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
+  const reduceMotion = useReduceMotion();
+  const accentPalette = useAccentPalette();
+  // 0 = off, 1 = on. Only the thumb moves on the native thread; the track
+  // colour switches instantly so a caller-supplied `backgroundColor` still wins
+  // through the `style` prop.
+  const [progress] = React.useState(() => new Animated.Value(value ? 1 : 0));
+
+  React.useEffect(() => {
+    if (reduceMotion) {
+      progress.setValue(value ? 1 : 0);
+      return;
+    }
+    const animation = Animated.spring(progress, {
+      toValue: value ? 1 : 0,
+      ...motion.toggleSpring,
+      useNativeDriver: true,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [value, progress, reduceMotion]);
+
   return (
     <Pressable
       accessibilityRole="switch"
@@ -372,11 +416,22 @@ export function Toggle({ value, onValueChange, label, disabled = false, style, a
       hitSlop={10}
       style={[
         styles.toggle,
-        { backgroundColor: value ? colors.toggleOn : colors.toggleOff, opacity: disabled ? 0.5 : 1 },
+        { backgroundColor: value ? accentPalette.strong : palette.borderSoft, opacity: disabled ? 0.5 : 1 },
         style,
       ]}
     >
-      <View style={[styles.toggleThumb, value ? styles.toggleThumbOn : styles.toggleThumbOff]} />
+      <Animated.View
+        style={[
+          styles.toggleThumb,
+          {
+            transform: [
+              {
+                translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [0, 14] }),
+              },
+            ],
+          },
+        ]}
+      />
     </Pressable>
   );
 }
@@ -410,7 +465,7 @@ export function ListRow({
   title,
   description,
   icon,
-  iconColor = colors.iconQuiet,
+  iconColor,
   iconBackground,
   value,
   right,
@@ -420,35 +475,38 @@ export function ListRow({
   accessibilityLabel,
   testID,
 }: ListRowProps) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
+  const resolvedIconColor = iconColor ?? palette.icon;
   const showChevron = chevron ?? Boolean(onPress);
   const content = (
     <Row gap={12} style={styles.listRow} align="center">
       {icon ? (
         iconBackground ? (
-          <IconSurface name={icon} box={36} radius={12} background={iconBackground} color={iconColor} size={18} />
+          <IconSurface name={icon} box={36} radius={12} background={iconBackground} color={resolvedIconColor} size={18} />
         ) : typeof icon === 'string' ? (
-          <Icon name={icon as IconName} size={18} color={iconColor} strokeWidth={1.7} />
+          <Icon name={icon as IconName} size={18} color={resolvedIconColor} strokeWidth={1.7} />
         ) : (
-          React.createElement(icon, { size: 18, color: iconColor, strokeWidth: 1.7 })
+          React.createElement(icon, { size: 18, color: resolvedIconColor, strokeWidth: 1.7 })
         )
       ) : null}
       <View style={styles.listRowText}>
-        <Text variant="strong" color={colors.ink}>
+        <Text variant="strong" color={palette.ink}>
           {title}
         </Text>
         {description ? (
-          <Text variant="meta" color={colors.subtle} style={styles.listRowDescription}>
+          <Text variant="meta" color={palette.faint} style={styles.listRowDescription}>
             {description}
           </Text>
         ) : null}
       </View>
       {value ? (
-        <Text variant="meta" weight="medium" color={colors.chipInk}>
+        <Text variant="meta" weight="medium" color={palette.chipInk}>
           {value}
         </Text>
       ) : null}
       {right}
-      {showChevron && !right ? <Icon name="chevron-right" size={16} color={colors.iconFaint} /> : null}
+      {showChevron && !right ? <Icon name="chevron-right" size={16} color={palette.iconFaint} /> : null}
     </Row>
   );
 
@@ -479,8 +537,9 @@ export function Footnote({
   children: React.ReactNode;
   style?: StyleProp<TextStyle>;
 }) {
+  const palette = useAccentPalette();
   return (
-    <Text variant="meta" color={colors.faint} style={style}>
+    <Text variant="meta" color={palette.faint} style={style}>
       {children}
     </Text>
   );
@@ -511,11 +570,14 @@ export function IconButton({
   size = 20,
   box = 42,
   radius = 14,
-  background = '#D5E7BD',
-  color = colors.icon,
+  background,
+  color,
   disabled = false,
   style,
 }: IconButtonProps) {
+  const palette = useAccentPalette();
+  const surface = background ?? palette.active;
+  const glyphColor = color ?? palette.icon;
   return (
     <Pressable
       accessibilityRole="button"
@@ -529,7 +591,7 @@ export function IconButton({
           width: box,
           height: box,
           borderRadius: radius,
-          backgroundColor: background,
+          backgroundColor: surface,
           alignItems: 'center',
           justifyContent: 'center',
           opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
@@ -539,8 +601,8 @@ export function IconButton({
       ]}
     >
       {typeof name === 'string'
-        ? <Icon name={name as IconName} size={size} color={color} strokeWidth={1.7} />
-        : React.createElement(name, { size, color, strokeWidth: 1.7 })}
+        ? <Icon name={name as IconName} size={size} color={glyphColor} strokeWidth={1.7} />
+        : React.createElement(name, { size, color: glyphColor, strokeWidth: 1.7 })}
     </Pressable>
   );
 }
@@ -553,7 +615,7 @@ export function IconButton({
 export function LinkText({
   children,
   onPress,
-  color = colors.chipInk,
+  color,
   variant = 'caption',
   weight = 'medium',
   chevron = false,
@@ -569,6 +631,9 @@ export function LinkText({
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
 }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
+  const ink = color ?? palette.chipInk;
   return (
     <Pressable
       accessibilityRole="button"
@@ -577,17 +642,17 @@ export function LinkText({
       hitSlop={8}
       style={({ pressed }) => [styles.linkText, style, pressed && styles.pressedDim]}
     >
-      <Text variant={variant} weight={weight} color={color}>
+      <Text variant={variant} weight={weight} color={ink}>
         {children}
       </Text>
-      {chevron ? <Icon name="chevron-right" size={13} color={color} /> : null}
+      {chevron ? <Icon name="chevron-right" size={13} color={ink} /> : null}
     </Pressable>
   );
 }
 
 export { SectionLabel };
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   divider: { height: 0, width: '100%' },
   notice: {
     borderRadius: radii.xl,
@@ -603,7 +668,7 @@ const styles = StyleSheet.create({
   stack: { gap: 4 },
   demoBadge: {
     borderRadius: radii.pill,
-    backgroundColor: colors.chipBg,
+    backgroundColor: p.chip,
     paddingHorizontal: 10,
     paddingVertical: 6,
     alignSelf: 'flex-start',
@@ -614,6 +679,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     padding: 3,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   toggleThumb: {
     width: 16,
@@ -621,8 +687,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: colors.white,
   },
-  toggleThumbOff: { alignSelf: 'flex-start' },
-  toggleThumbOn: { alignSelf: 'flex-end' },
   listRow: {
     minHeight: touchTarget,
     paddingVertical: 12,

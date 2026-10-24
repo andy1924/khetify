@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useDemo, formatRupees, numberOrNull, type WaterAvailability } from '../../demo';
 import { languageLabel, localeOptions, useT } from '../../locales';
 import {
-  Avatar,
   Button,
   Field,
   Icon,
@@ -15,7 +14,13 @@ import {
   Toggle,
   colors,
 } from '../../ui';
+import { DemoAvatar } from '../../ui/DemoAvatar';
+import { accentOptions, useAccent, useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { profileCopy } from './strings';
+
+/** Local picker copy — keeps the accent control self-contained. */
+const ACCENT_LABEL = 'Accent colour';
+const ACCENT_NOTE = 'Used for your avatar and key actions.';
 
 const WATER_OPTIONS: { id: WaterAvailability; label: string }[] = [
   { id: 'rainfed', label: profileCopy['profile.water.rainfed'] },
@@ -37,6 +42,9 @@ type SheetId =
 /** 15 · Farm profile & privacy — fixture identity, resources, settings and demo controls. */
 export function ProfileScreen() {
   const { state, actions } = useDemo();
+  const { accent, setAccent } = useAccent();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   const t = useT();
   const [sheet, setSheet] = useState<SheetId>(null);
   const [attempted, setAttempted] = useState(false);
@@ -55,7 +63,7 @@ export function ProfileScreen() {
   return (
     <Screen>
       <View style={styles.heading}>
-        <Text variant="heading" color={colors.heading} accessibilityRole="header">
+        <Text variant="heading" color={palette.heading} accessibilityRole="header">
           {t('profile.title')}
         </Text>
       </View>
@@ -67,18 +75,18 @@ export function ProfileScreen() {
           .replace('{name}', state.farm.farmerName)
           .replace('{location}', fullLocation)}
       >
-        <Avatar initials={state.farm.initials} size={48} background="#E6F0DA" color="#567043" />
+        <DemoAvatar size={48} />
         <View style={styles.identityText}>
-          <Text variant="title" color="#405E33">
+          <Text variant="title" color={palette.ink}>
             {state.farm.farmerName}
           </Text>
-          <Text variant="caption" color="#697560">
+          <Text variant="caption" color={palette.faint}>
             {fullLocation}
           </Text>
         </View>
       </View>
 
-      <View style={styles.farmCard}>
+      <View style={[styles.farmCard, { backgroundColor: palette.surface }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={profileCopy['profile.editFarmA11y'].replace('{farm}', state.farm.farmName)}
@@ -88,10 +96,10 @@ export function ProfileScreen() {
           }}
           style={styles.farmHead}
         >
-          <Text variant="title" color="#4D6E3C" style={styles.flex}>
+          <Text variant="title" color={palette.deep} style={styles.flex}>
             {state.farm.farmName}
           </Text>
-          <Icon name="pencil" size={17} color={colors.icon} />
+          <Icon name="pencil" size={17} color={palette.icon} />
         </Pressable>
         <ResourceRow label={t('profile.area')} value={profileCopy['profile.acres'].replace('{area}', String(state.farm.areaAcres))} />
         <ResourceRow label={t('profile.water')} value={waterLabel} />
@@ -134,6 +142,44 @@ export function ProfileScreen() {
         />
       </View>
 
+      {/* Session accent — recolours the demo avatar and primary accents. */}
+      <View style={styles.accentBlock}>
+        <View style={styles.accentHead}>
+          <Text variant="strong" color={palette.ink}>
+            {ACCENT_LABEL}
+          </Text>
+          <Text variant="meta" color={palette.faint}>
+            {accent.label}
+          </Text>
+        </View>
+        <View style={styles.accentRow} accessibilityRole="radiogroup">
+          {accentOptions.map(option => {
+            const selected = accent.id === option.id;
+            return (
+              <Pressable
+                key={option.id}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={`${option.label} accent`}
+                onPress={() => setAccent(option.id)}
+                style={({ pressed }) => [
+                  styles.swatchButton,
+                  selected && styles.swatchButtonSelected,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View style={[styles.swatch, { backgroundColor: option.strong }, selected && styles.swatchSelected]}>
+                  {selected ? <Icon name="check" size={13} color={colors.white} strokeWidth={2.4} /> : null}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text variant="meta" color={palette.faint}>
+          {ACCENT_NOTE}
+        </Text>
+      </View>
+
       {/* Demo controls sit below the reference content, not inside it. */}
       <View style={styles.demoBlock}>
         <DemoRow icon="log-out"
@@ -144,11 +190,11 @@ export function ProfileScreen() {
         />
 
         {notice ? (
-          <Text variant="meta" color={colors.chipInk}>
+          <Text variant="meta" color={palette.chipInk}>
             {notice}
           </Text>
         ) : null}
-        <Text variant="meta" color={colors.faint}>
+        <Text variant="meta" color={palette.faint}>
           {t('profile.version')}
         </Text>
       </View>
@@ -156,7 +202,7 @@ export function ProfileScreen() {
       {/* ------------------------------------------------------------- sheets */}
 
       <Sheet visible={sheet === 'consent'} onClose={close} title={t('profile.consentSheet')}>
-        <Text variant="meta" color={colors.faint} style={styles.sheetNote}>
+        <Text variant="meta" color={palette.faint} style={styles.sheetNote}>
           {profileCopy['profile.consentNote']}
         </Text>
         <View style={styles.sheetList}>
@@ -193,26 +239,26 @@ export function ProfileScreen() {
                 accessibilityState={{ selected }}
                 accessibilityLabel={languageLabel(option.code)}
                 onPress={() => actions.setLocale(option.code)}
-                style={[styles.languageRow, selected && styles.languageRowSelected]}
+                style={[styles.languageRow, selected && { backgroundColor: palette.surface }]}
               >
                 <View style={styles.flex}>
-                  <Text variant="subtitle" weight={selected ? 'semiBold' : 'regular'} color={colors.ink}>
+                  <Text variant="subtitle" weight={selected ? 'semiBold' : 'regular'} color={palette.ink}>
                     {t(option.nativeKey)}
                   </Text>
                   {option.englishKey ? (
-                    <Text variant="meta" color={colors.muted}>
+                    <Text variant="meta" color={palette.muted}>
                       {t(option.englishKey)}
                     </Text>
                   ) : null}
                 </View>
                 <View style={[styles.dot, selected && styles.dotSelected]}>
-                  {selected ? <Icon name="check" size={13} color={colors.ink} strokeWidth={2} /> : null}
+                  {selected ? <Icon name="check" size={13} color={palette.ink} strokeWidth={2} /> : null}
                 </View>
               </Pressable>
             );
           })}
         </View>
-        <Text variant="meta" color={colors.faint} style={styles.sheetNote}>
+        <Text variant="meta" color={palette.faint} style={styles.sheetNote}>
           {profileCopy['profile.languageNote']}
         </Text>
         <Button title={t('common.done')} variant="secondary" trailingArrow={false} onPress={close} />
@@ -226,10 +272,10 @@ export function ProfileScreen() {
           <Button title={t('common.close')} variant="secondary" trailingArrow={false} onPress={close} />
         }
       >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
+        <Text variant="body" color={palette.muted} style={styles.sheetBody}>
           {profileCopy['profile.evidence.body']}
         </Text>
-        <Text variant="strong" color={colors.ink}>
+        <Text variant="strong" color={palette.ink}>
           {profileCopy['profile.evidence.sources']}
         </Text>
         <View style={styles.sourceList}>
@@ -237,10 +283,10 @@ export function ProfileScreen() {
           <SourceRow label={profileCopy['profile.evidence.soil']} />
           <SourceRow label={profileCopy['profile.evidence.market']} />
         </View>
-        <Text variant="strong" color={colors.ink}>
+        <Text variant="strong" color={palette.ink}>
           {profileCopy['profile.evidence.limits']}
         </Text>
-        <Text variant="meta" color={colors.subtle} style={styles.sheetBody}>
+        <Text variant="meta" color={palette.faint} style={styles.sheetBody}>
           {profileCopy['profile.evidence.limitsBody']}
         </Text>
       </Sheet>
@@ -253,7 +299,7 @@ export function ProfileScreen() {
           <Button title={t('common.close')} variant="secondary" trailingArrow={false} onPress={close} />
         }
       >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
+        <Text variant="body" color={palette.muted} style={styles.sheetBody}>
           {profileCopy['profile.freshness.body']}
         </Text>
         <View style={styles.sourceList}>
@@ -271,26 +317,18 @@ export function ProfileScreen() {
           <Button title={t('common.close')} variant="secondary" trailingArrow={false} onPress={close} />
         }
       >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
+        <Text variant="body" color={palette.muted} style={styles.sheetBody}>
           {profileCopy['profile.about.body']}
         </Text>
         <View style={styles.aboutBlock}>
-          <Text variant="strong" color={colors.ink}>
-            {profileCopy['profile.about.simulated']}
-          </Text>
-          <Text variant="meta" color={colors.subtle} style={styles.sheetBody}>
-            {profileCopy['profile.about.simulatedBody']}
-          </Text>
-        </View>
-        <View style={styles.aboutBlock}>
-          <Text variant="strong" color={colors.ink}>
+          <Text variant="strong" color={palette.ink}>
             {profileCopy['profile.about.resetTitle']}
           </Text>
-          <Text variant="meta" color={colors.subtle} style={styles.sheetBody}>
+          <Text variant="meta" color={palette.faint} style={styles.sheetBody}>
             {profileCopy['profile.about.resetBody']}
           </Text>
         </View>
-        <Text variant="meta" color={colors.faint}>
+        <Text variant="meta" color={palette.faint}>
           {t('profile.version')}
         </Text>
       </Sheet>
@@ -361,7 +399,7 @@ export function ProfileScreen() {
               />
             </View>
 
-            <Text variant="caption" color={colors.muted}>
+            <Text variant="caption" color={palette.muted}>
               {profileCopy['profile.field.water']}
             </Text>
             <View style={styles.waterRow}>
@@ -374,9 +412,9 @@ export function ProfileScreen() {
                     accessibilityState={{ selected }}
                     accessibilityLabel={option.label}
                     onPress={() => actions.updateProfileDraft({ water: option.id })}
-                    style={[styles.waterChip, selected && styles.waterChipSelected]}
+                    style={[styles.waterChip, selected && { backgroundColor: palette.active }]}
                   >
-                    <Text variant="meta" weight={selected ? 'semiBold' : 'medium'} color={colors.chipInk}>
+                    <Text variant="meta" weight={selected ? 'semiBold' : 'medium'} color={palette.chipInk}>
                       {option.label}
                     </Text>
                   </Pressable>
@@ -384,7 +422,7 @@ export function ProfileScreen() {
               })}
             </View>
 
-            <Text variant="meta" color={colors.faint} style={styles.sheetNote}>
+            <Text variant="meta" color={palette.faint} style={styles.sheetNote}>
               {t('profile.editNote')}
             </Text>
 
@@ -418,7 +456,7 @@ export function ProfileScreen() {
             />
           </View>
         ) : (
-          <Text variant="body" color={colors.muted}>
+          <Text variant="body" color={palette.muted}>
             {t('profile.editNote')}
           </Text>
         )}
@@ -440,13 +478,13 @@ export function ProfileScreen() {
                 // Drop the authenticated (tabs) stack so hardware back cannot
                 // re-enter the app while signed out.
                 if (router.canDismiss()) router.dismissAll();
-                router.replace('/language');
+                router.replace('/sign-in');
               }}
             />
           </View>
         }
       >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
+        <Text variant="body" color={palette.muted} style={styles.sheetBody}>
           {t('profile.resetBody')}
         </Text>
       </Sheet>
@@ -465,13 +503,13 @@ export function ProfileScreen() {
                 actions.signOut();
                 close();
                 if (router.canDismiss()) router.dismissAll();
-                router.replace('/language');
+                router.replace('/sign-in');
               }}
             />
           </View>
         }
       >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
+        <Text variant="body" color={palette.muted} style={styles.sheetBody}>
           {t('profile.signOutBody')}
         </Text>
       </Sheet>
@@ -481,12 +519,14 @@ export function ProfileScreen() {
 }
 
 function ResourceRow({ label, value }: { label: string; value: string }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <View style={styles.resourceRow}>
-      <Text variant="caption" color="#626C58">
+      <Text variant="caption" color={palette.faint}>
         {label}
       </Text>
-      <Text variant="caption" weight="medium" color="#5B7249" style={styles.flex} align="right">
+      <Text variant="caption" weight="medium" color={palette.chipInk} style={styles.flex} align="right">
         {value}
       </Text>
     </View>
@@ -506,6 +546,8 @@ function DemoRow({
   accessibilityLabel: string;
   onPress: () => void;
 }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <Pressable
       accessibilityRole="button"
@@ -513,16 +555,16 @@ function DemoRow({
       onPress={onPress}
       style={({ pressed }) => [styles.demoRow, pressed && styles.pressed]}
     >
-      <Icon name={icon} size={18} color={colors.iconQuiet} />
+      <Icon name={icon} size={18} color={palette.icon} />
       <View style={styles.flex}>
-        <Text variant="strong" color={colors.ink}>
+        <Text variant="strong" color={palette.ink}>
           {title}
         </Text>
-        <Text variant="meta" color={colors.subtle}>
+        <Text variant="meta" color={palette.faint}>
           {body}
         </Text>
       </View>
-      <Icon name="chevron-right" size={16} color={colors.iconFaint} />
+      <Icon name="chevron-right" size={16} color={palette.iconFaint} />
     </Pressable>
   );
 }
@@ -538,13 +580,15 @@ function ConsentRow({
   value: boolean;
   onChange: (value: boolean) => void;
 }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <View style={styles.consentRow}>
       <View style={styles.flex}>
-        <Text variant="strong" color={colors.ink}>
+        <Text variant="strong" color={palette.ink}>
           {title}
         </Text>
-        <Text variant="meta" color={colors.subtle}>
+        <Text variant="meta" color={palette.faint}>
           {body}
         </Text>
       </View>
@@ -554,14 +598,16 @@ function ConsentRow({
 }
 
 function SourceRow({ label, value }: { label: string; value?: string }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <View style={styles.sourceRow}>
-      <Icon name="circle-check" size={15} color={colors.iconQuiet} />
-      <Text variant="meta" color={colors.subtle} style={styles.flex}>
+      <Icon name="circle-check" size={15} color={palette.icon} />
+      <Text variant="meta" color={palette.faint} style={styles.flex}>
         {label}
       </Text>
       {value ? (
-        <Text variant="meta" weight="medium" color={colors.chipInk}>
+        <Text variant="meta" weight="medium" color={palette.chipInk}>
           {value}
         </Text>
       ) : null}
@@ -569,7 +615,7 @@ function SourceRow({ label, value }: { label: string; value?: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   flex: { flex: 1 },
   heading: { gap: 6 },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 51 },
@@ -580,6 +626,29 @@ const styles = StyleSheet.create({
   resourceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 17 },
 
   settingsRow: { minHeight: 72, paddingVertical: 16, borderBottomWidth: 0, borderBottomColor: '#E7EDE0' },
+
+  accentBlock: { gap: 10 },
+  accentHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  accentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+  swatchButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: p.border,
+    backgroundColor: p.surfaceSoft,
+  },
+  swatchButtonSelected: { borderColor: p.ink, borderWidth: 1.5 },
+  swatch: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swatchSelected: { width: 30, height: 30, borderRadius: 15 },
 
   demoBlock: { gap: 10, paddingTop: 8 },
   demoRow: {

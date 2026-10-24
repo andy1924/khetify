@@ -9,7 +9,8 @@ import {
 import { router } from 'expo-router';
 import { Icon } from './Icon';
 import { Text } from './Text';
-import { colors, touchTarget } from './tokens';
+import { touchTarget } from './tokens';
+import { useAccentPalette } from './AccentTheme';
 
 export type HeaderProps = {
   title: string;
@@ -40,6 +41,7 @@ export function Header({
   size = 'lg',
   style,
 }: HeaderProps) {
+  const palette = useAccentPalette();
   return (
     <View style={[styles.container, style]}>
       {back ? (
@@ -50,9 +52,9 @@ export function Header({
           hitSlop={8}
           style={styles.backRow}
         >
-          <Icon name="chevron-left" size={18} color={colors.icon} strokeWidth={1.8} />
+          <Icon name="chevron-left" size={18} color={palette.icon} strokeWidth={1.8} />
           {backLabel ? (
-            <Text variant="caption" color={colors.mutedSoft} numberOfLines={1}>
+            <Text variant="caption" color={palette.muted} numberOfLines={1}>
               {backLabel}
             </Text>
           ) : null}
@@ -61,11 +63,11 @@ export function Header({
       <View style={styles.titleRow}>
         <View style={styles.titleBlock}>
           {size === 'lg' ? (
-            <Text variant="heading" color={colors.heading} accessibilityRole="header">
+            <Text variant="heading" color={palette.heading} accessibilityRole="header">
               {title}
             </Text>
           ) : (
-            <Text variant="title" color={colors.heading} accessibilityRole="header">
+            <Text variant="title" color={palette.heading} accessibilityRole="header">
               {title}
             </Text>
           )}

@@ -6,6 +6,7 @@ import type { ToolKind } from '../../demo';
 import type { StringKey } from '../../locales';
 import { formatDateLabel } from '../../demo';
 import { Icon, Screen, Text } from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { ScreenHeading, Sheet, StatusChip, Button } from './components';
 import { useToolHistory } from './history';
 import { toolCopy } from './strings';
@@ -27,7 +28,7 @@ const TOOLS: ToolEntry[] = [
   { kind: 'grainQuality', titleKey: 'tools.grainQuality.title', detailKey: 'tools.grainQuality.detail', status: 'unavailable', icon: 'wheat' },
   { kind: 'grainId', titleKey: 'tools.grainId.title', detailKey: 'tools.grainId.detail', status: 'limited', icon: 'scan' },
   { kind: 'forecast', titleKey: 'tools.forecast.title', detailKey: 'tools.forecast.detail', status: 'unavailable', icon: 'chart-no-axes-combined', route: '/tools/forecast' },
-  { kind: 'mandi', titleKey: 'tools.mandi.title', detailKey: 'tools.mandi.detail', status: 'ready', icon: 'store', route: '/tools/mandi' },
+  { kind: 'market', titleKey: 'tools.market.title', detailKey: 'tools.market.detail', status: 'ready', icon: 'store', route: '/tools/market' },
   { kind: 'satellite', titleKey: 'tools.satellite.title', detailKey: 'tools.satellite.detail', status: 'limited', icon: 'satellite', route: '/tools/satellite' },
 ];
 
@@ -45,12 +46,14 @@ const KIND_LABEL: Record<ToolKind, StringKey> = {
   grainQuality: 'tools.grainQuality.title',
   grainId: 'tools.grainId.title',
   forecast: 'tools.forecast.title',
-  mandi: 'tools.mandi.title',
+  market: 'tools.market.title',
   satellite: 'tools.satellite.title',
 };
 
 /** 07 · Independent tools — six entries with capability states and local history. */
 export function ToolsScreen() {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   const t = useT();
   const history = useToolHistory();
   const [sheetTool, setSheetTool] = useState<ToolEntry | null>(null);
@@ -68,7 +71,7 @@ export function ToolsScreen() {
       <ScreenHeading
         title={t('tools.title')}
         subtitle={t('tools.subtitle')}
-        titleColor="#263B29"
+        titleColor={palette.ink}
         subtitleSize={14}
       />
 
@@ -81,16 +84,16 @@ export function ToolsScreen() {
               accessibilityRole="button"
               accessibilityLabel={`${t(tool.titleKey)}. ${t(tool.detailKey)}.`}
               onPress={() => open(tool)}
-              android_ripple={{ color: 'rgba(38, 59, 41, 0.05)' }}
+              android_ripple={{ color: palette.surface }}
               style={({ pressed }) => [styles.row, pressed && styles.pressed]}
             >
               <View style={styles.iconCell}>
-                <Icon name={tool.icon} size={24} color={usable ? '#6B8C52' : '#A3AF99'} strokeWidth={1.6} />
+                <Icon name={tool.icon} size={24} color={usable ? palette.icon : palette.iconFaint} strokeWidth={1.6} />
               </View>
               <View style={styles.labels}>
                 <Text style={styles.title}>{t(tool.titleKey)}</Text>
               </View>
-              {tool.status === 'ready' ? <Icon name="arrow-right" size={18} color="#7C8C72" /> : null}
+              {tool.status === 'ready' ? <Icon name="arrow-right" size={18} color={palette.iconFaint} /> : null}
             </Pressable>
           );
         })}
@@ -130,9 +133,6 @@ export function ToolsScreen() {
             <StatusChip label={t(statusLabel[sheetTool.status])} tone={statusTone[sheetTool.status]} />
             <Text style={styles.body13}>{t(sheetTool.detailKey)}</Text>
             <Text style={styles.body13}>This feature is being prepared.</Text>
-            {sheetTool.kind === 'grainId' ? (
-              <Text style={styles.meta}>{toolCopy('tools.grainId.sheetBody')}</Text>
-            ) : null}
           </View>
         ) : null}
       </Sheet>
@@ -147,18 +147,18 @@ function isoDay(timestamp: number): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-const styles = StyleSheet.create({
-  row: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, marginBottom: 10, borderRadius: 18, backgroundColor: '#F2F5EE' },
-  pressed: { backgroundColor: 'rgba(38, 59, 41, 0.03)' },
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
+  row: { minHeight: 80, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, marginBottom: 10, borderRadius: 18, backgroundColor: p.surfaceSoft },
+  pressed: { backgroundColor: p.surface },
   iconCell: { width: 26, height: 24, justifyContent: 'center' },
   labels: { flex: 1, gap: 5 },
-  title: { fontFamily: 'System', fontSize: 17, lineHeight: 23, color: '#263B29', fontWeight: '600' },
-  sub: { fontFamily: 'System', fontSize: 14, lineHeight: 20, color: '#52604D' },
-  subStrong: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#263B29' },
-  meta: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
-  eyebrow: { fontFamily: 'System', fontWeight: '600', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: '#657360' },
-  body13: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
-  note: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 18, color: '#657360' },
+  title: { fontFamily: 'System', fontSize: 17, lineHeight: 23, color: p.ink, fontWeight: '600' },
+  sub: { fontFamily: 'System', fontSize: 14, lineHeight: 20, color: p.muted },
+  subStrong: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: p.ink },
+  meta: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
+  eyebrow: { fontFamily: 'System', fontWeight: '600', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: p.icon },
+  body13: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: p.icon },
+  note: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 18, color: p.icon },
   history: { gap: 12, paddingTop: 4 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   historyLabel: { flex: 1, gap: 2 },

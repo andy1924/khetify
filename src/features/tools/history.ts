@@ -4,12 +4,14 @@
  * for the tools screens — no local store, no listeners.
  */
 import { useCallback } from 'react';
-import { useDemoState, useDemoActions } from '../../demo';
+import { useDemoSlices, useDemoActions } from '../../demo';
 import type { ToolHistoryEntry, ToolKind } from '../../demo';
 import type { StringKey } from '../../locales';
 
 export function useToolHistory(): ToolHistoryEntry[] {
-  return useDemoState().toolHistory;
+  // Slice subscription: a keystroke in the Soil screen no longer re-renders the
+  // whole Tools list.
+  return useDemoSlices(['toolHistory'] as const).toolHistory;
 }
 
 /** Returns a stable recorder that writes through `actions.recordToolUse`. */

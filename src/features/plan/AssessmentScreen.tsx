@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { formatRupees, useDemo, type AssessmentDraft, type WaterAvailability } from '../../demo';
+import { formatRupees, useDemoSlices, useDemoActions, type AssessmentDraft, type WaterAvailability } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, SegmentedProgress, Sheet, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
+import { useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { ChoiceRow, Hairline, InfoStrip, ScreenHeading } from './components';
 import { planText } from './strings';
 
@@ -30,7 +32,10 @@ type Errors = Partial<Record<'farmName' | 'area' | 'district' | 'budget' | 'seas
 
 /** 03 · Farm assessment — editable land & resources, then a sample seed choice. */
 export function AssessmentScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['assessmentDraft', 'farm'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const draft = state.assessmentDraft;
 
@@ -96,7 +101,9 @@ export function AssessmentScreen() {
 
   const patch = (values: Partial<AssessmentDraft>) => {
     actions.updateAssessment(values);
-    setDirty(true);
+    // `dirty` only gates the discard prompt; setting it again per keystroke
+    // would schedule a second render of the whole form.
+    if (!dirtyRef.current) setDirty(true);
   };
 
   if (!draft) {
@@ -167,7 +174,7 @@ export function AssessmentScreen() {
                   onChangeText={value => patch({ farmName: value })}
                   accessibilityLabel={t('assessment.farmName')}
                   placeholder={state.farm.farmName}
-                  placeholderTextColor="#A3AF99"
+                  placeholderTextColor={palette.iconFaint}
                   selectionColor="#3D5C30"
                   style={styles.input}
                 />
@@ -192,7 +199,7 @@ export function AssessmentScreen() {
                     keyboardType="decimal-pad"
                     accessibilityLabel={`${t('assessment.area')} (${planText(`assessment.unit.${unit}`)})`}
                     placeholder="2"
-                    placeholderTextColor="#A3AF99"
+                    placeholderTextColor={palette.iconFaint}
                     selectionColor="#3D5C30"
                     style={[styles.input, styles.areaInput]}
                   />
@@ -206,7 +213,7 @@ export function AssessmentScreen() {
                     style={styles.unitChip}
                   >
                     <Text style={styles.unitLabel}>{planText(`assessment.unit.${unit}`)}</Text>
-                    <Icon name="chevron-down" size={12} color="#52664D" strokeWidth={1.8} />
+                    <Icon name="chevron-down" size={12} color={palette.icon} strokeWidth={1.8} />
                   </Pressable>
                 </View>
                 {errors.area ? <Text style={styles.error}>{errors.area}</Text> : null}
@@ -220,7 +227,7 @@ export function AssessmentScreen() {
                 onChangeText={value => patch({ district: value })}
                 accessibilityLabel={t('assessment.district')}
                 placeholder={`${state.farm.district}, ${state.farm.stateName}`}
-                placeholderTextColor="#A3AF99"
+                placeholderTextColor={palette.iconFaint}
                 selectionColor="#3D5C30"
                 style={styles.input}
               />
@@ -267,7 +274,7 @@ export function AssessmentScreen() {
                     keyboardType="number-pad"
                     accessibilityLabel={t('assessment.budget')}
                     placeholder="30,000"
-                    placeholderTextColor="#A3AF99"
+                    placeholderTextColor={palette.iconFaint}
                     selectionColor="#3D5C30"
                     style={[styles.input, styles.budgetInput]}
                   />
@@ -309,7 +316,7 @@ export function AssessmentScreen() {
         <>
           <View style={styles.summaryCard}>
             <View style={styles.summaryHead}>
-              <Icon name="sprout" size={20} color="#72975A" strokeWidth={1.6} />
+              <Icon name="sprout" size={20} color={palette.icon} strokeWidth={1.6} />
               <Text style={styles.summaryText} numberOfLines={2}>
                 {summary}
               </Text>
@@ -399,17 +406,17 @@ export function AssessmentScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   screenContent: { gap: 20 },
-  card: { backgroundColor: '#F2F5EE', borderRadius: 18, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 8, gap: 8 },
-  cardTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
+  card: { backgroundColor: p.surfaceSoft, borderRadius: 18, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 8, gap: 8 },
+  cardTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: p.ink },
   cardBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
-  cardNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462', paddingBottom: 6 },
+  cardNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon, paddingBottom: 6 },
 
   pairRow: { flexDirection: 'row', gap: 16 },
   pairCell: { flex: 1, gap: 4, paddingVertical: 10 },
   fullRow: { paddingVertical: 10, gap: 4 },
-  fieldLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#66705d' },
+  fieldLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.icon },
   input: {
     padding: 0,
     margin: 0,
@@ -417,7 +424,7 @@ const styles = StyleSheet.create({
     fontFamily: 'System', fontWeight: '500',
     fontSize: 15,
     lineHeight: 21,
-    color: '#30432B',
+    color: p.ink,
     includeFontPadding: false,
   },
   areaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -431,12 +438,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  unitLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: '#4A693D' },
+  unitLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 10, lineHeight: 14, color: p.chipInk },
 
   budgetRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  currency: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 21, color: '#30432B' },
+  currency: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 21, color: p.ink },
   budgetInput: { flex: 1 },
-  budgetHint: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  budgetHint: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
 
   seasonRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 2 },
   seasonChip: {
@@ -447,8 +454,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
-  seasonChipSelected: { backgroundColor: '#D4E7BE' },
-  seasonText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#4A693D' },
+  seasonChipSelected: { backgroundColor: p.active },
+  seasonText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: p.chipInk },
   seasonTextSelected: { color: '#3D5C30', fontFamily: 'System', fontWeight: '600' },
 
   waterRow: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
@@ -460,8 +467,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8EDE3',
     paddingHorizontal: 14,
   },
-  waterChipSelected: { backgroundColor: '#D4E7BE' },
-  waterText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: '#4A693D' },
+  waterChipSelected: { backgroundColor: p.active },
+  waterText: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 15, color: p.chipInk },
 
   error: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#8B4A3A' },
 
@@ -477,5 +484,5 @@ const styles = StyleSheet.create({
 
   sheetActions: { flexDirection: 'row', gap: 12 },
   sheetCell: { flex: 1 },
-  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: '#687560' },
+  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: p.icon },
 });

@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { formatRupees, useDemo } from '../../demo';
+import { formatRupees, useDemoSlices, useDemoActions } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Sheet, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
 import { ScreenHeading } from './components';
 import { planText } from './strings';
 
@@ -11,7 +12,9 @@ const CHANGE_ICONS = { storage: 'minus', seed: 'replace', resources: 'equal' } a
 
 /** 06 · Review plan changes — before/after budget, sample delta, confirm or cancel. */
 export function ReviewScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const state = useDemoSlices(['plan', 'farm'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const draft = state.plan.revisionDraft;
 
@@ -115,7 +118,7 @@ export function ReviewScreen() {
         <View style={styles.changeList}>
           {draft.changes.map(change => (
             <View key={change.id} style={styles.changeRow}>
-              <Icon name={CHANGE_ICONS[change.id]} size={18} color="#7F966A" strokeWidth={1.8} />
+              <Icon name={CHANGE_ICONS[change.id]} size={18} color={palette.icon} strokeWidth={1.8} />
               <View style={styles.changeCopy}>
                 <Text style={styles.changeTitle}>{t(change.titleKey)}</Text>
                 <Text style={styles.changeDetail}>

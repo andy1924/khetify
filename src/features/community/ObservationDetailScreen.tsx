@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useDemo, formatDistance } from '../../demo';
+import { useDemoSlices, formatDistance } from '../../demo';
 import { useT } from '../../locales';
-import { Button, Divider, Icon, Screen, Sheet, Text, colors } from '../../ui';
+import { Button, Divider, Icon, Screen, Sheet, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
+import { useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { CommunityHeading, FixtureArt, findFixturePhoto, type FixturePhotoId } from './components';
 import { communityCopy } from './strings';
 
@@ -13,7 +15,9 @@ import { communityCopy } from './strings';
  * cards, the same status badges and one evidence/limitations sheet.
  */
 export function ObservationDetailScreen() {
-  const { state } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['community'] as const);
   const t = useT();
   const params = useLocalSearchParams<{ id?: string }>();
   const [evidenceOpen, setEvidenceOpen] = useState(false);
@@ -30,8 +34,8 @@ export function ObservationDetailScreen() {
           back={<BackRow />}
         />
         <View style={styles.notFound}>
-          <Icon name="circle-help" size={24} color={colors.iconQuiet} />
-          <Text variant="body" color={colors.muted}>
+          <Icon name="circle-help" size={24} color={palette.icon} />
+          <Text variant="body" color={palette.muted}>
             {communityCopy['detail.notFoundBody']}
           </Text>
         </View>
@@ -73,7 +77,7 @@ export function ObservationDetailScreen() {
             {statusLabel}
           </Text>
         </View>
-        <Text variant="meta" color={colors.subtle} style={styles.flex}>
+        <Text variant="meta" color={palette.faint} style={styles.flex}>
           {statusBody}
         </Text>
       </View>
@@ -82,18 +86,18 @@ export function ObservationDetailScreen() {
         <FixtureArt id={photo.id as FixturePhotoId} height={180} />
       ) : (
         <View style={styles.noPhoto}>
-          <Icon name="image" size={22} color={colors.iconQuiet} />
-          <Text variant="meta" color={colors.faint}>
+          <Icon name="image" size={22} color={palette.icon} />
+          <Text variant="meta" color={palette.faint}>
             {communityCopy['detail.noPhoto']}
           </Text>
         </View>
       )}
 
       <View style={styles.summaryCard}>
-        <Text variant="label" color={colors.muted}>
+        <Text variant="label" color={palette.muted}>
           {communityCopy['detail.summary'].toUpperCase()}
         </Text>
-        <Text variant="body" color={colors.muted} style={styles.summaryBody}>
+        <Text variant="body" color={palette.muted} style={styles.summaryBody}>
           {t(item.detailKey)}
         </Text>
       </View>
@@ -117,20 +121,16 @@ export function ObservationDetailScreen() {
         style={({ pressed }) => [styles.limitsCard, pressed && styles.pressed]}
       >
         <View style={styles.limitsHead}>
-          <Icon name="shield-check" size={18} color={colors.icon} />
-          <Text variant="strong" color={colors.ink} style={styles.flex}>
+          <Icon name="shield-check" size={18} color={palette.icon} />
+          <Text variant="strong" color={palette.ink} style={styles.flex}>
             {communityCopy['detail.evidence']}
           </Text>
-          <Icon name="chevron-right" size={16} color={colors.iconFaint} />
+          <Icon name="chevron-right" size={16} color={palette.iconFaint} />
         </View>
-        <Text variant="meta" color={colors.subtle} style={styles.limitsBody}>
+        <Text variant="meta" color={palette.faint} style={styles.limitsBody}>
           {communityCopy['detail.limitsBody']}
         </Text>
       </Pressable>
-
-      <Text variant="meta" color="#6A7461" style={styles.footer}>
-        {communityCopy['detail.footer']}
-      </Text>
 
       <Sheet
         visible={evidenceOpen}
@@ -145,30 +145,30 @@ export function ObservationDetailScreen() {
           />
         }
       >
-        <Text variant="body" color={colors.muted} style={styles.sheetBody}>
+        <Text variant="body" color={palette.muted} style={styles.sheetBody}>
           {communityCopy['detail.evidenceSheetBody']}
         </Text>
         <View style={styles.sheetBlock}>
-          <Text variant="strong" color={colors.ink}>
+          <Text variant="strong" color={palette.ink}>
             {communityCopy['detail.privacyTitle']}
           </Text>
-          <Text variant="meta" color={colors.subtle} style={styles.sheetBody}>
+          <Text variant="meta" color={palette.faint} style={styles.sheetBody}>
             {communityCopy['detail.privacyBody']}
           </Text>
         </View>
         <View style={styles.sheetBlock}>
-          <Text variant="strong" color={colors.ink}>
+          <Text variant="strong" color={palette.ink}>
             {communityCopy['detail.limitsTitle']}
           </Text>
-          <Text variant="meta" color={colors.subtle} style={styles.sheetBody}>
+          <Text variant="meta" color={palette.faint} style={styles.sheetBody}>
             {communityCopy['detail.limitsBody']}
           </Text>
         </View>
         <View style={styles.sheetBlock}>
-          <Text variant="strong" color={colors.ink}>
+          <Text variant="strong" color={palette.ink}>
             {statusLabel}
           </Text>
-          <Text variant="meta" color={colors.subtle} style={styles.sheetBody}>
+          <Text variant="meta" color={palette.faint} style={styles.sheetBody}>
             {statusBody}
           </Text>
         </View>
@@ -178,6 +178,8 @@ export function ObservationDetailScreen() {
 }
 
 function BackRow() {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   const t = useT();
   return (
     <Pressable
@@ -187,8 +189,8 @@ function BackRow() {
       hitSlop={8}
       style={styles.backRow}
     >
-      <Icon name="chevron-left" size={18} color={colors.icon} strokeWidth={1.8} />
-      <Text variant="caption" color={colors.mutedSoft}>
+      <Icon name="chevron-left" size={18} color={palette.icon} strokeWidth={1.8} />
+      <Text variant="caption" color={palette.muted}>
         {communityCopy['detail.back']}
       </Text>
     </Pressable>
@@ -196,12 +198,14 @@ function BackRow() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.metaRow}>
-      <Text variant="caption" color={colors.muted}>
+      <Text variant="caption" color={palette.muted}>
         {label}
       </Text>
-      <Text variant="caption" weight="medium" color={colors.chipInk} style={styles.metaValue}>
+      <Text variant="caption" weight="medium" color={palette.chipInk} style={styles.metaValue}>
         {value}
       </Text>
     </View>
@@ -220,7 +224,7 @@ const statusBadgeInk = {
   confirmed: '#556D44',
 } as const;
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   flex: { flex: 1 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
   notFound: { gap: 10, paddingVertical: 12 },
@@ -234,17 +238,17 @@ const styles = StyleSheet.create({
   noPhoto: {
     minHeight: 96,
     borderRadius: 18,
-    backgroundColor: '#F2F5EC',
+    backgroundColor: p.surfaceSoft,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  summaryCard: { backgroundColor: '#F4F7EF', borderRadius: 18, padding: 16, gap: 8 },
+  summaryCard: { backgroundColor: p.surfaceSoft, borderRadius: 18, padding: 16, gap: 8 },
   summaryBody: { lineHeight: 20 },
-  metaCard: { backgroundColor: '#F2F5EC', borderRadius: 18, paddingHorizontal: 16, paddingVertical: 6 },
+  metaCard: { backgroundColor: p.surfaceSoft, borderRadius: 18, paddingHorizontal: 16, paddingVertical: 6 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   metaValue: { flex: 1, textAlign: 'right' },
-  limitsCard: { backgroundColor: '#EEF4E7', borderRadius: 18, padding: 16, gap: 8 },
+  limitsCard: { backgroundColor: p.surface, borderRadius: 18, padding: 16, gap: 8 },
   limitsHead: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
   limitsBody: { lineHeight: 16 },
   pressed: { opacity: 0.85 },

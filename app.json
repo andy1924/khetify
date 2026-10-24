@@ -9,7 +9,13 @@
     "android": {
       "package": "com.khetify.demo",
       "predictiveBackGestureEnabled": true,
-      "softwareKeyboardLayoutMode": "resize"
+      "softwareKeyboardLayoutMode": "resize",
+      "icon": "./assets/icon/khetify-icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon/khetify-adaptive-foreground.png",
+        "monochromeImage": "./assets/icon/khetify-monochrome.png",
+        "backgroundColor": "#F1E8D6"
+      }
     },
     "web": {
       "output": "single"
@@ -41,6 +47,7 @@
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "icon": "./assets/icon/khetify-icon.png"
   }
 }

@@ -4,11 +4,14 @@ import { router } from 'expo-router';
 import {
   formatRupees,
   selectRemainingBudget,
-  useDemo,
+  useDemoSlices,
+  useDemoActions,
   type PlanStage,
 } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Sheet, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
+import { useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { InfoStrip, PressableRow, ScreenHeading, StageIndicator } from './components';
 import { planText } from './strings';
 
@@ -16,7 +19,10 @@ const EMPTY_FEATURES = ['plan.empty.cover.1', 'plan.empty.cover.2', 'plan.empty.
 
 /** 02/04 · Farm Plan — empty first-visit state or the active six-stage plan. */
 export function PlanScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['plan', 'farm'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const [assumptionsOpen, setAssumptionsOpen] = useState(false);
   const [lockedStage, setLockedStage] = useState<string | null>(null);
@@ -28,14 +34,14 @@ export function PlanScreen() {
 
         <View style={styles.emptyBody}>
           <View style={styles.emptyCircle}>
-            <Icon name="sprout" size={42} color="#718F58" strokeWidth={1.5} />
+            <Icon name="sprout" size={42} color={palette.icon} strokeWidth={1.5} />
           </View>
           <Text style={styles.emptyHeading}>{t('plan.empty.heading')}</Text>
           <Text style={styles.emptyCopy}>{t('plan.empty.body')}</Text>
           <View style={styles.emptyPanel}>
             {EMPTY_FEATURES.map(key => (
               <View key={key} style={styles.emptyFeature}>
-                <Icon name="check" size={16} color="#52664D" strokeWidth={1.8} />
+                <Icon name="check" size={16} color={palette.icon} strokeWidth={1.8} />
                 <Text style={styles.emptyFeatureText}>{t(key)}</Text>
               </View>
             ))}
@@ -139,11 +145,11 @@ export function PlanScreen() {
                 </Text>
               </View>
               {locked ? (
-                <Icon name="lock-keyhole" size={14} color="#A1AC96" strokeWidth={1.7} />
+                <Icon name="lock-keyhole" size={14} color={palette.iconFaint} strokeWidth={1.7} />
               ) : stage.status === 'current' ? (
-                <Icon name="chevron-right" size={18} color="#52664D" strokeWidth={1.8} />
+                <Icon name="chevron-right" size={18} color={palette.icon} strokeWidth={1.8} />
               ) : (
-                <Icon name="chevron-right" size={16} color="#A1AC96" strokeWidth={1.8} />
+                <Icon name="chevron-right" size={16} color={palette.iconFaint} strokeWidth={1.8} />
               )}
             </PressableRow>
           );
@@ -214,6 +220,7 @@ export function PlanScreen() {
 }
 
 function AssumptionRow({ label, value }: { label: string; value: string }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.assumptionRow}>
       <Text style={styles.assumptionLabel}>{label}</Text>
@@ -222,7 +229,7 @@ function AssumptionRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   emptyBody: { alignItems: 'center', gap: 12, paddingTop: 8 },
   emptyCircle: {
     width: 72,
@@ -259,10 +266,10 @@ const styles = StyleSheet.create({
   emptyFeatureText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#64745A' },
   emptyActions: { gap: 12 },
 
-  budgetCard: { backgroundColor: '#E9F1DF', borderRadius: 18, padding: 16, gap: 8 },
+  budgetCard: { backgroundColor: p.surface, borderRadius: 18, padding: 16, gap: 8 },
   budgetLabel: { fontFamily: 'System', fontWeight: '600', fontSize: 10, lineHeight: 14, letterSpacing: 0.4, color: '#5e6f50' },
   budgetValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  budgetValue: { flex: 1, fontFamily: 'System', fontWeight: '600', fontSize: 32, lineHeight: 38, color: '#2E452B' },
+  budgetValue: { flex: 1, fontFamily: 'System', fontWeight: '600', fontSize: 32, lineHeight: 38, color: p.ink },
   reviseChip: {
     borderRadius: 99,
     backgroundColor: '#F4F8EE',
@@ -284,15 +291,15 @@ const styles = StyleSheet.create({
   stageRow: { minHeight: 59, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
   stageHairline: { borderBottomWidth: 0, borderBottomColor: '#E7EBE1' },
   stageCopy: { flex: 1, gap: 3 },
-  stageTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#30432B' },
-  stageCaption: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#6c7562' },
+  stageTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: p.ink },
+  stageCaption: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
 
   footerRow: { paddingVertical: 8, minHeight: 36, justifyContent: 'center' },
-  footerText: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  footerText: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
 
   sheetBody: { gap: 12 },
-  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: '#687560' },
-  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  sheetText: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 19, color: p.icon },
+  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
   assumptionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -300,7 +307,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 9,
     borderBottomWidth: 0,
-    borderBottomColor: '#E6EBE1',
+    borderBottomColor: p.borderSoft,
   },
   assumptionLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
   assumptionValue: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#526D43' },

@@ -4,7 +4,7 @@ export const toolsCopy = {
   'tools.recent': 'RECENT',
   'tools.recentNote': 'Tools you use appear here on this device.',
   'tools.grainId.sheetBody':
-    'Grain ID recognises a small set of demo fixtures. Camera capture and recognition are not connected.',
+    'Grain ID recognises a small set of sample images. Camera capture and recognition are not connected.',
 
   'tools.soil.unit': 'Unit',
   'soil.unit.none': 'No unit',
@@ -26,7 +26,7 @@ export const toolsCopy = {
   'soilResult.evidenceValue': 'Entered values',
   'soilResult.evidenceLimit': 'What this result cannot say',
   'soilResult.completeNote':
-    'All {total} values are recorded. This demo does not produce nutrient recommendations or fertiliser quantities.',
+    'All {total} values are recorded. No nutrient recommendations or fertiliser quantities are produced.',
 
   'import.selectHint': 'Unselect any value you do not want to add.',
   'import.selectedCount': '{count} of {total} values selected',
@@ -39,25 +39,25 @@ export const toolsCopy = {
   'forecast.pickerCommodity': 'Commodity',
   'forecast.pickerMarket': 'Market',
   'forecast.demoBody':
-    'A complete demo series would be required before any forecast is shown. Nothing here is a projection.',
+    'A complete price series would be required before any forecast is shown. Nothing here is a projection.',
 
-  'mandi.quantityError': 'Enter a quantity greater than zero.',
-  'mandi.costError': 'Enter an amount, or leave the field empty to keep it unknown.',
-  'mandi.marketSheet': 'Costs for {market}',
-  'mandi.recorded': 'Costs updated on this device. Figures are still demo data.',
-  'mandi.confirm': 'Update',
+  'market.quantityError': 'Enter a quantity greater than zero.',
+  'market.costError': 'Enter an amount, or leave the field empty to keep it unknown.',
+  'market.marketSheet': 'Costs for {market}',
+  'market.recorded': 'Costs updated on this device.',
+  'market.confirm': 'Update',
 
-  'photo.pick': 'Choose a demo photo',
+  'photo.pick': 'Choose a photo',
   'photo.change': 'Change photo',
-  'photo.pickerTitle': 'Demo photos',
-  'photo.pickerNote': 'Fixture artwork. Camera and gallery stay off in this demo.',
-  'photo.empty': 'Choose a demo photo to preview this tool.',
-  'photo.fixture': 'Fixture artwork · not a real capture',
+  'photo.pickerTitle': 'Photos',
+  'photo.pickerNote': 'Fixture artwork. Camera and gallery stay off.',
+  'photo.empty': 'Choose a photo to preview this tool.',
+  'photo.fixture': 'Sample artwork · not a real capture',
   'photo.limitedTitle': 'What this preview can say',
   'photo.limitedBody':
     'A photo alone is not enough for a diagnosis. This preview lists what a reviewer could inspect.',
   'photo.noDiagnosis':
-    'No diagnosis, cause or treatment is produced. Imagery and results are demo fixtures only.',
+    'No diagnosis, cause or treatment is produced.',
   'photo.unavailableBody':
     'Grain quality needs validated measurements. No image, score or grade is produced here.',
   'photo.inspect.leaf': 'Leaf blade with scattered spots',

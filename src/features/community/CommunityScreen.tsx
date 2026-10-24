@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import {
-  useDemo,
+  useDemoSlices,
+  useDemoActions,
   selectFilteredFeed,
   formatDistance,
   type CommunityFilter,
   type Observation,
 } from '../../demo';
 import { useT, type StringKey } from '../../locales';
-import { Button, Chip, Icon, Screen, Sheet, Text, colors } from '../../ui';
+import { Button, Chip, Icon, Screen, Sheet, Text } from '../../ui';
+import { useAccentPalette } from '../../ui/AccentTheme';
+import { useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { CommunityHeading, FeedPost } from './components';
 import { communityCopy } from './strings';
 
@@ -17,12 +20,12 @@ const FILTERS: { id: CommunityFilter; key: StringKey; detail: string }[] = [
   {
     id: 'nearby',
     key: 'community.filter.nearby',
-    detail: 'Reports within 10 km of the demo farm.',
+    detail: 'Reports within 10 km.',
   },
   {
     id: 'crop',
     key: 'community.filter.crop',
-    detail: 'Reports for the crop on this demo farm.',
+    detail: 'Reports for this crop.',
   },
   {
     id: 'week',
@@ -53,17 +56,29 @@ function metaLabel(item: Observation, t: ReturnType<typeof useT>): string {
 
 /** 13 · Community · demo feed — fixture posts, filters, detail and compose. */
 export function CommunityScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['community', 'farm'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const [filterSheet, setFilterSheet] = useState(false);
   const [dismissedSubmission, setDismissedSubmission] = useState<string | null>(null);
-  const feed = selectFilteredFeed(state);
+  // Derived feed is memoised so unrelated re-renders (the filter sheet, the
+  // dismissed banner) do not re-filter and rebuild every row's props.
+  const feed = useMemo(() => selectFilteredFeed(state), [state]);
   const submitted = state.community.lastSubmittedId;
   const showSuccess = Boolean(submitted) && submitted !== dismissedSubmission;
 
-  const select = (id: CommunityFilter) => {
-    actions.setCommunityFilter(id);
-  };
+  const select = useCallback(
+    (id: CommunityFilter) => {
+      actions.setCommunityFilter(id);
+    },
+    [actions],
+  );
+
+  const openPost = useCallback((id: string) => {
+    router.push(`/community/detail?id=${encodeURIComponent(id)}`);
+  }, []);
 
   return (
     <Screen>
@@ -79,7 +94,7 @@ export function CommunityScreen() {
             style={({ pressed }) => [styles.composeTarget, pressed && styles.pressed]}
           >
             <View style={styles.composeButton}>
-              <Icon name="plus" size={20} color={colors.icon} />
+              <Icon name="plus" size={20} color={palette.icon} />
             </View>
           </Pressable>
         }
@@ -111,7 +126,7 @@ export function CommunityScreen() {
           hitSlop={10}
           style={styles.filterButton}
         >
-          <Icon name="sliders-horizontal" size={16} color={colors.chipInk} />
+          <Icon name="sliders-horizontal" size={16} color={palette.chipInk} />
         </Pressable>
       </View>
 
@@ -122,18 +137,18 @@ export function CommunityScreen() {
           onPress={() => setDismissedSubmission(submitted)}
           style={styles.successBanner}
         >
-          <Icon name="circle-check" size={18} color={colors.successInk} />
-          <Text variant="meta" color={colors.successInk} style={styles.flex}>
+          <Icon name="circle-check" size={18} color={palette.ink} />
+          <Text variant="meta" color={palette.ink} style={styles.flex}>
             {t('compose.submitted')}
           </Text>
-          <Icon name="x" size={14} color={colors.successInk} />
+          <Icon name="x" size={14} color={palette.ink} />
         </Pressable>
       ) : null}
 
       {feed.length === 0 ? (
         <View style={styles.empty}>
-          <Icon name="filter" size={22} color={colors.iconQuiet} />
-          <Text variant="body" color={colors.muted} style={styles.emptyText}>
+          <Icon name="filter" size={22} color={palette.icon} />
+          <Text variant="body" color={palette.muted} style={styles.emptyText}>
             {t('community.empty')}
           </Text>
           <Button
@@ -149,18 +164,19 @@ export function CommunityScreen() {
           {feed.map(item => (
             <FeedPost
               key={item.id}
+              id={item.id}
               time={metaLabel(item, t)}
               title={t(item.titleKey)}
               detail={t(item.detailKey)}
               status={item.status}
               statusLabel={t(STATUS_LABEL[item.status])}
-              onPress={() => router.push(`/community/detail?id=${encodeURIComponent(item.id)}`)}
+              onOpen={openPost}
             />
           ))}
         </View>
       )}
 
-      <Text variant="meta" color="#6A7461" style={styles.footer}>
+      <Text variant="meta" color={palette.icon} style={styles.footer}>
         {t('community.footer')}
       </Text>
 
@@ -176,9 +192,6 @@ export function CommunityScreen() {
           />
         }
       >
-        <Text variant="meta" color={colors.faint} style={styles.sheetNote}>
-          {communityCopy['community.filterNote']}
-        </Text>
         <View style={styles.sheetList}>
           {FILTERS.map(filter => {
             const selected = state.community.filter === filter.id;
@@ -192,15 +205,15 @@ export function CommunityScreen() {
                 style={[styles.sheetRow, selected && styles.sheetRowSelected]}
               >
                 <View style={styles.sheetRowText}>
-                  <Text variant="strong" color={colors.ink}>
+                  <Text variant="strong" color={palette.ink}>
                     {t(filter.key)}
                   </Text>
-                  <Text variant="meta" color={colors.subtle}>
+                  <Text variant="meta" color={palette.faint}>
                     {filter.detail}
                   </Text>
                 </View>
                 <View style={[styles.dot, selected && styles.dotSelected]}>
-                  {selected ? <Icon name="check" size={13} color={colors.ink} strokeWidth={2} /> : null}
+                  {selected ? <Icon name="check" size={13} color={palette.ink} strokeWidth={2} /> : null}
                 </View>
               </Pressable>
             );
@@ -211,7 +224,7 @@ export function CommunityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   flex: { flex: 1 },
   composeTarget: { width: 48, height: 48, alignItems: 'flex-end', justifyContent: 'center' },
   composeButton: {
@@ -231,7 +244,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 16,
-    backgroundColor: '#E9F1DF',
+    backgroundColor: p.surface,
   },
   filterRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 48 },
   chipTarget: { minHeight: 48, justifyContent: 'center' },
@@ -259,19 +272,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 16,
-    backgroundColor: '#F2F5EC',
+    backgroundColor: p.surfaceSoft,
   },
-  sheetRowSelected: { backgroundColor: '#E8F0DE' },
+  sheetRowSelected: { backgroundColor: p.surface },
   sheetRowText: { flex: 1, gap: 3 },
   dot: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: '#D6DFD0',
-    backgroundColor: '#FEFFFC',
+    borderColor: p.border,
+    backgroundColor: p.page,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dotSelected: { backgroundColor: '#C4DEA9', borderColor: '#C4DEA9' },
+  dotSelected: { backgroundColor: p.active, borderColor: p.active },
 });

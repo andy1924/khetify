@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
-import { useDemo } from '../../demo';
-import { Button, Card, colors, Field, Header, Icon, Notice, Screen, Text } from '../../ui';
+import { useDemoSlices } from '../../demo';
+import { Button, Card, Field, Header, Icon, Notice, Screen, Text } from '../../ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { BoundaryMap } from './BoundaryMap';
 import { apiBase, validDate, type Point, type RegisteredField } from './satelliteProvider';
 
@@ -9,7 +10,9 @@ const steps = ['Find field', 'Draw boundary', 'Field details'];
 type Place = { id: string; label: string; lat: number; lon: number };
 
 export function FieldSetup({ onSaved, onCancel }: { onSaved: (field: RegisteredField) => void; onCancel?: () => void }) {
-  const { state } = useDemo();
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
+  const state = useDemoSlices(['deviceLocation', 'onboarding', 'farm'] as const);
   const [step, setStep] = useState(0);
   const [query, setQuery] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
@@ -74,13 +77,13 @@ export function FieldSetup({ onSaved, onCancel }: { onSaved: (field: RegisteredF
     <Button title={step === 1 ? 'Use this boundary' : 'Save & view my field'} onPress={next} disabled={step === 1 ? polygon.length < 3 || !mapAvailable : !name.trim() || !crop.trim()} />
   </View> : undefined}>
     <View style={styles.topRow}>
-      <Text variant="label" color={colors.accentDeep}>YOUR FIELD, FROM ABOVE</Text>
+      <Text variant="label" color={palette.deep}>YOUR FIELD, FROM ABOVE</Text>
       {onCancel ? <Button title="Cancel" variant="ghost" fullWidth={false} trailingArrow={false} onPress={onCancel} /> : null}
     </View>
     <View style={styles.steps} accessibilityLabel={`Step ${step + 1} of 3: ${steps[step]}`}>
       {steps.map((label, index) => <View key={label} style={styles.step}>
         <View style={[styles.stepLine, index <= step && styles.stepLineActive]} />
-        <Text variant="meta" color={index <= step ? colors.ink : colors.muted}>{index + 1}. {label}</Text>
+        <Text variant="meta" color={index <= step ? palette.ink : palette.muted}>{index + 1}. {label}</Text>
       </View>)}
     </View>
     <View style={styles.section}>
@@ -120,7 +123,7 @@ export function FieldSetup({ onSaved, onCancel }: { onSaved: (field: RegisteredF
     </> : null}
     {step === 2 ? <>
       <Card tone="soft" padding={16} gap={8}>
-        <View style={styles.inline}><Icon name="circle-check" color={colors.accentDeep} size={20} /><Text variant="strong">Boundary ready</Text></View>
+        <View style={styles.inline}><Icon name="circle-check" color={palette.deep} size={20} /><Text variant="strong">Boundary ready</Text></View>
         <Text variant="caption">{polygon.length} corners · {center?.latitude.toFixed(4)}, {center?.longitude.toFixed(4)}</Text>
       </Card>
       <Field label="Field name" placeholder="e.g. North field" value={name} onChangeText={setName} maxLength={120} />
@@ -132,15 +135,15 @@ export function FieldSetup({ onSaved, onCancel }: { onSaved: (field: RegisteredF
   </Screen>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   steps: { flexDirection: 'row', gap: 10 },
   step: { flex: 1, gap: 8 },
-  stepLine: { height: 4, borderRadius: 4, backgroundColor: colors.border },
-  stepLineActive: { backgroundColor: colors.accentDeep },
+  stepLine: { height: 4, borderRadius: 4, backgroundColor: p.border },
+  stepLineActive: { backgroundColor: p.deep },
   section: { gap: 12 },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  place: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, padding: 14, borderWidth: 1, borderColor: colors.border, borderRadius: 16 },
+  place: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, padding: 14, borderWidth: 1, borderColor: p.border, borderRadius: 16 },
   placeLabel: { flex: 1 },
   tip: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   footer: { gap: 12, paddingBottom: 8 },

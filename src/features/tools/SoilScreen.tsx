@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { useDemo } from '../../demo';
+import { useDemoSlices, useDemoActions } from '../../demo';
 import { useT } from '../../locales';
 import { formatDateLabel, SOIL_PARAMS, type SoilParamKey } from '../../demo';
 import { Button, Field, Icon, Screen, Text } from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { Banner, InfoStrip, ScreenHeading, Sheet } from './components';
 import { toolCopy } from './strings';
 import { useToolRecorder } from './history';
@@ -41,10 +42,13 @@ type Phase = 'idle' | 'loading' | 'error';
 
 /** 08 · Soil test input — editable values, optional fields, validation, local result. */
 export function SoilScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['soil'] as const);
+  const actions = useDemoActions();
   const recordToolUse = useToolRecorder();
   const t = useT();
-  const units = { ...DEFAULT_UNITS, ...state.soil.units };
+  const units = useMemo(() => ({ ...DEFAULT_UNITS, ...state.soil.units }), [state.soil.units]);
   const [unitTarget, setUnitTarget] = useState<SoilParamKey | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [cropDraft, setCropDraft] = useState(state.soil.crop);
@@ -114,6 +118,19 @@ export function SoilScreen() {
     setEditError(null);
   };
 
+  // Stable per-parameter handlers so the 12 value fields can be memoised: typing
+  // in one field re-renders only that field, not the other eleven TextInputs.
+  const handlers = useMemo(() => {
+    const map = {} as Record<SoilParamKey, { change: (text: string) => void; pick: () => void }>;
+    for (const key of SOIL_PARAMS) {
+      map[key] = {
+        change: text => actions.setSoilValue(key, text),
+        pick: () => setUnitTarget(key),
+      };
+    }
+    return map;
+  }, [actions]);
+
   const unitLabel = (key: SoilParamKey) => units[key] ?? '';
   /** Carbon's input label carries the currently selected unit, never a hardcoded one. */
   const inputLabel = (key: SoilParamKey) => {
@@ -144,7 +161,7 @@ export function SoilScreen() {
           style={styles.editButton}
         >
           <Text style={styles.editLabel}>{t('soil.edit')}</Text>
-          <Icon name="pencil" size={15} color="#657360" />
+          <Icon name="pencil" size={15} color={palette.icon} />
         </Pressable>
       </View>
 
@@ -157,8 +174,8 @@ export function SoilScreen() {
             value={state.soil.values[key] ?? ''}
             unit={unitLabel(key)}
             unitOptions={UNIT_OPTIONS[key]}
-            onChangeText={text => actions.setSoilValue(key, text)}
-            onPickUnit={() => setUnitTarget(key)}
+            onChangeText={handlers[key].change}
+            onPickUnit={handlers[key].pick}
             invalid={showErrors && invalid.includes(key)}
             errorText={t('soil.error.value')}
           />
@@ -185,7 +202,7 @@ export function SoilScreen() {
         <Icon
           name="chevron-down"
           size={20}
-          color="#657360"
+          color={palette.icon}
         />
       </Pressable>
 
@@ -199,8 +216,8 @@ export function SoilScreen() {
               value={state.soil.values[key] ?? ''}
               unit={unitLabel(key)}
               unitOptions={UNIT_OPTIONS[key]}
-              onChangeText={text => actions.setSoilValue(key, text)}
-              onPickUnit={() => setUnitTarget(key)}
+              onChangeText={handlers[key].change}
+              onPickUnit={handlers[key].pick}
               invalid={showErrors && invalid.includes(key)}
               errorText={t('soil.error.value')}
               compact
@@ -243,8 +260,6 @@ export function SoilScreen() {
           />
         ) : null}
       </View>
-
-      <Text style={styles.footer}>{t('soil.footer')}</Text>
 
       <Sheet
         visible={editOpen}
@@ -294,7 +309,7 @@ export function SoilScreen() {
                 style={[styles.unitRow, selected && styles.unitRowSelected]}
               >
                 <Text style={styles.unitRowLabel}>{option}</Text>
-                {selected ? <Icon name="check" size={18} color="#3D5C30" /> : null}
+                {selected ? <Icon name="check" size={18} color={palette.deep} /> : null}
               </Pressable>
             );
           })
@@ -304,7 +319,8 @@ export function SoilScreen() {
   );
 }
 
-function SoilValueField({
+/** Memoised: only the edited parameter's value, unit and error change. */
+const SoilValueField = React.memo(function SoilValueField({
   label,
   value,
   unit,
@@ -326,6 +342,8 @@ function SoilValueField({
   errorText: string;
   compact?: boolean;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <View>
       <View style={[styles.valueCard, compact && styles.valueCardCompact]}>
@@ -347,7 +365,7 @@ function SoilValueField({
                 style={styles.unitButton}
               >
                 <Text style={styles.unitButtonLabel}>{unit || '—'}</Text>
-                <Icon name="chevron-down" size={13} color="#657360" />
+                <Icon name="chevron-down" size={13} color={palette.icon} />
               </Pressable>
             ) : null}
           </View>
@@ -356,7 +374,7 @@ function SoilValueField({
       {invalid ? <Text style={styles.fieldError}>{errorText}</Text> : null}
     </View>
   );
-}
+});
 
 function TextInputValue({
   value,
@@ -369,6 +387,8 @@ function TextInputValue({
   accessibilityLabel: string;
   large: boolean;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <TextInput
       value={value}
@@ -376,14 +396,14 @@ function TextInputValue({
       keyboardType="decimal-pad"
       accessibilityLabel={accessibilityLabel}
       placeholder="—"
-      placeholderTextColor="#A3AF99"
-      selectionColor="#3D5C30"
+      placeholderTextColor={palette.iconFaint}
+      selectionColor={palette.deep}
       style={large ? styles.inputLarge : styles.inputSmall}
     />
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -392,25 +412,25 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 16,
     borderBottomWidth: 0,
-    borderBottomColor: '#DFE6D8',
+    borderBottomColor: p.border,
     minHeight: 48,
   },
-  context: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#657360' },
+  context: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: p.muted },
   editButton: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingLeft: 8 },
-  editLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#263B29' },
+  editLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: p.ink },
 
   fields: { gap: 16 },
   valueCard: {
     minHeight: 78,
     borderRadius: 12,
-    backgroundColor: '#F6F8F3',
+    backgroundColor: p.surfaceSoft,
     paddingHorizontal: 14,
     paddingVertical: 10,
     justifyContent: 'center',
   },
   valueCardCompact: { minHeight: 64 },
   valueLabels: { gap: 4 },
-  valueLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 16, color: '#657360' },
+  valueLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 16, color: p.muted },
   valueRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   inputLarge: {
     flex: 1,
@@ -419,7 +439,7 @@ const styles = StyleSheet.create({
     fontFamily: 'System', fontWeight: '500',
     fontSize: 22,
     lineHeight: 28,
-    color: '#263B29',
+    color: p.ink,
     includeFontPadding: false,
   },
   inputSmall: {
@@ -429,7 +449,7 @@ const styles = StyleSheet.create({
     fontFamily: 'System', fontWeight: '500',
     fontSize: 16,
     lineHeight: 22,
-    color: '#263B29',
+    color: p.ink,
     includeFontPadding: false,
   },
   unitButton: {
@@ -439,9 +459,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: '#EAF0E2',
+    backgroundColor: p.chip,
   },
-  unitButtonLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 14, color: '#4A693D' },
+  unitButtonLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 14, color: p.deep },
   fieldError: {
     marginTop: 6,
     fontFamily: 'System', fontWeight: '400',
@@ -458,17 +478,16 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderTopWidth: 0,
     borderBottomWidth: 0,
-    borderColor: '#DFE6D8',
+    borderColor: p.border,
   },
   additionalCopy: { flex: 1, gap: 5 },
-  additionalTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 20, color: '#263B29' },
-  additionalSub: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 16, color: '#657360' },
+  additionalTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 15, lineHeight: 20, color: p.ink },
+  additionalSub: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 16, color: p.muted },
 
   actions: { gap: 12 },
-  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#657360' },
   emptyHint: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#77694b' },
 
-  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#657360' },
+  sheetNote: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
   unitRow: {
     minHeight: 48,
     flexDirection: 'row',
@@ -476,8 +495,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#F4F7EF',
+    backgroundColor: p.surfaceSoft,
   },
-  unitRowSelected: { backgroundColor: '#E4EED8' },
-  unitRowLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#263B29' },
+  unitRowSelected: { backgroundColor: p.active },
+  unitRowLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: p.ink },
 });

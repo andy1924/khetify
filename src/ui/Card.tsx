@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors, radii } from './tokens';
+import { useAccentPalette, type AccentPalette } from './AccentTheme';
 
 export type CardTone = 'surface' | 'plain' | 'soft' | 'muted' | 'tint' | 'translucent' | 'warning' | 'info';
 
@@ -23,16 +24,23 @@ export type CardProps = {
   testID?: string;
 };
 
-const tones: Record<CardTone, string> = {
-  surface: colors.surface,
-  plain: colors.surfacePlain,
-  soft: colors.surfaceSoft,
-  muted: colors.surfaceMuted,
-  tint: colors.surfaceTint,
-  translucent: colors.surfaceAlt,
-  warning: colors.warningBg,
-  info: colors.infoBg,
-};
+/**
+ * Accent-aware tones. Everything that reads as "the app's green surface" is
+ * remixed from the active accent; warning/info keep their semantic colour.
+ */
+function accentTones(p: AccentPalette) {
+  const tones: Record<CardTone, string> = {
+    surface: p.surface,
+    plain: p.page,
+    soft: p.surfaceSoft,
+    muted: p.surfaceSoft,
+    tint: p.surface,
+    translucent: p.surfaceTile,
+    warning: colors.warningBg,
+    info: p.surfaceSoft,
+  };
+  return tones;
+}
 
 /** Quiet surface container: 20 radius by default, no shadow, no border. */
 export function Card({
@@ -46,9 +54,11 @@ export function Card({
   accessibilityLabel,
   testID,
 }: CardProps) {
+  const palette = useAccentPalette();
+  const background = accentTones(palette)[tone];
   const base: StyleProp<ViewStyle> = [
     styles.base,
-    { backgroundColor: tones[tone], padding, gap, borderRadius: radius },
+    { backgroundColor: background, padding, gap, borderRadius: radius },
     style,
   ];
 
