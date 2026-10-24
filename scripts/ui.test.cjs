@@ -94,3 +94,21 @@ test('Expo Go resolves development localhost to the LAN host without changing pr
   assert.equal(nativeModule.exports.resolveApiUrl('http://localhost:8787', 'ios', '192.168.1.10:8081', true), 'http://192.168.1.10:8787');
   assert.equal(nativeModule.exports.resolveApiUrl('http://localhost:8787', 'ios', 'exp://192.168.1.10:8081', true), 'http://192.168.1.10:8787');
 });
+
+test('client rejects out-of-range NDVI and sends an explicit refresh flag', async () => {
+  const source = fs.readFileSync(path.join(__dirname, '../src/features/tools/satelliteProvider.ts'), 'utf8');
+  const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const providerModule = { exports: {} };
+  let payload;
+  vm.runInNewContext(code, { exports: providerModule.exports, module: providerModule, AbortSignal, require: name => {
+    if (name === '../../lib/api') return { apiBase: 'http://test.local', connectionError: () => 'offline' };
+    throw new Error(`Unexpected import: ${name}`);
+  }, fetch: async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return { ok: true, json: async () => ({ status: 'ready', observations: [1.3, -1.1, NaN, .64, 0, -1, 1, null].map(ndvi => ({ ndvi, confidence: 'moderate' })) }) };
+  } });
+  const data = await providerModule.exports.fieldMonitoringProvider.getObservations([], true);
+  assert.equal(payload.refresh, true);
+  assert.deepEqual(Array.from(data.observations, o => o.ndvi), [null, null, null, .64, 0, -1, 1, null]);
+  assert.equal(data.observations[0].confidence, 'low');
+});

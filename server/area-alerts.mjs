@@ -34,7 +34,17 @@ export function weatherAlerts(data, now) {
         occurredAt: new Date(time).toISOString(), detail: `${value.toFixed(1)} ${rule.unit}${rule.id === 'rain' ? ' daily total' : ''}. Historical model estimate, not a verified damage report.`, source: WEATHER_SOURCE });
     }
   }
-  return { warnings, events: events.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)) };
+  const hours = data.hourly.time.map((time, i) => ({ time: time * 1000, temperature: data.hourly.temperature_2m[i], rain: data.hourly.precipitation[i], gust: data.hourly.wind_gusts_10m[i] }))
+    .filter(row => row.time >= Math.floor(now / 3600000) * 3600000 && row.time < Math.floor(now / 3600000) * 3600000 + DAY);
+  const temperatures = hours.map(h => h.temperature).filter(Number.isFinite), gusts = hours.map(h => h.gust).filter(Number.isFinite);
+  const rains = hours.map(h => h.rain).filter(Number.isFinite);
+  const outlook = hours.length ? { validFrom: new Date(hours[0].time).toISOString(), validUntil: new Date(hours.at(-1).time + 3600000).toISOString(),
+    temperature: Number.isFinite(hours[0].temperature) ? hours[0].temperature : null,
+    minTemperature: temperatures.length ? Math.min(...temperatures) : null, maxTemperature: temperatures.length ? Math.max(...temperatures) : null,
+    maxGust: gusts.length ? Math.max(...gusts) : null,
+    rainTotal: rains.length === hours.length ? Math.round(rains.reduce((sum, n) => sum + n, 0) * 10) / 10 : null,
+    hours: hours.length, source: WEATHER_SOURCE } : null;
+  return { warnings, outlook, events: events.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)) };
 }
 
 export function publishedIncidents(records, origin, radiusKm, now) {
@@ -68,7 +78,7 @@ export function createAreaAlerts({ request = (...args) => fetch(...args), read =
     const key = `${latitude}:${longitude}`;
     const weather = async () => {
       const existing = cache.get(key);
-      if (existing && now - existing.at < 10 * 60000) return existing.data;
+      if (params.get('refresh') !== 'true' && existing && now - existing.at < 10 * 60000) return existing;
       const query = new URLSearchParams({ latitude: String(latitude), longitude: String(longitude),
         hourly: 'temperature_2m,precipitation,wind_gusts_10m', daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,wind_gusts_10m_max',
         past_days: '7', forecast_days: '2', timezone: 'UTC', timeformat: 'unixtime', wind_speed_unit: 'kmh', temperature_unit: 'celsius', precipitation_unit: 'mm' });
@@ -77,20 +87,26 @@ export function createAreaAlerts({ request = (...args) => fetch(...args), read =
       const data = await response.json();
       // A malformed response is not evidence that there are no warnings.
       for (const [section, fields] of [['hourly', ['temperature_2m', 'precipitation', 'wind_gusts_10m']], ['daily', ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'wind_gusts_10m_max']]]) {
-        if (!Array.isArray(data[section]?.time) || !data[section].time.length || fields.some(field => !Array.isArray(data[section][field]) || data[section][field].length !== data[section].time.length || data[section][field].some(v => !Number.isFinite(v)))) throw new Error('Incomplete weather data.');
+        if (!Array.isArray(data[section]?.time) || !data[section].time.length || data[section].time.some(v => !Number.isFinite(v)) || fields.some(field => !Array.isArray(data[section][field]) || data[section][field].length !== data[section].time.length || data[section][field].some(v => v !== null && !Number.isFinite(v)))) throw new Error('Incomplete weather data.');
       }
+      const upcoming = data.hourly.time.map((time, i) => ({ time: time * 1000, i })).filter(row => row.time >= now - 3600000 && row.time <= now + DAY);
+      if (!upcoming.length || ['temperature_2m', 'precipitation', 'wind_gusts_10m'].some(field => !upcoming.some(row => Number.isFinite(data.hourly[field][row.i])))) throw new Error('Current forecast coverage is missing.');
       if (cache.size >= 200) cache.delete(cache.keys().next().value);
-      cache.set(key, { at: now, data });
-      return data;
+      const entry = { at: now, data };
+      cache.set(key, entry);
+      return entry;
     };
     const [forecast, feed] = await Promise.allSettled([weather(), read('area-incidents.json', null)]);
-    const modeled = forecast.status === 'fulfilled' ? weatherAlerts(forecast.value, now) : { warnings: [], events: [] };
+    const modeled = forecast.status === 'fulfilled' ? weatherAlerts(forecast.value.data, now) : { warnings: [], events: [], outlook: null };
+    const incomplete = forecast.status === 'fulfilled' && ['temperature_2m', 'precipitation', 'wind_gusts_10m'].some(field => forecast.value.data.hourly.time.some((time, i) => time * 1000 >= now - 3600000 && time * 1000 <= now + DAY && !Number.isFinite(forecast.value.data.hourly[field][i])));
     const records = feed.status === 'fulfilled' ? feed.value : null;
     const incidents = publishedIncidents(records, origin, radiusKm, now);
-    return { checkedAt: new Date(now).toISOString(), radiusKm,
-      weatherStatus: forecast.status === 'fulfilled' ? 'ready' : 'unavailable', incidentStatus: Array.isArray(records) ? 'ready' : 'unconfigured',
+    return { checkedAt: new Date(now).toISOString(), radiusKm, outlook: modeled.outlook,
+      weatherFetchedAt: forecast.status === 'fulfilled' ? new Date(forecast.value.at).toISOString() : null,
+      thresholds: 'Rain ≥10 mm/hour, gusts ≥50 km/h, temperature ≥40°C or ≤2°C. Local risks can occur below these app thresholds.',
+      weatherStatus: forecast.status === 'fulfilled' ? incomplete ? 'partial' : 'ready' : 'unavailable', incidentStatus: Array.isArray(records) ? 'ready' : 'unconfigured',
       warnings: [...incidents.warnings, ...modeled.warnings], events: [...incidents.events, ...modeled.events].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)),
-      attribution: 'Weather data by Open-Meteo (CC BY 4.0). Advisories use app thresholds; they are not official IMD alerts. Approximate area only; no location is stored.' };
+      attribution: 'Weather data by Open-Meteo (CC BY 4.0). Advisories use app thresholds; they are not official IMD alerts. Rounded areas are cached in memory only, not saved to disk.' };
   };
 }
 export const areaAlerts = createAreaAlerts();

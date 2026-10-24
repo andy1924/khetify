@@ -1,5 +1,6 @@
 import { copernicusProvider } from './satellite.mjs';
 import { areaAlerts } from './area-alerts.mjs';
+import { plantHealth, reviewedLabels } from './plant-health.mjs';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { SOURCE, compare, forecast, keyOf, matches } from './prices.mjs';
@@ -123,7 +124,7 @@ function comparisonInput(body) {
   return { query, origin, radius, quantity: body.quantity, unit, costs, locations: locations.map(loc => ({ ...loc, verifiedOn: new Date().toISOString().slice(0, 10), basis: 'Caller-confirmed OSM pin; not independently verified' })) };
 }
 
-export function createPriceServer({ recognize = identifyCrop, locate = lookupPlace, alerts = areaAlerts } = {}) {
+export function createPriceServer({ recognize = identifyCrop, locate = lookupPlace, alerts = areaAlerts, assessPlant = plantHealth } = {}) {
   const rate = new Map();
   const tokens = analysisTokens();
   let activePhotos = 0;
@@ -147,7 +148,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
         if (req.method !== 'GET') return send(405, { error: 'Use GET.' });
         return send(200, await alerts(params));
       }
-      const posts = ['/api/compare', '/api/photo-prices', '/api/grain-screening', '/api/grain-screening/review', '/api/grain-screening/prices', '/api/grain-history', '/api/grain-history/session', '/api/field-observations'];
+      const posts = ['/api/compare', '/api/photo-prices', '/api/plant-health', '/api/grain-screening', '/api/grain-screening/review', '/api/grain-screening/prices', '/api/grain-history', '/api/grain-history/session', '/api/field-observations'];
       const historyPath = url.pathname === '/api/grain-history' || /^\/api\/grain-history\/[a-f0-9-]{36}$/.test(url.pathname);
       if (req.method !== 'GET' && !(req.method === 'POST' && posts.includes(url.pathname)) && !(req.method === 'DELETE' && historyPath)) return send(405, { error: 'Use a supported read, screening or history endpoint.' });
       if (url.pathname === '/api/grain-history/session') {
@@ -180,7 +181,19 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       }
       if (url.pathname === '/api/field-observations') {
         if (req.method !== 'POST') return send(405, { error: 'Use POST.' });
-        return send(200, await copernicusProvider.getObservations((await readBody(req)).polygon));
+        const body = await readBody(req);
+        if (body.refresh !== undefined && typeof body.refresh !== 'boolean') throw fail('refresh must be true or false.');
+        return send(200, await copernicusProvider.getObservations(body.polygon, { refresh: body.refresh === true }));
+      }
+      if (url.pathname === '/api/plant-health/capabilities') return send(200, { configured: Boolean(process.env.OPENAI_API_KEY && (process.env.PLANT_HEALTH_MODEL || process.env.CROP_VISION_MODEL)), maxPhotoBytes: 5 * 1024 * 1024, reviewedLabelCount: (await reviewedLabels()).length });
+      if (url.pathname === '/api/plant-health') {
+        if (req.method !== 'POST') return send(405, { error: 'Use POST with a plant photo and consent.' });
+        counter.plantCount = (counter.plantCount ?? 0) + 1;
+        if (counter.plantCount > 3) return send(429, { error: 'Plant photo limit reached. Wait a minute before trying again.' });
+        if (activePhotos >= 2) return send(429, { error: 'Photo processing is busy. Please retry shortly.' });
+        activePhotos++;
+        try { return send(200, await assessPlant(await readBody(req, PHOTO_BODY_LIMIT))); }
+        finally { activePhotos--; }
       }
       if (url.pathname === '/api/photo-prices/capabilities') return send(200, { supportedCrops: await cropScope(), priceCrops: await marketCropScope(), manualPriceLookupWithoutPhoto: true, recognitionConfigured: Boolean(process.env.OPENAI_API_KEY && process.env.CROP_VISION_MODEL),
         maxPhotoBytes: 5 * 1024 * 1024, acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'], farmerConfirmationRequired: true, limitations: PHOTO_LIMITATIONS });

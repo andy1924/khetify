@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, View } from 'react-native';
+import Svg, { Polygon } from 'react-native-svg';
+import { router } from 'expo-router';
 import { useDemo } from '../../demo';
 import { Button, Card, Chip, colors, Header, Icon, Notice, Screen, Text } from '../../ui';
 import { FieldSetup } from './FieldSetup';
@@ -22,12 +24,12 @@ export function SatelliteScreen() {
   const request = useRef(0);
   const fieldId = active?.id;
   const polygon = active?.polygon;
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (force = false) => {
     if (!polygon) return;
     const id = ++request.current;
     setCheckedAt(Date.now()); setLoading(true); setError(''); setFailedImage(null); setResult(null);
     try {
-      const data = await fieldMonitoringProvider.getObservations(polygon);
+      const data = await fieldMonitoringProvider.getObservations(polygon, force);
       if (id === request.current) setResult(data);
     } catch (failure) { if (id === request.current) setError(failure instanceof Error ? failure.message : 'Your images could not load. Check your connection and try again.'); }
     finally { if (id === request.current) setLoading(false); }
@@ -47,6 +49,8 @@ export function SatelliteScreen() {
   const clear = observations.filter(o => o.ndvi !== null && o.confidence === 'moderate' && checkedAt - Date.parse(o.capturedAt) <= 14 * 86400000);
   const latest = clear[0], previous = clear[1];
   const preview = observations.find(o => o.imageUrl);
+  const bounds = preview?.imageBounds;
+  const outline = bounds && active ? active.polygon.map(p => `${100 * (p.longitude - bounds.west) / (bounds.east - bounds.west)},${100 * (bounds.north - p.latitude) / (bounds.north - bounds.south)}`).join(' ') : '';
   return <Screen key={active?.id} gap={24}>
     <View style={styles.topRow}>
       <View style={styles.heading}><Text variant="label" color={colors.accentDeep}>FIELD MONITORING</Text><Text variant="heading">Your fields</Text></View>
@@ -61,7 +65,10 @@ export function SatelliteScreen() {
     {active ? <>
       <View style={styles.heading}><Header title={active.name} /><Text variant="caption">{`${active.crop}${active.sowingDate ? ` · Sown ${captureDate(active.sowingDate)}` : ''}`}</Text></View>
       <View style={styles.imageCard}>
-        {preview?.imageUrl && failedImage !== preview.imageUrl ? <Image source={{ uri: preview.imageUrl }} accessibilityLabel={`Satellite image of ${active.name}, ${captureDate(preview.capturedAt)}`} style={styles.image} resizeMode="contain" onError={() => setFailedImage(preview.imageUrl!)} /> : <View style={styles.imageEmpty}>
+        {preview?.imageUrl && failedImage !== preview.imageUrl ? <View style={styles.imageFrame}>
+          <Image source={{ uri: preview.imageUrl }} accessibilityLabel={`Satellite image of ${active.name}, ${captureDate(preview.capturedAt)}`} style={StyleSheet.absoluteFill} resizeMode="stretch" onError={() => setFailedImage(preview.imageUrl!)} />
+          {outline ? <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill} pointerEvents="none"><Polygon points={outline} fill="rgba(220,255,180,0.08)" stroke="#DFFF9B" strokeWidth="0.6" /></Svg> : null}
+        </View> : <View style={styles.imageEmpty}>
           {loading ? <ActivityIndicator size="large" color={colors.accentDeep} /> : <Icon name="satellite" size={36} color={colors.accentDeep} />}
           <Text variant="subtitle" align="center">{loading ? 'Finding your latest view…' : failedImage ? 'The preview could not display' : error ? 'Let’s reconnect' : 'Your next view starts here'}</Text>
           <Text variant="caption" align="center">{loading ? 'Checking recent Sentinel-2 captures for this field.' : failedImage ? 'Refresh to reload the image. Available vegetation readings are still shown below.' : 'Refresh to check for a recent satellite image.'}</Text>
@@ -71,7 +78,10 @@ export function SatelliteScreen() {
           <Icon name="satellite" size={20} color={colors.accentDeep} />
         </View>
       </View>
-      <Button title="Refresh images" variant="outline" icon="refresh-cw" loading={loading} onPress={refresh} />
+      <Text variant="meta">Field outline over a wider, contrast-adjusted view. Smoothing improves presentation, not the original 10 m detail. NDVI uses unaltered bands.</Text>
+      {result?.fetchedAt ? <Text variant="meta">{result.cached ? 'Cached view' : 'Fetched'} · {new Date(result.fetchedAt).toLocaleTimeString()} · cached for 15 minutes. Capture dates stay unchanged.</Text> : null}
+      <Button title="Refresh images" variant="outline" icon="refresh-cw" loading={loading} onPress={() => void refresh(true)} />
+      <Button title="Check a plant photo" icon="camera" variant="secondary" onPress={() => router.push('/tools/photo?tool=cropPhoto')} />
       {error ? <Notice tone="warning" title="Connection interrupted">{error}</Notice> : null}
       {result?.status === 'unconfigured' ? <Notice title="Imagery is not connected" tone="info">Your field is saved for this session. Connect the imagery provider to load images and vegetation readings.</Notice> : null}
       {result?.status === 'no-coverage' ? <Notice title="No recent captures" tone="info">No images were found for this boundary in the last 30 days. You can check again later.</Notice> : null}
@@ -82,12 +92,13 @@ export function SatelliteScreen() {
             <View style={styles.metricRow}><Text style={styles.metric}>{latest.ndvi.toFixed(2)}</Text><View style={styles.heading}><Text variant="strong">Vegetation index</Text><Text variant="caption">NDVI · {captureDate(latest.capturedAt)}</Text></View></View>
             <Text variant="caption">{previous?.ndvi != null ? `Previous clear reading: ${previous.ndvi.toFixed(2)} on ${captureDate(previous.capturedAt)}.` : 'A second recent clear capture will let you compare readings.'}</Text>
           </> : <Text>Recent captures are cloudy, too old, or have too few clear field pixels for a reliable reading.</Text>}
-          <Text variant="meta">Vegetation readings vary with crop stage and soil. They do not diagnose pests or disease.</Text>
+          <Text variant="meta">NDVI ranges from −1 to 1. Buildings, water, soil and urban greenery can affect an area average. It is not proof of farmland, crop health, pests or disease.</Text>
         </Card>
         <View style={styles.heading}><Text variant="subtitle">Recent captures</Text><Text variant="caption">Quality and coverage, at a glance.</Text></View>
         {observations.map(observation => <Card key={observation.capturedAt} tone="soft" padding={16} gap={10}>
           <View style={styles.topRow}><Text variant="strong">{captureDate(observation.capturedAt)}</Text><Chip label={observation.ndvi !== null ? `NDVI ${observation.ndvi.toFixed(2)}` : 'Limited reading'} tone={observation.ndvi !== null ? 'success' : 'limited'} /></View>
           <Text variant="caption">{`Cloud / unusable: ${observation.cloudPercent === null ? 'Unknown' : `${Math.round(observation.cloudPercent)}%`}   ·   Field coverage: ${observation.fieldCoveragePercent === null ? 'Unknown' : `${Math.round(observation.fieldCoveragePercent)}%`}`}</Text>
+          <Text variant="meta">{observation.summary}</Text>
           {checkedAt - Date.parse(observation.capturedAt) > 14 * 86400000 ? <Text variant="meta">Older than 14 days · use a recent capture for comparison.</Text> : null}
           {observation.imageError ? <Text variant="caption">Preview unavailable. Refresh to retry; available readings are shown above.</Text> : null}
         </Card>)}
@@ -108,7 +119,7 @@ const styles = StyleSheet.create({
   heading: { gap: 5, flexShrink: 1 },
   fieldTabs: { gap: 8, paddingVertical: 4 },
   imageCard: { borderRadius: 24, overflow: 'hidden', backgroundColor: '#E6EDE0', borderWidth: 1, borderColor: colors.border },
-  image: { width: '100%', aspectRatio: 1, maxHeight: 360 },
+  imageFrame: { width: '100%', maxWidth: 520, aspectRatio: 1, alignSelf: 'center' },
   imageEmpty: { minHeight: 240, padding: 28, alignItems: 'center', justifyContent: 'center', gap: 14 },
   imageCaption: { padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, backgroundColor: colors.surfaceSoft },
   outline: { borderWidth: 1, borderColor: colors.border },

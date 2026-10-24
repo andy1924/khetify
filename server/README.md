@@ -167,6 +167,8 @@ No thresholds have been agreed for a real series. An approval must set positive 
 
 ## Sources and limits
 
+Mobile monitoring setup: [satellite previews and NDVI](SATELLITE.md), [weather and reviewed area alerts](AREA_ALERTS.md), and [OpenAI plant-photo assessment](PLANT_HEALTH.md). These live features do not use demo observations as fallbacks. Other pre-existing demo app sections are not converted into live data by these integrations.
+
 - Prices: [AGMARKNET OGD resource](https://www.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi), Department of Agriculture and Farmers Welfare, Government of India. Expected daily reporting; actual market/commodity coverage and access require operator verification. Attribution travels with every price row.
 - Licence: [Government Open Data License – India](https://data.gov.in/Godl). Verify applicability to the selected export/resource before import.
 - Places/maps: [OpenStreetMap](https://www.openstreetmap.org/copyright), © OpenStreetMap contributors, ODbL. [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/). No scraping or bulk geocoding is implemented.

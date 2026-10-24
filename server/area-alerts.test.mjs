@@ -51,15 +51,16 @@ test('area API uses rounded location, caches weather and keeps unconfigured inci
   assert.equal(result.warnings.length, 3);
   await handler(params);
   assert.equal(calls, 1);
+  params.set('refresh', 'true');
+  await handler(params);
+  assert.equal(calls, 2);
   for (const values of [{ lat: '', lon: '75' }, { lat: '0', lon: '0' }, { lat: '20', lon: '75', radius: '0' }]) {
     await assert.rejects(handler(new URLSearchParams(values)), { status: 400 });
   }
 });
 
 test('weather errors or missing measurements never become an all-clear or erase valid incidents', async () => {
-  for (const request of [async () => { throw new Error('offline'); }, async () => Response.json({ hourly: {}, daily: {} }), async () => {
-    const data = forecast(); data.hourly.precipitation[0] = null; return Response.json(data);
-  }]) {
+  for (const request of [async () => { throw new Error('offline'); }, async () => Response.json({ hourly: {}, daily: {} })]) {
     const handler = createAreaAlerts({ clock: () => now, read: async () => [incident], request });
     const result = await handler(new URLSearchParams({ lat: '20', lon: '75' }));
     assert.equal(result.weatherStatus, 'unavailable');
@@ -67,6 +68,22 @@ test('weather errors or missing measurements never become an all-clear or erase 
     assert.equal(result.warnings.length, 1);
     assert.equal(result.warnings[0].category, 'incident');
   }
+});
+
+test('missing samples remain explicit; benign forecasts still show sourced weather data', async () => {
+  const partial = forecast(); partial.hourly.precipitation[0] = null;
+  const handler = createAreaAlerts({ clock: () => now, read: async () => null, request: async () => Response.json(partial) });
+  const result = await handler(new URLSearchParams({ lat: '20', lon: '75' }));
+  assert.equal(result.weatherStatus, 'partial');
+  assert.equal(result.outlook.rainTotal, null);
+  assert.equal(result.outlook.temperature, 29);
+  const calm = forecast();
+  calm.hourly.temperature_2m = [25, 26]; calm.hourly.precipitation = [0, 0]; calm.hourly.wind_gusts_10m = [10, 12];
+  const benign = weatherAlerts(calm, now);
+  assert.equal(benign.warnings.length, 0);
+  assert.equal(benign.outlook.temperature, 25);
+  assert.equal(benign.outlook.rainTotal, 0);
+  assert.equal(benign.outlook.hours, 2);
 });
 
 test('HTTP alerts endpoint preserves independent source states and validates request methods', async () => {

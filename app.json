@@ -17,6 +17,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a plant photo for an assessment you explicitly approve.",
+          "cameraPermission": "Take a plant photo for a health assessment.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#FBFCF9"

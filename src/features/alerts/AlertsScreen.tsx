@@ -11,8 +11,10 @@ type AreaEvent = {
   source: { name: string; url: string; basis: string };
 };
 type AlertsResult = {
-  checkedAt: string; radiusKm: number; weatherStatus: 'ready' | 'unavailable'; incidentStatus: 'ready' | 'unconfigured';
+  checkedAt: string; radiusKm: number; weatherStatus: 'ready' | 'partial' | 'unavailable'; incidentStatus: 'ready' | 'unconfigured';
   warnings: AreaEvent[]; events: AreaEvent[]; attribution: string;
+  outlook?: { temperature: number | null; minTemperature: number | null; maxTemperature: number | null; rainTotal: number | null; maxGust: number | null; hours: number; validFrom: string; validUntil: string } | null;
+  weatherFetchedAt?: string | null; thresholds?: string;
 };
 const dateLabel = (value: string) => new Date(value).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
@@ -28,7 +30,7 @@ export function AlertsScreen() {
   const field = fields.find(item => item.id === selected) ?? fields[0];
   const points = field?.polygon;
   const request = useRef(0);
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (force = false) => {
     if (!points?.length) return;
     const id = ++request.current;
     setLoading(true); setError(''); setResult(null);
@@ -38,7 +40,7 @@ export function AlertsScreen() {
     try {
       if (!apiBase) throw new Error(connectionError());
       let response: Response;
-      try { response = await fetch(`${apiBase}/api/area-alerts?lat=${lat}&lon=${lon}&radius=${radius}`, { signal: AbortSignal.timeout(20000) }); }
+      try { response = await fetch(`${apiBase}/api/area-alerts?lat=${lat}&lon=${lon}&radius=${radius}&refresh=${force}`, { signal: AbortSignal.timeout(20000) }); }
       catch { throw new Error(connectionError()); }
       if (!response.ok) throw new Error(response.status === 404 ? 'Your backend needs the latest update to load area alerts. Restart the backend and refresh.' : 'Area updates could not load. Please retry.');
       const data: AlertsResult = await response.json();
@@ -74,10 +76,20 @@ export function AlertsScreen() {
         <Button title={`Recent events${result ? ` (${result.events.length})` : ''}`} icon="clock" variant={tab === 'events' ? 'primary' : 'ghost'} style={styles.switchButton} fullWidth={false} trailingArrow={false} onPress={() => setTab('events')} accessibilityLabel="Show recent nearby events" />
       </View>
       <View style={styles.heading}><Text variant="subtitle">{tab === 'warnings' ? 'Current warnings' : 'Recent nearby events'}</Text><Text variant="caption">{tab === 'warnings' ? 'Weather outlook for the next 24 hours, plus active reviewed incidents.' : 'Last 7 days of weather estimates and up to 30 days of reviewed incidents.'}</Text></View>
-      <Button title="Refresh area updates" variant="outline" icon="refresh-cw" loading={loading} onPress={refresh} />
+      <Button title="Refresh area updates" variant="outline" icon="refresh-cw" loading={loading} onPress={() => void refresh(true)} />
       {loading ? <Text variant="caption">Checking local sources…</Text> : null}
       {error ? <Notice tone="warning" title="Updates unavailable">{error}</Notice> : null}
+      {result?.outlook ? <Card tone="soft" gap={12}>
+        <Text variant="subtitle">Your area’s weather outlook</Text>
+        <Text variant="caption">Model estimates · {dateLabel(result.outlook.validFrom)} to {dateLabel(result.outlook.validUntil)}</Text>
+        <Text variant="strong">{result.outlook.temperature === null ? 'Temperature unavailable' : `${result.outlook.temperature.toFixed(1)}°C near the current hour`}</Text>
+        <Text>{`Range ${result.outlook.minTemperature?.toFixed(1) ?? '—'}–${result.outlook.maxTemperature?.toFixed(1) ?? '—'}°C · Rain ${result.outlook.rainTotal ?? '—'} mm · Gusts up to ${result.outlook.maxGust ?? '—'} km/h`}</Text>
+        <Text variant="meta">{`Forecast coverage: ${result.outlook.hours} hourly samples. ${result.thresholds ?? ''}`}</Text>
+        {result.weatherFetchedAt ? <Text variant="meta">Source fetched {dateLabel(result.weatherFetchedAt)} · cached up to 10 minutes</Text> : null}
+        <Button title="Official IMD warnings" variant="ghost" trailingArrow={false} onPress={() => { void Linking.openURL('https://mausam.imd.gov.in/').catch(() => setError('The IMD website could not open.')); }} />
+      </Card> : null}
       {result?.weatherStatus === 'unavailable' ? <Notice tone="warning" title="Weather source unavailable">We could not check the forecast. An empty list does not mean your area is free of weather risks.</Notice> : null}
+      {result?.weatherStatus === 'partial' ? <Notice tone="warning" title="Some forecast measurements are missing">Available measurements are shown, but the warning check is incomplete. Missing values are not treated as zero or as an all-clear.</Notice> : null}
       {result?.incidentStatus === 'unconfigured' ? <Notice title="Reviewed incident feed not connected">Local pest, disease and damage reports will appear here when a reviewed public feed is connected. Community demo posts are not treated as live incidents.</Notice> : null}
       {entries.map(item => <Card key={`${item.category}-${item.id}`} gap={12} tone={tab === 'warnings' ? 'warning' : 'soft'} padding={18}>
         <View style={styles.eventHeader}><Icon name={item.category === 'weather' ? 'cloud-rain' : 'triangle-alert'} size={22} color={tab === 'warnings' ? colors.warningInk : colors.accentDeep} /><Text variant="subtitle" style={styles.eventTitle}>{item.title}</Text></View>
@@ -91,7 +103,7 @@ export function AlertsScreen() {
       {result && !entries.length ? <Card tone="soft" gap={10}>
         <Icon name={tab === 'warnings' ? 'bell' : 'clock'} size={24} color={colors.muted} />
         <Text variant="subtitle">{tab === 'warnings' ? 'No advisories returned' : 'No events returned'}</Text>
-        <Text variant="caption">{tab === 'warnings' ? 'No advisories were returned by the available sources. This is not an all-clear for local hazards.' : 'No matching events were returned for this radius and time range.'}</Text>
+        <Text variant="caption">{tab === 'warnings' ? result.weatherStatus === 'ready' ? 'No available forecast values crossed the app’s advisory thresholds, and no active reviewed incident was returned. This is not an all-clear. Check official IMD updates for local warnings.' : 'The weather check is incomplete or unavailable, and no active reviewed incident was returned. This is not an all-clear. Check official IMD updates.' : 'No matching events were returned for this radius and time range.'}</Text>
       </Card> : null}
       {result ? <View style={styles.heading}><Text variant="meta">Checked {dateLabel(result.checkedAt)}</Text><Text variant="meta">{result.attribution}</Text></View> : null}
     </>}

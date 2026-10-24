@@ -8,6 +8,7 @@ import { Button, Icon, Screen, Text } from './ui';
 import { Banner, ScreenHeading, Sheet, StatusChip } from './components';
 import { toolCopy } from './strings';
 import { useToolRecorder } from './history';
+import { PlantHealthScreen } from './PlantHealthScreen';
 
 type PhotoTool = 'cropPhoto' | 'grainId' | 'grainQuality';
 
@@ -52,6 +53,11 @@ const TOOL_COPY: Record<PhotoTool, { titleKey: 'tools.cropPhoto.title' | 'tools.
 
 /** Photo-driven tools: local fixture picker only, no diagnostics, no permissions. */
 export function PhotoToolScreen() {
+  const params = useLocalSearchParams<{ tool?: string }>();
+  return params.tool === 'grainId' || params.tool === 'grainQuality' ? <DemoPhotoToolScreen /> : <PlantHealthScreen />;
+}
+
+function DemoPhotoToolScreen() {
   const { state } = useDemo();
   const recordToolUse = useToolRecorder();
   const t = useT();

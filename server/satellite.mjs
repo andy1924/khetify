@@ -1,4 +1,7 @@
 // Provider implementation stays on the backend; never expose OAuth credentials to Expo.
+import { createHash } from 'node:crypto';
+const cache = new Map(), pending = new Map();
+const CACHE_MS = 15 * 60000;
 const base = 'https://sh.dataspace.copernicus.eu';
 let token, expires = 0;
 async function accessToken() {
@@ -16,15 +19,26 @@ async function post(path, body) {
 }
 const imageScript = `//VERSION=3
 function setup() { return { input: ['B02','B03','B04','dataMask'], output: { bands: 4 } }; }
-function evaluatePixel(s) { return [2.5*s.B04, 2.5*s.B03, 2.5*s.B02, s.dataMask]; }`;
+function display(v) { return Math.pow(Math.max(0, Math.min(1, 2.5*v)), 1/1.4); }
+function evaluatePixel(s) { return [display(s.B04), display(s.B03), display(s.B02), s.dataMask]; }`;
+export function imageBoundsFor(geometry) {
+  const ring = geometry.coordinates[0], xs = ring.map(p => p[0]), ys = ring.map(p => p[1]);
+  const west = Math.min(...xs), east = Math.max(...xs), south = Math.min(...ys), north = Math.max(...ys);
+  const latitude = (north + south) / 2, longitude = (west + east) / 2;
+  const lonMeters = 111320 * Math.cos(latitude * Math.PI / 180);
+  const halfMeters = Math.max(300, (east - west) * lonMeters * .7, (north - south) * 111320 * .7);
+  return { west: longitude - halfMeters / lonMeters, east: longitude + halfMeters / lonMeters,
+    south: latitude - halfMeters / 111320, north: latitude + halfMeters / 111320 };
+}
 async function fieldImage(geometry, from, to) {
+  const imageBounds = imageBoundsFor(geometry);
   const response = await fetch(`${base}/process/v1`, {
     method: 'POST', headers: { Authorization: `Bearer ${await accessToken()}`, 'Content-Type': 'application/json', Accept: 'image/png' },
-    body: JSON.stringify({ input: { bounds: { geometry }, data: [{ type: 'sentinel-2-l2a', dataFilter: { timeRange: { from, to } } }] }, output: { width: 256, height: 256, responses: [{ identifier: 'default', format: { type: 'image/png' } }] }, evalscript: imageScript }),
+    body: JSON.stringify({ input: { bounds: { bbox: [imageBounds.west, imageBounds.south, imageBounds.east, imageBounds.north], properties: { crs: 'http://www.opengis.net/def/crs/EPSG/0/4326' } }, data: [{ type: 'sentinel-2-l2a', dataFilter: { timeRange: { from, to } }, processing: { upsampling: 'BILINEAR', downsampling: 'BILINEAR' } }] }, output: { width: 768, height: 768, responses: [{ identifier: 'default', format: { type: 'image/png' } }] }, evalscript: imageScript }),
     signal: AbortSignal.timeout(20000),
   });
   if (!response.ok) throw new Error('Satellite image could not be loaded. Please retry.');
-  return `data:image/png;base64,${Buffer.from(await response.arrayBuffer()).toString('base64')}`;
+  return { imageUrl: `data:image/png;base64,${Buffer.from(await response.arrayBuffer()).toString('base64')}`, imageBounds };
 }
 export function geometryFor(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3 || polygon.length > 50 || polygon.some(p => !p || !Number.isFinite(p.latitude) || !Number.isFinite(p.longitude) || p.latitude < 6 || p.latitude > 38 || p.longitude < 68 || p.longitude > 98)) throw Object.assign(new Error('Supply 3–50 field corners in the India service envelope (6–38 N, 68–98 E).'), { status: 400 });
@@ -38,9 +52,8 @@ export function geometryFor(polygon) {
 }
 const evalscript = `//VERSION=3
 function setup() { return { input: [{ bands: ['B04','B08','SCL','dataMask'] }], output: [{ id:'ndvi', bands:1 },{ id:'quality', bands:1 },{ id:'dataMask', bands:['ndvi','quality'] }] }; }
-function evaluatePixel(s) { let bad = [0,1,3,8,9,10,11].includes(s.SCL), valid = !bad && s.B08+s.B04>0; return { ndvi: [valid ? (s.B08-s.B04)/(s.B08+s.B04) : 0], quality:[bad ? 1 : 0], dataMask:[s.dataMask * (valid ? 1 : 0), s.dataMask] }; }`;
-export const copernicusProvider = {
-  async getObservations(polygon) {
+function evaluatePixel(s) { let bad = [0,1,3,8,9,10,11].includes(s.SCL) || !Number.isFinite(s.B08) || !Number.isFinite(s.B04) || s.B08<0 || s.B04<0 || s.B08+s.B04<=0, valid = !bad; return { ndvi: [valid ? (s.B08-s.B04)/(s.B08+s.B04) : 0], quality:[bad ? 1 : 0], dataMask:[s.dataMask * (valid ? 1 : 0), s.dataMask] }; }`;
+async function loadObservations(polygon) {
     const geometry = geometryFor(polygon);
     if (!process.env.CDSE_CLIENT_ID || !process.env.CDSE_CLIENT_SECRET) return { status: 'unconfigured', observations: [] };
     const to = new Date(), from = new Date(to.getTime() - 30 * 86400000);
@@ -68,14 +81,36 @@ export const copernicusProvider = {
       const observedPixels = q?.sampleCount - q?.noDataCount;
       const coverage = Number.isFinite(fieldPixels) && fieldPixels > 0 && Number.isFinite(observedPixels)
         ? Math.max(0, Math.min(100, 100 * observedPixels / fieldPixels)) : null;
-      const cloud = Number.isFinite(q?.mean) ? q.mean * 100 : null;
-      const usable = coverage !== null && coverage >= 80 && cloud !== null && cloud < 30 && n?.sampleCount - n?.noDataCount >= 5;
+      const cloud = Number.isFinite(q?.mean) && q.mean >= 0 && q.mean <= 1 ? q.mean * 100 : null;
+      const validNdvi = Number.isFinite(n?.mean) && n.mean >= -1 && n.mean <= 1;
+      const usable = validNdvi && coverage !== null && coverage >= 80 && cloud !== null && cloud < 30 && n?.sampleCount - n?.noDataCount >= 5;
       // Render the latest capture only; the remaining captures supply dated comparisons.
-      const image = index === 0 ? await fieldImage(geometry, start, end).then(imageUrl => ({ imageUrl }), () => ({ imageError: 'Image could not be loaded. Refresh to retry.' })) : {};
+      const image = index === 0 ? await fieldImage(geometry, start, end).catch(() => ({ imageError: 'Image could not be loaded. Refresh to retry.' })) : {};
       return { ...image, capturedAt, source: 'Copernicus Sentinel-2 L2A · ~10 m sampling', cloudPercent: cloud, fieldCoveragePercent: coverage,
         confidence: usable ? 'moderate' : 'low', ndvi: usable && Number.isFinite(n?.mean) ? n.mean : null,
-        summary: usable ? 'Vegetation signal for this capture. Compare dated values alongside field inspection; crop stage and soil background affect NDVI.' : 'Cloudy image, insufficient clear pixels or incomplete coverage. No reliable vegetation signal available.' };
+        summary: usable ? 'Vegetation signal for this capture. Compare dated values alongside field inspection; crop stage and soil background affect NDVI.' : Number.isFinite(n?.mean) && !validNdvi ? 'Invalid vegetation index outside −1 to 1 was rejected. No reliable reading is displayed.' : 'Cloudy image, invalid pixels, insufficient clear pixels or incomplete coverage. No reliable vegetation signal available.' };
     }));
     return { status: 'ready', observations };
+}
+export const copernicusProvider = {
+  async getObservations(polygon, { refresh = false } = {}) {
+    geometryFor(polygon);
+    const key = createHash('sha256').update(JSON.stringify(polygon)).digest('hex');
+    const existing = cache.get(key);
+    if (!refresh && existing && Date.now() < existing.expiresAt) return { ...existing.data, cached: true, fetchedAt: existing.fetchedAt, expiresAt: existing.expiresAt };
+    if (pending.has(key)) return pending.get(key);
+    const operation = (async () => {
+      const data = await loadObservations(polygon);
+      if (data.status === 'unconfigured') return data;
+      const fetchedAt = new Date().toISOString(), expiresAt = Date.now() + CACHE_MS;
+      // In-memory only, bounded to 24 field previews. Do not retain precise boundaries on disk.
+      if (data.observations.every(o => !o.imageError)) {
+        if (cache.size >= 24) cache.delete(cache.keys().next().value);
+        cache.set(key, { data, fetchedAt, expiresAt });
+      }
+      return { ...data, cached: false, fetchedAt, expiresAt };
+    })();
+    pending.set(key, operation);
+    try { return await operation; } finally { pending.delete(key); }
   },
 };
