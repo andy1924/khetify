@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, View } from 'react-native';
-import Svg, { Polygon } from 'react-native-svg';
+import Svg, { Circle, Polygon } from 'react-native-svg';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useDemoSlices, useDemoDispatch } from '../../demo';
 import { Button, Card, Chip, Header, Icon, Notice, Screen, Text } from '../../ui';
 import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { FieldSetup } from './FieldSetup';
-import { DummySatelliteMap } from './DummySatelliteMap';
+import { locationArea, satelliteBasemap } from './locationArea';
 import { fieldMonitoringProvider, type ObservationResult, type RegisteredField } from './satelliteProvider';
 
 const captureDate = (value: string) => new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
@@ -20,19 +21,49 @@ export function SatelliteScreen() {
   const [selected, setSelected] = useState<string | null>(fields[0]?.id ?? null);
   const [adding, setAdding] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const active = fields.find(field => field.id === selected) ?? fields[0];
+  const [currentArea, setCurrentArea] = useState<RegisteredField | null>(null);
+  const [usingLocation, setUsingLocation] = useState(true);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const gpsRequest = useRef(0);
+  const active = usingLocation ? currentArea : fields.find(field => field.id === selected) ?? fields[0];
   const [result, setResult] = useState<ObservationResult | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [failedImage, setFailedImage] = useState<string | null>(null);
+  const [basemapFailed, setBasemapFailed] = useState(false);
   const [checkedAt, setCheckedAt] = useState(0);
   const request = useRef(0);
   const fieldId = active?.id;
   const polygon = active?.polygon;
+  const locate = useCallback(async () => {
+    const id = ++gpsRequest.current;
+    setLocating(true); setLocationError(''); setUsingLocation(true); setDetailsOpen(false);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) throw new Error('Allow location access for Expo Go in your phone settings, then tap Use my current location.');
+      const fix = await Location.getLastKnownPositionAsync({ maxAge: 30000, requiredAccuracy: 200 })
+        ?? await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const polygon = locationArea(fix.coords);
+      if (id !== gpsRequest.current) return;
+      setAccuracy(fix.coords.accuracy);
+      setCurrentArea({ id: 'current-location', name: 'Your current location', crop: '500 m area around your phone · not a farm boundary',
+        polygon, sowingDate: '', alertsOptIn: false, shareApproximate: false, radiusKm: 5 });
+      dispatch({ type: 'onboarding/location', location: { latitude: fix.coords.latitude, longitude: fix.coords.longitude,
+        accuracy: fix.coords.accuracy, capturedAt: fix.timestamp } });
+    } catch (failure) { if (id === gpsRequest.current) setLocationError(failure instanceof Error ? failure.message : 'Could not get your location. Turn on phone location services and retry.'); }
+    finally { if (id === gpsRequest.current) setLocating(false); }
+  }, [dispatch]);
+  useEffect(() => {
+    const token = gpsRequest;
+    const start = setTimeout(() => { void locate(); }, 0);
+    return () => { clearTimeout(start); token.current++; };
+  }, [locate]);
   const refresh = useCallback(async (force = false) => {
     if (!polygon) return;
     const id = ++request.current;
-    setCheckedAt(Date.now()); setLoading(true); setError(''); setFailedImage(null); setResult(null);
+    setCheckedAt(Date.now()); setLoading(true); setError(''); setFailedImage(null); setBasemapFailed(false); setResult(null);
     try {
       const data = await fieldMonitoringProvider.getObservations(polygon, force);
       if (id === request.current) setResult(data);
@@ -46,48 +77,61 @@ export function SatelliteScreen() {
   }, [refresh, fieldId, adding]);
   const saveField = (field: RegisteredField) => {
     dispatch({ type: 'monitoring/field', field });
-    setSelected(field.id); setAdding(false); setDetailsOpen(false);
+    setSelected(field.id); setUsingLocation(false); setAdding(false); setDetailsOpen(false);
   };
-  if (!fields.length || adding) return <FieldSetup onSaved={saveField} onCancel={fields.length ? () => setAdding(false) : undefined} />;
+  if (adding) return <FieldSetup onSaved={saveField} onCancel={() => setAdding(false)} />;
+  if (!active) return <Screen gap={20}>
+    <Header title="Satellite near you" />
+    <Text>Use your phone’s current location to load real imagery. Your area is sent to Esri for a basemap and Copernicus for recent captures and vegetation readings.</Text>
+    {locating ? <ActivityIndicator size="large" color={palette.deep} /> : null}
+    <Button title={locating ? 'Finding your location…' : 'Use my current location'} icon="map-pin" loading={locating} onPress={() => void locate()} />
+    {locationError ? <Notice title="Location needed" tone="warning">{locationError}</Notice> : null}
+    <Button title="Choose a field manually" variant="secondary" onPress={() => setAdding(true)} />
+    {fields.map(field => <Button key={field.id} title={`View saved field: ${field.name}`} variant="ghost" onPress={() => { setUsingLocation(false); setSelected(field.id); }} />)}
+  </Screen>;
 
   const observations = result?.observations ?? [];
   const clear = observations.filter(o => o.ndvi !== null && o.confidence === 'moderate' && checkedAt - Date.parse(o.capturedAt) <= 14 * 86400000);
   const latest = clear[0], previous = clear[1];
   const preview = observations.find(o => o.imageUrl);
-  const bounds = preview?.imageBounds;
-  const outline = bounds && active ? active.polygon.map(p => `${100 * (p.longitude - bounds.west) / (bounds.east - bounds.west)},${100 * (bounds.north - p.latitude) / (bounds.north - bounds.south)}`).join(' ') : '';
+  const fallback = satelliteBasemap(active.polygon);
+  const showingSentinel = Boolean(preview?.imageUrl && failedImage !== preview.imageUrl);
+  const imageUrl = showingSentinel ? preview!.imageUrl : basemapFailed ? undefined : fallback.url;
+  const bounds = showingSentinel ? preview?.imageBounds : fallback.bounds;
+  const outline = !usingLocation && bounds && active ? active.polygon.map(p => `${100 * (p.longitude - bounds.west) / (bounds.east - bounds.west)},${100 * (bounds.north - p.latitude) / (bounds.north - bounds.south)}`).join(' ') : '';
   return <Screen key={active?.id} gap={24}>
     <View style={styles.topRow}>
-      <View style={styles.heading}><Text variant="label" color={palette.deep}>FIELD MONITORING</Text><Text variant="heading">Your fields</Text></View>
+      <View style={styles.heading}><Text variant="label" color={palette.deep}>SATELLITE MONITORING</Text><Text variant="heading">{usingLocation ? 'Near you' : 'Your fields'}</Text></View>
       <Button title="Add field" icon="plus" variant="secondary" fullWidth={false} trailingArrow={false} onPress={() => setAdding(true)} />
     </View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fieldTabs}>
+      <Chip label="My location" icon="map-pin" selected={usingLocation} onPress={() => void locate()} />
       {fields.map(field => <Chip key={field.id} label={field.name} selected={field.id === active?.id} icon="map-pin" onPress={() => {
         if (field.id === active?.id) return;
-        request.current++; setResult(null); setError(''); setSelected(field.id); setDetailsOpen(false);
+        gpsRequest.current++; setLocating(false); request.current++; setResult(null); setError(''); setUsingLocation(false); setSelected(field.id); setDetailsOpen(false);
       }} />)}
     </ScrollView>
     {active ? <>
       <View style={styles.heading}><Header title={active.name} /><Text variant="caption">{`${active.crop}${active.sowingDate ? ` · Sown ${captureDate(active.sowingDate)}` : ''}`}</Text></View>
       <View style={styles.imageCard}>
-        {preview?.imageUrl && failedImage !== preview.imageUrl ? <View style={styles.imageFrame}>
-          <Image source={{ uri: preview.imageUrl }} accessibilityLabel={`Satellite image of ${active.name}, ${captureDate(preview.capturedAt)}`} style={StyleSheet.absoluteFill} resizeMode="stretch" onError={() => setFailedImage(preview.imageUrl!)} />
+        {imageUrl ? <View style={styles.imageFrame}>
+          <Image source={{ uri: imageUrl }} accessibilityLabel={showingSentinel ? `Satellite image of ${active.name}, ${captureDate(preview!.capturedAt)}` : `Satellite and aerial basemap of ${active.name}; capture date varies`} style={{ width: '100%', height: '100%' }} resizeMode="cover" onError={() => { if (showingSentinel) setFailedImage(preview!.imageUrl!); else setBasemapFailed(true); }} />
+          {usingLocation ? <Svg width="100%" height="100%" viewBox="0 0 100 100" style={StyleSheet.absoluteFill} pointerEvents="none"><Circle cx="50" cy="50" r="1.7" fill="#178BEB" stroke="#FFFFFF" strokeWidth="0.6" /></Svg> : null}
           {outline ? <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={StyleSheet.absoluteFill} pointerEvents="none"><Polygon points={outline} fill="rgba(220,255,180,0.08)" stroke={palette.iconFaint} strokeWidth="0.6" /></Svg> : null}
-        </View> : <View style={styles.imageFrame}>
-          <DummySatelliteMap
-            fieldId={active.id}
-            polygon={active.polygon}
-            outlineColor={palette.strong}
-            fieldColor={palette.strong}
-          />
-          {loading ? <View style={styles.mapLoading}><ActivityIndicator size="small" color={palette.deep} /></View> : null}
+        </View> : <View style={[styles.imageFrame, styles.imageEmpty]}>
+          {loading ? <ActivityIndicator size="large" color={palette.deep} /> : <Icon name="satellite" size={36} color={palette.deep} />}
+          <Text align="center">{loading ? 'Loading real satellite imagery…' : failedImage ? 'The image could not display. Refresh to retry.' : 'No satellite preview available. Refresh to check the imagery service.'}</Text>
         </View>}
         <View style={styles.imageCaption}>
-          <View style={styles.heading}><Text variant="strong">{preview ? `Captured ${captureDate(preview.capturedAt)}` : 'Satellite view'}</Text><Text variant="meta">Copernicus Sentinel-2 · approx. 10 m detail</Text></View>
+          <View style={styles.heading}><Text variant="strong">{showingSentinel ? `Captured ${captureDate(preview!.capturedAt)}` : 'Satellite / aerial basemap'}</Text><Text variant="meta">{showingSentinel ? 'Copernicus Sentinel-2 · approx. 10 m detail' : 'Source: Esri, Vantor, Earthstar Geographics, GIS User Community · dates vary'}</Text></View>
           <Icon name="satellite" size={20} color={palette.deep} />
         </View>
       </View>
-      <Text variant="meta">Field outline over a wider, contrast-adjusted view. Smoothing improves presentation, not the original 10 m detail. NDVI uses unaltered bands.</Text>
+      {loading && imageUrl ? <Text variant="caption">Satellite view loaded. Checking recent Sentinel captures and NDVI…</Text> : null}
+      {!showingSentinel ? <Text variant="meta">Basemap imagery is not live or necessarily recent. Vegetation readings below come only from dated Copernicus data, never from this basemap.</Text> : null}
+      <Text variant="meta">{usingLocation ? `Blue dot: your phone location${accuracy !== null ? ` (accuracy about ${Math.round(accuracy)} m)` : ''}. Latest available satellite capture, not a live camera. NDVI samples a 500 m area, not an identified farm.` : 'Field outline over a wider, contrast-adjusted view. Source detail is about 10 m; NDVI uses unaltered bands.'}</Text>
+      {locationError ? <Notice title="Location update failed" tone="warning">{locationError}</Notice> : null}
+      <Button title="Use my current location" icon="map-pin" variant="secondary" loading={locating} onPress={() => void locate()} />
       {result?.fetchedAt ? <Text variant="meta">{result.cached ? 'Cached view' : 'Fetched'} · {new Date(result.fetchedAt).toLocaleTimeString()} · cached for 15 minutes. Capture dates stay unchanged.</Text> : null}
       <Button title="Refresh images" variant="outline" icon="refresh-cw" loading={loading} onPress={() => void refresh(true)} />
       <Button title="Check a plant photo" icon="camera" variant="secondary" onPress={() => router.push('/tools/photo?tool=cropPhoto')} />
@@ -129,7 +173,7 @@ const makeStyles = (p: AccentPalette) => StyleSheet.create({
   fieldTabs: { gap: 8, paddingVertical: 4 },
   imageCard: { borderRadius: 24, overflow: 'hidden', backgroundColor: p.surfaceTile, borderWidth: 1, borderColor: p.border },
   imageFrame: { width: '100%', maxWidth: 520, aspectRatio: 1, alignSelf: 'center' },
-  mapLoading: { position: 'absolute', top: 12, right: 12, backgroundColor: 'rgba(255,255,255,0.82)', borderRadius: 999, padding: 7 },
+  imageEmpty: { alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24 },
   imageCaption: { padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, backgroundColor: p.surfaceSoft },
   outline: { borderWidth: 1, borderColor: p.border },
   metricRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },

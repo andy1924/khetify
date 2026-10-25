@@ -1,6 +1,6 @@
 import { copernicusProvider } from './satellite.mjs';
 import { areaAlerts } from './area-alerts.mjs';
-import { plantHealth, reviewedLabels } from './plant-health.mjs';
+import { plantHealth, plantHealthModel, reviewedLabels } from './plant-health.mjs';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { SOURCE, compare, forecast, keyOf, matches } from './prices.mjs';
@@ -130,7 +130,9 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
   let activePhotos = 0;
   return createServer({ requestTimeout: 30000, headersTimeout: 10000 }, async (req, res) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Access-Control-Allow-Origin', process.env.PRICE_ALLOWED_ORIGIN || 'http://localhost:8081');
+    const origins = (process.env.PRICE_ALLOWED_ORIGIN || 'http://localhost:8081').split(',').map(origin => origin.trim());
+    res.setHeader('Access-Control-Allow-Origin', origins.includes(req.headers.origin) ? req.headers.origin : origins[0]);
+    res.setHeader('Vary', 'Origin');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     const send = (code, body) => { res.writeHead(code); res.end(JSON.stringify(body)); };
@@ -144,6 +146,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
       if (rate.size > 10000) for (const [ip, value] of rate) if (Date.now() - value.at > 60000) rate.delete(ip);
       const url = new URL(req.url, 'http://localhost');
       const params = url.searchParams;
+      if (url.pathname === '/api/health' && req.method === 'GET') return send(200, { service: 'khetify-api', status: 'ok' });
       if (url.pathname === '/api/area-alerts') {
         if (req.method !== 'GET') return send(405, { error: 'Use GET.' });
         return send(200, await alerts(params));
@@ -185,7 +188,7 @@ export function createPriceServer({ recognize = identifyCrop, locate = lookupPla
         if (body.refresh !== undefined && typeof body.refresh !== 'boolean') throw fail('refresh must be true or false.');
         return send(200, await copernicusProvider.getObservations(body.polygon, { refresh: body.refresh === true }));
       }
-      if (url.pathname === '/api/plant-health/capabilities') return send(200, { configured: Boolean(process.env.OPENAI_API_KEY && (process.env.PLANT_HEALTH_MODEL || process.env.CROP_VISION_MODEL)), maxPhotoBytes: 5 * 1024 * 1024, reviewedLabelCount: (await reviewedLabels()).length });
+      if (url.pathname === '/api/plant-health/capabilities') return send(200, { configured: Boolean(process.env.OPENAI_API_KEY?.trim()), model: plantHealthModel(), maxPhotoBytes: 5 * 1024 * 1024, reviewedLabelCount: (await reviewedLabels()).length });
       if (url.pathname === '/api/plant-health') {
         if (req.method !== 'POST') return send(405, { error: 'Use POST with a plant photo and consent.' });
         counter.plantCount = (counter.plantCount ?? 0) + 1;

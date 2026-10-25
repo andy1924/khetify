@@ -66,7 +66,7 @@ export function PlantHealthScreen() {
     <Header title="Plant health check" />
     <Text>Photograph the symptoms, confirm your crop, then review possible causes and next steps.</Text>
     <Notice title="A second opinion, not a diagnosis">AI can confuse infection with nutrient, water or chemical injury. Do not spray based only on a photo.</Notice>
-    {capability?.configured === false ? <Notice tone="warning" title="OpenAI is not connected">Set OPENAI_API_KEY and PLANT_HEALTH_MODEL in server/.env.local and restart the backend. Keep the key off the phone and out of EXPO_PUBLIC variables.</Notice> : null}
+    {capability?.configured === false ? <Notice tone="warning" title="OpenAI is not connected">Add the actual OPENAI_API_KEY value to server/.env.local, save and restart the backend. The default model is gpt-4.1-mini. Never put the key in EXPO_PUBLIC variables.</Notice> : null}
     <Card gap={14} tone="soft">
       <Text variant="subtitle">1 · Add a clear plant photo</Text>
       <Text variant="caption">Use daylight. Include the affected leaf and its underside. No demo image is substituted.</Text>

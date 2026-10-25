@@ -30,13 +30,14 @@ export function AlertsScreen() {
   const [radius, setRadius] = useState(10);
   const [result, setResult] = useState<AlertsResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const field = fields.find(item => item.id === selected) ?? fields[0];
   const points = field?.polygon;
   const request = useRef(0);
   const refresh = useCallback(async (force = false) => {
     if (!points?.length) return;
     const id = ++request.current;
-    setLoading(true); setResult(null);
+    setLoading(true); setError(''); setResult(null);
     // Only a rounded field center is sent; never the precise boundary.
     const lat = (points.reduce((sum, p) => sum + p.latitude, 0) / points.length).toFixed(2);
     const lon = (points.reduce((sum, p) => sum + p.longitude, 0) / points.length).toFixed(2);
@@ -49,7 +50,7 @@ export function AlertsScreen() {
       const data: AlertsResult = await response.json();
       if (!Array.isArray(data.warnings) || !Array.isArray(data.events)) throw new Error('Area updates returned an unexpected response.');
       if (id === request.current) setResult(data);
-    } catch { /* a failed check leaves the previous result cleared by design */ }
+    } catch (failure) { if (id === request.current) setError(failure instanceof Error ? failure.message : connectionError()); }
     finally { if (id === request.current) setLoading(false); }
   }, [points, radius]);
   useEffect(() => {
@@ -81,6 +82,7 @@ export function AlertsScreen() {
       <View style={styles.heading}><Text variant="subtitle">{tab === 'warnings' ? 'Current warnings' : 'Recent nearby events'}</Text><Text variant="caption">{tab === 'warnings' ? 'Weather outlook for the next 24 hours, plus active reviewed incidents.' : 'Last 7 days of weather estimates and up to 30 days of reviewed incidents.'}</Text></View>
       <Button title="Refresh area updates" variant="outline" icon="refresh-cw" loading={loading} onPress={() => void refresh(true)} />
       {loading ? <Text variant="caption">Checking local sources…</Text> : null}
+      {error ? <Notice tone="warning" title="Updates unavailable">{error}</Notice> : null}
       {result?.outlook ? <Card tone="soft" gap={12}>
         <Text variant="subtitle">Your area’s weather outlook</Text>
         <Text variant="caption">Model estimates · {dateLabel(result.outlook.validFrom)} to {dateLabel(result.outlook.validUntil)}</Text>

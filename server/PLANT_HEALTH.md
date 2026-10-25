@@ -8,10 +8,10 @@ Add these to `server/.env.local`, never to a public Expo variable or source cont
 
 ```dotenv
 OPENAI_API_KEY=your-server-side-key
-PLANT_HEALTH_MODEL=your-image-input-and-structured-outputs-compatible-model
+PLANT_HEALTH_MODEL=gpt-4.1-mini
 ```
 
-Use a model available to your OpenAI account; an unset plant model falls back to `CROP_VISION_MODEL`. Restart with `npm --prefix server start`. `GET /api/plant-health/capabilities` exposes configuration booleans, not secrets. The app already uses `EXPO_PUBLIC_FIELD_API_URL` for the reachable backend address. Expo Go development resolves localhost to the Expo LAN host; phone and computer must be able to reach that port.
+Use a model available to your OpenAI account; an unset plant model falls back to `CROP_VISION_MODEL`, then `gpt-4.1-mini`. Only a nonempty `OPENAI_API_KEY` is required for the demo default. Restart with `npm --prefix server start`. `GET /api/plant-health/capabilities` exposes configuration booleans and the model name, not secrets. The app already uses `EXPO_PUBLIC_FIELD_API_URL` for the reachable backend address. Expo Go development resolves localhost to the Expo LAN host; phone and computer must be able to reach that port.
 
 `POST /api/plant-health` accepts `{image:{mimeType,base64},crop,state,symptoms?,consentToAnalysis:true}`. JPEG/PNG/WebP only, ≤5 MiB, ≥64 pixels per side, ≤20 megapixels. Decoding strips metadata and downsizes to 1536 px before sending to the OpenAI Responses API with strict Structured Outputs and `store:false`. This app does not persist images or assessments. `store:false` is not a promise of zero provider retention; review [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data). Photos and farmer text are treated as untrusted evidence, not instructions.
 

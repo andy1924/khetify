@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import { plantHealth, reviewedLabels } from './plant-health.mjs';
+import { plantHealth, plantHealthModel, reviewedLabels } from './plant-health.mjs';
 
 const now = Date.parse('2026-10-24T06:00:00Z');
 const observation = () => ({ imageQuality: 'clear', confidence: 'medium', observedSymptoms: ['Brown spots visible.'],
@@ -16,6 +16,16 @@ function configure(t) {
   t.after(() => { for (const [k, v] of Object.entries(previous)) if (v === undefined) delete process.env[k]; else process.env[k] = v; });
 }
 const providerResponse = value => Response.json({ status: 'completed', output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(value) }] }] });
+
+test('plant-photo demo has a compatible default model without overriding an explicit model', t => {
+  configure(t);
+  assert.equal(plantHealthModel(), 'test-image-model');
+  delete process.env.PLANT_HEALTH_MODEL;
+  process.env.CROP_VISION_MODEL = 'configured-crop-model';
+  assert.equal(plantHealthModel(), 'configured-crop-model');
+  delete process.env.CROP_VISION_MODEL;
+  assert.equal(plantHealthModel(), 'gpt-4.1-mini');
+});
 
 test('consent and configuration gate uploads; never manufacture an assessment', async t => {
   configure(t);

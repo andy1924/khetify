@@ -92,7 +92,7 @@ Run collection regularly using your deployment scheduler. On-demand lookups also
 
 ## Crop photo to price workflow
 
-This remains **backend only**; the mobile camera and screens are not connected. Configure server `OPENAI_API_KEY` and `CROP_VISION_MODEL` for a model supporting image input and strict Structured Outputs via the Responses API. No default model is silently chosen. Live recognition has not been verified without these credentials. The price-data credential is separate.
+The mobile Plant Health screen is connected to `POST /api/plant-health`. Configure server `OPENAI_API_KEY`; the model defaults to `gpt-4.1-mini` and can be overridden with `PLANT_HEALTH_MODEL` or `CROP_VISION_MODEL`. The model must support image input and strict Structured Outputs via the Responses API. The price-data credential is separate. This endpoint assesses plant photos; it does not create pesticide recommendations unless reviewed label data is configured.
 
 The initial photo suggestion scope is wheat, maize, paddy, soybean and onion. `crop-scope.json` maps identities to exact source commodity names; confirm these mappings against the connected price feed before expanding coverage. This scope is an experimental suggestion list, not an expert-validated crop classifier. The model's confidence labels are not calibrated probabilities. Farmer confirmation is mandatory before a forecast, including when the model reports high confidence.
 
@@ -167,7 +167,7 @@ No thresholds have been agreed for a real series. An approval must set positive 
 
 ## Sources and limits
 
-Mobile monitoring setup: [satellite previews and NDVI](SATELLITE.md), [weather and reviewed area alerts](AREA_ALERTS.md), and [OpenAI plant-photo assessment](PLANT_HEALTH.md). These live features do not use demo observations as fallbacks. Other pre-existing demo app sections are not converted into live data by these integrations.
+Mobile monitoring setup: [satellite previews and NDVI](SATELLITE.md), [weather and reviewed area alerts](AREA_ALERTS.md), and [OpenAI plant-photo assessment](PLANT_HEALTH.md). The mobile Satellite screen uses foreground GPS to request a nearby 500 m sample area and can display an Esri aerial basemap when a Sentinel preview is unavailable. These live features do not use demo observations as fallbacks. Other pre-existing demo app sections are not converted into live data by these integrations.
 
 - Prices: [AGMARKNET OGD resource](https://www.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi), Department of Agriculture and Farmers Welfare, Government of India. Expected daily reporting; actual market/commodity coverage and access require operator verification. Attribution travels with every price row.
 - Licence: [Government Open Data License – India](https://data.gov.in/Godl). Verify applicability to the selected export/resource before import.
@@ -179,7 +179,7 @@ Rate limiting is per socket IP (60 requests/minute); a reverse proxy must apply 
 
 ### Mandi-Ready Crop Grader
 
-This implementation changes backend files only. No camera, navigation, screens, frontend state or app persistence is added. Crop identifiers are configurable rather than restricted to wheat and soybean: cereals, millets, pulses and other named grains can be documented manually. Automatic observations require a separately validated detector for each crop. Accepting a crop identifier does not establish detector coverage.
+The grain-screening implementation remains backend-only; it is separate from the connected Plant Health photo flow. Crop identifiers are configurable rather than restricted to wheat and soybean: cereals, millets, pulses and other named grains can be documented manually. Automatic observations require a separately validated detector for each crop. Accepting a crop identifier does not establish detector coverage.
 
 `POST /api/grain-screening` accepts `{crop,image:{mimeType,base64},referenceConfirmed:true,consentToUpload:true}`. Image preprocessing flags poor lighting/detail; these heuristics are not grain measurements. Without a validated specialized detector, counts stay null. OpenAI is not used for this endpoint. Set `GRAIN_DETECTOR_URL` (HTTPS or loopback), optional server-only `GRAIN_DETECTOR_TOKEN`, and `.price-data/grain-detector.json`:
 

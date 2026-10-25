@@ -3,6 +3,7 @@ import { readJson } from './store.mjs';
 
 const fail = (status, message) => Object.assign(new Error(message), { status });
 const normalize = value => value.trim().toLowerCase();
+export const plantHealthModel = () => process.env.PLANT_HEALTH_MODEL?.trim() || process.env.CROP_VISION_MODEL?.trim() || 'gpt-4.1-mini';
 const actions = {
   inspect: 'Inspect several plants, including leaf undersides, stems and the edge of the affected patch. Record when symptoms started.',
   retake: 'Take a sharp close-up of both leaf surfaces and a second photo of the whole plant in daylight.',
@@ -45,8 +46,8 @@ export async function plantHealth(body, { request = fetch, read = readJson, now 
   if (body.consentToAnalysis !== true) throw fail(400, 'Explicit consent is required before a plant photo is sent to OpenAI.');
   for (const field of ['crop', 'state']) if (typeof body[field] !== 'string' || !body[field].trim() || body[field].length > 80 || /[\x00-\x1f]/.test(body[field])) throw fail(400, 'Confirm your crop and Indian state.');
   if (body.symptoms !== undefined && (typeof body.symptoms !== 'string' || body.symptoms.length > 1000)) throw fail(400, 'Describe symptoms in at most 1,000 characters.');
-  const model = process.env.PLANT_HEALTH_MODEL?.trim() || process.env.CROP_VISION_MODEL?.trim();
-  if (!process.env.OPENAI_API_KEY || !model) throw fail(503, 'Plant assessment is not configured. Add OPENAI_API_KEY and PLANT_HEALTH_MODEL to server/.env.local, then restart the backend.');
+  const model = plantHealthModel();
+  if (!process.env.OPENAI_API_KEY?.trim()) throw fail(503, 'Add your actual OPENAI_API_KEY after the = in server/.env.local, save the file, and restart the backend. An empty OPENAI_API_KEY= does not configure OpenAI.');
   const photo = await preparePhoto(body.image);
   const labels = (await reviewedLabels(read, now)).filter(r => normalize(r.crop) === normalize(body.crop) && r.states.some(s => normalize(s) === normalize(body.state) || s === '*'));
   let response;
