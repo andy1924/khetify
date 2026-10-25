@@ -1,7 +1,7 @@
 import React from 'react';
-import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import {
   ActivityIndicator,
+  Animated,
   Pressable,
   StyleSheet,
   type StyleProp,
@@ -10,6 +10,8 @@ import {
 import { Icon, type IconName, type LucideIcon } from './Icon';
 import { Text } from './Text';
 import { colors, radii, touchTarget } from './tokens';
+import { motion, useReduceMotion } from './motion';
+import { useAccentPalette, type AccentPalette } from './AccentTheme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
 
@@ -38,21 +40,25 @@ export type ButtonProps = {
   testID?: string;
 };
 
-const backgrounds: Record<ButtonVariant, string> = {
-  primary: colors.accent,
-  secondary: colors.surface,
-  ghost: colors.transparent,
-  outline: colors.transparent,
-  danger: colors.dangerBg,
-};
+function backgrounds(p: AccentPalette): Record<ButtonVariant, string> {
+  return {
+    primary: p.soft,
+    secondary: p.surface,
+    ghost: colors.transparent,
+    outline: colors.transparent,
+    danger: colors.dangerBg,
+  };
+}
 
-const labelColors: Record<ButtonVariant, string> = {
-  primary: colors.accentInk,
-  secondary: colors.accentInk,
-  ghost: colors.accentDeep,
-  outline: colors.ink,
-  danger: colors.danger,
-};
+function labelColors(p: AccentPalette): Record<ButtonVariant, string> {
+  return {
+    primary: p.ink,
+    secondary: p.ink,
+    ghost: p.deep,
+    outline: p.ink,
+    danger: colors.danger,
+  };
+}
 
 const heights = { sm: 40, md: touchTarget, lg: 52 } as const;
 
@@ -60,6 +66,11 @@ const heights = { sm: 40, md: touchTarget, lg: 52 } as const;
  * Filled pill button, 48dp tall with a 24 radius, matching the HeroUI-based
  * reference. Primary is leaf green, secondary is the soft surface, ghost is
  * borderless.
+ *
+ * Press feedback is a short native-driven scale (90ms down, 140ms back), so the
+ * label responds on the UI thread instead of waiting for a JS re-render. The
+ * scale sits on the inner content view, leaving layout, padding and the pill
+ * background on the pressable where call sites override them.
  */
 export function Button({
   title,
@@ -80,10 +91,46 @@ export function Button({
   testID,
 }: ButtonProps) {
   const text = title ?? label ?? '';
-  const pressScale = useSharedValue(1);
-  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: pressScale.get() }] }));
   const inactive = disabled || loading;
-  const iconColor = inactive ? colors.disabled : labelColors[variant];
+  const palette = useAccentPalette();
+  // Primary and secondary follow the session accent so a blue accent never
+  // leaves a green pill behind; other variants keep their semantic colour.
+  const background = backgrounds(palette)[variant];
+  const labelColor = labelColors(palette)[variant];
+  const iconColor = inactive ? palette.disabled : labelColor;
+  const reduceMotion = useReduceMotion();
+
+  const [press] = React.useState(() => new Animated.Value(1));
+  const running = React.useRef<Animated.CompositeAnimation | null>(null);
+
+  // Stop the in-flight timing when the button unmounts mid-press, and settle at
+  // rest if the system preference flips while it is still animating.
+  React.useEffect(() => () => running.current?.stop(), []);
+  React.useEffect(() => {
+    if (!reduceMotion) return;
+    running.current?.stop();
+    press.setValue(1);
+  }, [press, reduceMotion]);
+
+  const animatePress = React.useCallback(
+    (toValue: number, duration: number) => {
+      // A new touch cancels the previous timing so a quick tap never leaves two
+      // animations fighting over the same scale.
+      running.current?.stop();
+      if (reduceMotion) {
+        press.setValue(toValue);
+        return;
+      }
+      running.current = Animated.timing(press, {
+        toValue,
+        duration,
+        easing: toValue < 1 ? motion.easing.out : motion.easing.in,
+        useNativeDriver: true,
+      });
+      running.current.start();
+    },
+    [press, reduceMotion],
+  );
 
   const renderIcon = (value: IconName | LucideIcon | undefined, fallbackName?: IconName) => {
     if (!value && !fallbackName) return null;
@@ -102,33 +149,33 @@ export function Button({
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}
       onPress={onPress}
-      onPressIn={() => { pressScale.set(withTiming(0.97, { duration: 120, reduceMotion: ReduceMotion.System })); }}
-      onPressOut={() => { pressScale.set(withTiming(1, { duration: 180, reduceMotion: ReduceMotion.System })); }}
+      onPressIn={() => animatePress(motion.pressScale, motion.press)}
+      onPressOut={() => animatePress(1, motion.release)}
       testID={testID}
       android_ripple={{ color: 'rgba(38, 59, 41, 0.10)', borderless: false }}
       style={({ pressed }) => [
         styles.base,
         {
           minHeight: heights[size],
-          backgroundColor: backgrounds[variant],
+          backgroundColor: background,
           borderWidth: variant === 'outline' ? 1 : 0,
-          borderColor: colors.border,
+          borderColor: palette.border,
           alignSelf: fullWidth ? 'stretch' : 'flex-start',
-          opacity: inactive ? 0.55 : pressed ? 0.86 : 1,
+          opacity: inactive ? 0.55 : pressed ? motion.pressOpacity : 1,
         },
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={labelColors[variant]} />
+        <ActivityIndicator size="small" color={labelColor} />
       ) : (
-        <Animated.View style={[styles.content, pressStyle]}>
+        <Animated.View style={[styles.content, { transform: [{ scale: press }] }]}>
           {renderIcon(icon)}
           {children ?? (
             <Text
               variant="strong"
               weight="semiBold"
-              color={inactive ? colors.disabled : labelColors[variant]}
+              color={inactive ? palette.disabled : labelColor}
               style={styles.label}
             >
               {text}

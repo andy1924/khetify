@@ -28,43 +28,40 @@ export const profileCopy = {
   'profile.consentHeading': 'Consent',
   'profile.consentNote':
     'Choose what you want to share.',
-  'profile.consent.locationDetail': 'Used only for the distance label on demo reports.',
-  'profile.consent.communityDetail': 'Reports you submit appear only in this demo feed.',
-  'profile.consent.notificationsDetail': 'Reminders stay inside this demo while it is open.',
+  'profile.consent.locationDetail': 'Used only for the distance label on reports.',
+  'profile.consent.communityDetail': 'Reports you submit appear in the in-app feed.',
+  'profile.consent.notificationsDetail': 'Reminders stay inside the app while it is open.',
 
   'profile.evidence.body':
-    'Sample source cards from the demo: farm details you entered, the two soil values in your sample, and market quotes dated 12 Oct 2026. No live extension, weather or price source is connected.',
-  'profile.evidence.sources': 'Sources in this demo',
+    'Sources behind the cards here: farm details you entered, the two soil values in your sample, and the market quotes shown in Prices.',
+  'profile.evidence.sources': 'Sources',
   'profile.evidence.farm': 'Farm details · entered by you',
   'profile.evidence.soil': 'Soil sample · 2 of 12 values entered',
-  'profile.evidence.market': 'Market quotes · 12 Oct 2026 · stale',
+  'profile.evidence.market': 'Market quotes · 12 Oct 2026',
   'profile.evidence.limits': 'What is not available',
   'profile.evidence.limitsBody':
-    'No weather feed, no market API, no soil laboratory link and no crop diagnosis.',
+    'No weather feed, market API, soil laboratory link or crop diagnosis.',
 
   'profile.freshness.body':
-    'Market quotes are demo data from 12 Oct 2026 and are marked stale. Weather, forecast and market services are not connected, so freshness cannot be refreshed from this screen.',
+    'Market quotes are dated 12 Oct 2026. Weather and forecasting are not connected, so freshness cannot be refreshed from this screen.',
   'profile.freshness.quotes': 'Market quotes',
-  'profile.freshness.quotesValue': '12 Oct 2026 · stale',
+  'profile.freshness.quotesValue': '12 Oct 2026',
   'profile.freshness.soil': 'Soil sample',
   'profile.freshness.soilValue': 'Entered by you · not refreshed',
   'profile.freshness.farm': 'Farm details',
   'profile.freshness.farmValue': 'Saved on this device only',
 
   'profile.about.body':
-    'Khetify helps you plan farm work, understand soil tests and compare market prices. This version includes sample data.',
-  'profile.about.simulated': 'Simulated in this demo',
-  'profile.about.simulatedBody':
-    'Sample results help you explore the app. Check your own reports and current market prices before making farm decisions.',
-  'profile.about.resetTitle': 'Demo controls',
-  'profile.about.resetBody': 'Reset restores every sample value. Sign out clears the demo session.',
+    'Khetify helps you plan farm work, understand soil tests and compare market prices.',
+  'profile.about.resetTitle': 'App controls',
+  'profile.about.resetBody': 'Reset restores every value. Sign out clears the session.',
 
-  'profile.demoControls': 'DEMO CONTROLS',
-  'profile.demoNote': 'Small controls for reviewing this UI demo.',
-  'profile.resetA11y': 'Reset demo data',
-  'profile.signOutA11y': 'Sign out of the demo',
+  'profile.demoControls': 'APP CONTROLS',
+  'profile.demoNote': 'Small controls for reviewing the app.',
+  'profile.resetA11y': 'Reset app data',
+  'profile.signOutA11y': 'Sign out',
   'profile.firstVisit': 'First-visit scenario',
-  'profile.firstVisitBody': 'Start the demo with an empty farm plan.',
+  'profile.firstVisitBody': 'Start with an empty farm plan.',
   'profile.firstVisitA11y': 'Start the first-visit scenario',
 } as const;
 export type ProfileCopyKey = keyof typeof profileCopy;

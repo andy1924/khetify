@@ -7,5 +7,5 @@ export { SoilScreen } from './SoilScreen';
 export { SoilResultScreen } from './SoilResultScreen';
 export { ImportScreen } from './ImportScreen';
 export { ForecastScreen } from './ForecastScreen';
-export { MandiScreen } from './MandiScreen';
+export { MarketScreen } from './MarketScreen';
 export { PhotoToolScreen } from './PhotoToolScreen';

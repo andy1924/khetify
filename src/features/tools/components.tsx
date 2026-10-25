@@ -1,12 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Button, Icon, Text, colors, radii, type IconName } from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 
 /* ---------------------------------------------------------------- headings */
 
 export function ScreenHeading({
   title,
-  titleColor = colors.heading,
+  titleColor,
 }: {
   title: string;
   subtitle?: string;
@@ -15,6 +16,7 @@ export function ScreenHeading({
   /** Tools and Soil use a 14/400 subtitle; other screens use 13/400. */
   subtitleSize?: number;
 }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.heading}>
       <Text style={[styles.headingTitle, { color: titleColor }]} accessibilityRole="header">
@@ -28,20 +30,25 @@ export function ScreenHeading({
 
 export type ChipTone = 'ready' | 'limited' | 'unavailable' | 'partial' | 'gold' | 'best';
 
-const chipTones: Record<ChipTone, { bg: string; ink: string }> = {
-  ready: { bg: '#E3EED7', ink: '#5c6953' },
-  limited: { bg: '#F4EDDC', ink: '#76663b' },
-  unavailable: { bg: '#EAEDE5', ink: '#606d56' },
-  partial: { bg: '#F5EFDE', ink: '#7a693c' },
-  gold: { bg: '#F1EDDF', ink: '#74653f' },
-  best: { bg: '#EBF2E4', ink: '#4A693D' },
-};
+/** Accent-derived tones; the amber/gold states stay semantic warnings. */
+function chipTones(p: AccentPalette): Record<ChipTone, { bg: string; ink: string }> {
+  return {
+    ready: { bg: p.chip, ink: p.chipInk },
+    limited: { bg: '#F4EDDC', ink: '#76663b' },
+    unavailable: { bg: p.surfaceSoft, ink: p.muted },
+    partial: { bg: '#F5EFDE', ink: '#7a693c' },
+    gold: { bg: '#F1EDDF', ink: '#74653f' },
+    best: { bg: p.chip, ink: p.deep },
+  };
+}
 
 export function StatusChip({ label, tone }: { label: string; tone: ChipTone }) {
-  const palette = chipTones[tone];
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const tones = chipTones(palette)[tone];
   return (
-    <View style={[styles.chip, { backgroundColor: palette.bg }]}>
-      <Text style={[styles.chipLabel, { color: palette.ink }]} numberOfLines={1}>
+    <View style={[styles.chip, { backgroundColor: tones.bg }]}>
+      <Text style={[styles.chipLabel, { color: tones.ink }]} numberOfLines={1}>
         {label}
       </Text>
     </View>
@@ -61,6 +68,7 @@ export function Banner({
   icon?: IconName;
   tone?: 'warning' | 'danger';
 }) {
+  const styles = useStyles(makeStyles);
   const ink = tone === 'danger' ? '#8B7746' : '#78643A';
   return (
     <View
@@ -79,9 +87,11 @@ export function Banner({
 }
 
 export function InfoStrip({ text, icon = 'info' }: { text: string; icon?: IconName }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.infoStrip}>
-      <Icon name={icon} size={16} color="#8D9A81" strokeWidth={1.6} />
+      <Icon name={icon} size={16} color={palette.icon} strokeWidth={1.6} />
       <Text style={styles.infoText}>{text}</Text>
     </View>
   );
@@ -102,10 +112,12 @@ export function HairlineRow({
   style?: StyleProp<ViewStyle>;
   last?: boolean;
 }) {
+  const styles = useStyles(makeStyles);
   return <View style={[styles.hairlineRow, last && styles.noHairline, style]}>{children}</View>;
 }
 
 export function KeyRow({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.keyRow}>
       <Text style={styles.keyLabel}>{label}</Text>
@@ -125,6 +137,8 @@ export function SelectCircle({
   onPress: () => void;
   label: string;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -134,7 +148,7 @@ export function SelectCircle({
       hitSlop={10}
       style={[styles.circle, selected ? styles.circleOn : styles.circleOff]}
     >
-      {selected ? <Icon name="check" size={14} color="#243527" strokeWidth={2} /> : null}
+      {selected ? <Icon name="check" size={14} color={palette.ink} strokeWidth={2} /> : null}
     </Pressable>
   );
 }
@@ -150,6 +164,8 @@ export function PickerField({
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <Pressable
       accessibilityRole="button"
@@ -162,7 +178,7 @@ export function PickerField({
         <Text style={styles.pickerValue} numberOfLines={1}>
           {value}
         </Text>
-        <Icon name="chevron-down" size={14} color={colors.muted} />
+        <Icon name="chevron-down" size={14} color={palette.muted} />
       </View>
     </Pressable>
   );
@@ -184,6 +200,8 @@ export function TextFieldRow({
   keyboardType?: 'number-pad' | 'decimal-pad';
   error?: string;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <View
       style={[
@@ -196,10 +214,10 @@ export function TextFieldRow({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#A3AF99"
+        placeholderTextColor={palette.iconFaint}
         keyboardType={keyboardType}
         accessibilityLabel={label}
-        selectionColor="#3D5C30"
+        selectionColor={palette.deep}
         style={styles.textFieldInput}
       />
     </View>
@@ -213,6 +231,7 @@ export function TwoButtonRow({
   primary: React.ReactNode;
   secondary: React.ReactNode;
 }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.twoButtons}>
       <View style={styles.twoButtonCell}>{primary}</View>
@@ -223,84 +242,85 @@ export function TwoButtonRow({
 
 export { Button };
 
-const hairline = { borderBottomWidth: 0, borderBottomColor: '#DFE6D8' } as const;
+const makeStyles = (p: AccentPalette) => {
+  const hairline = { borderBottomWidth: 0, borderBottomColor: p.border } as const;
+  return StyleSheet.create({
+    heading: { gap: 6 },
+    headingTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 28, lineHeight: 39.2 },
+    headingSubtitle: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: p.muted },
 
-const styles = StyleSheet.create({
-  heading: { gap: 6 },
-  headingTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 28, lineHeight: 39.2 },
-  headingSubtitle: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#6a7667' },
+    chip: {
+      minHeight: 25,
+      borderRadius: radii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      alignItems: 'center',
+      justifyContent: 'center',
+      alignSelf: 'flex-start',
+    },
+    chipLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 14 },
 
-  chip: {
-    minHeight: 25,
-    borderRadius: radii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'flex-start',
-  },
-  chipLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 11, lineHeight: 14 },
+    banner: { borderRadius: 18, padding: 12, gap: 6 },
+    bannerHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    bannerTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18 },
+    bannerBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17 },
 
-  banner: { borderRadius: 18, padding: 12, gap: 6 },
-  bannerHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  bannerTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18 },
-  bannerBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17 },
-
-  infoStrip: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#657360' },
+    infoStrip: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    infoText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
 
 
-  hairlineRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 48,
-    paddingVertical: 12,
-    gap: 12,
-    ...hairline,
-  },
-  noHairline: { borderBottomWidth: 0 },
+    hairlineRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: 48,
+      paddingVertical: 12,
+      gap: 12,
+      ...hairline,
+    },
+    noHairline: { borderBottomWidth: 0 },
 
-  keyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7 },
-  keyLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
-  keyValue: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#526D43', textAlign: 'right' },
+    keyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7 },
+    keyLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
+    keyValue: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: p.deep, textAlign: 'right' },
 
-  circle: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  circleOn: { backgroundColor: '#C4DEA9' },
-  circleOff: { backgroundColor: '#FEFFFC', borderWidth: 1, borderColor: '#D6DFD0' },
+    circle: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+    circleOn: { backgroundColor: p.active },
+    circleOff: { backgroundColor: p.sheet, borderWidth: 1, borderColor: p.border },
 
-  pickerField: {
-    flex: 1,
-    minHeight: 54,
-    borderRadius: 12,
-    backgroundColor: '#F6F8F3',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 4,
-    justifyContent: 'center',
-  },
-  pickerLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#666f63' },
-  pickerValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  pickerValue: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 14, lineHeight: 19, color: '#243527' },
+    pickerField: {
+      flex: 1,
+      minHeight: 54,
+      borderRadius: 12,
+      backgroundColor: p.surfaceSoft,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      gap: 4,
+      justifyContent: 'center',
+    },
+    pickerLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.muted },
+    pickerValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    pickerValue: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 14, lineHeight: 19, color: p.ink },
 
-  textField: {
-    minHeight: 54,
-    borderRadius: 12,
-    backgroundColor: '#F6F8F3',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 4,
-  },
-  textFieldInput: {
-    padding: 0,
-    margin: 0,
-    fontFamily: 'System', fontWeight: '500',
-    fontSize: 15,
-    lineHeight: 21,
-    color: '#243527',
-    includeFontPadding: false,
-  },
-  twoButtons: { flexDirection: 'row', gap: 12 },
-  twoButtonCell: { flex: 1 },
-  pressed: { opacity: 0.86 },
-});
+    textField: {
+      minHeight: 54,
+      borderRadius: 12,
+      backgroundColor: p.surfaceSoft,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      gap: 4,
+    },
+    textFieldInput: {
+      padding: 0,
+      margin: 0,
+      fontFamily: 'System', fontWeight: '500',
+      fontSize: 15,
+      lineHeight: 21,
+      color: p.ink,
+      includeFontPadding: false,
+    },
+    twoButtons: { flexDirection: 'row', gap: 12 },
+    twoButtonCell: { flex: 1 },
+    pressed: { opacity: 0.86 },
+  });
+};

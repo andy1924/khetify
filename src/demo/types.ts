@@ -19,7 +19,7 @@ export type CommunityFilter = 'nearby' | 'crop' | 'week';
 
 export type ConsentKey = 'approximateLocation' | 'communitySharing' | 'notifications';
 
-export type ToolKind = 'soil' | 'cropPhoto' | 'grainQuality' | 'grainId' | 'forecast' | 'mandi' | 'satellite';
+export type ToolKind = 'soil' | 'cropPhoto' | 'grainQuality' | 'grainId' | 'forecast' | 'market' | 'satellite';
 
 export type SoilParamKey =
   | 'ph'
@@ -221,6 +221,8 @@ export type DemoAction =
   | { type: 'onboarding/otpFailed' }
   | { type: 'onboarding/otpReset' }
   | { type: 'onboarding/complete' }
+  /** Dummy Google sign-in: fills the demo account and signs in, in one update. */
+  | { type: 'onboarding/googleSignIn'; location: boolean }
   | { type: 'onboarding/signOut' }
   | { type: 'demo/reset' }
   | { type: 'plan/startFirstVisit' }

@@ -1,52 +1,51 @@
 export const planCopy = {
   'plan.assumptions.title': 'Assumptions & evidence',
   'plan.assumptions.body':
-    'This demo plan uses the farm details you entered and stored sample costs. It is not an agronomic recommendation.',
+    'Your plan uses the farm details you entered and the costs you stored. It is not an agronomic recommendation.',
   'plan.assumptions.area': 'Farm area',
   'plan.assumptions.water': 'Water availability',
   'plan.assumptions.budget': 'Season budget',
   'plan.assumptions.committed': 'Recorded costs',
-  'plan.assumptions.source': 'Costs are sample values entered on this device.',
+  'plan.assumptions.source': 'Costs are values you entered on this device.',
 
   'plan.locked.title': 'Stage locked',
   'plan.locked.body': 'Finish {prerequisite} first. Stages unlock in order.',
   'plan.completed.open': 'Open stage',
 
   'plan.check.title': 'What the plan covers',
-  'plan.demoNote': 'Demo plan · Sample data',
   'plan.footerLink': 'Assumptions & evidence',
 
-  'plan.seed.a': 'Demo seed option A',
-  'plan.seed.b': 'Demo seed option B',
+  'plan.seed.a': 'Seed option A',
+  'plan.seed.b': 'Seed option B',
 
   'plan.stage.seedSheetTitle': 'Choose a seed option',
   'plan.stage.seedSheetBody':
-    'Two sample options for this walkthrough. No variety, dose or price is claimed.',
+    'Two options to compare. No variety, dose or price is claimed.',
   'plan.stage.quantityHint': 'Quantity and cost stay unknown without a verified seed rate.',
   'plan.stage.quoteSavedTitle': 'Quote saved locally',
   'plan.stage.editQuote': 'Edit quote',
   'plan.stage.doneSheetTitle': 'Mark this stage done?',
   'plan.stage.doneSheetBody':
-    'This completes the stage on this device and unlocks the next one. Sample data only.',
+    'This completes the stage on this device and unlocks the next one.',
   'plan.stage.doneConfirm': 'Mark done',
   'plan.stage.lockedTitle': 'Finish the previous stage first',
   'plan.stage.lockedBody': 'Stages unlock in order. Return to your season to continue.',
   'plan.stage.sourceTitle': 'Source calendar',
   'plan.stage.sourceBody':
-    'No live calendar or advisory service is connected. The stage order is a fixed demo sequence from land to selling.',
+    'No live calendar or advisory service is connected. The stage order runs from land to selling.',
   'plan.stage.sourceRow1': 'Land assessment',
   'plan.stage.sourceRow2': 'Seed options',
   'plan.stage.sourceRow3': 'Preparation & sowing',
   'plan.stage.sourceRow4': 'Nutrition & water',
   'plan.stage.sourceRow5': 'Harvest & storage',
   'plan.stage.sourceRow6': 'Selling',
-  'plan.stage.sourceNote': 'Demo sequence · no external schedule.',
+  'plan.stage.sourceNote': 'Stage order · no external schedule.',
 
   'assessment.step2.subtitle': 'Step 2 of 2 · Seed options',
   'assessment.step2.section': 'Seed options',
   'assessment.step2.body':
-    'Choose one sample option. Your choices stay editable after you create the plan.',
-  'assessment.step2.note': 'Demo options only. No variety, dose or price is implied.',
+    'Choose one option. Your choices stay editable after you create the plan.',
+  'assessment.step2.note': 'Options only. No variety, dose or price is implied.',
   'assessment.step2.save': 'Create my plan',
   'assessment.step2.back': 'Back to land & resources',
   'assessment.step2.summary': '{farm} · {area} acres · {season} · {budget}',
@@ -66,7 +65,7 @@ export const planCopy = {
   'assessment.discard': 'Discard',
 
   'revision.editTitle': 'Edit season budget',
-  'revision.editBody': 'The sample cost estimate stays ₹ 3,200 for this demo revision.',
+  'revision.editBody': 'The cost estimate stays ₹ 3,200 for this revision.',
   'revision.editLabel': 'Season budget',
   'revision.editAction': 'Change budget',
   'revision.editApply': 'Apply',

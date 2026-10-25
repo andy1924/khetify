@@ -21,3 +21,5 @@ No remote image URL is needed by the demo. Reference screenshots are never rende
 
 - `assets/images/farmer-phone-magic.jpg`: generated with the built-in image-generation tool. A farmer checking his phone at sunset, with a subtle glowing seedling above the screen. Bundled locally and used on Home and the empty Farm Plan screen with a taller 192-point crop that preserves the farmer's face and hands.
 - The full generation prompt and usage notes are in [farmer-image-prompt.md](farmer-image-prompt.md).
+
+- App icon: original Khetify sprout/field/seed SVG artwork, rendered to PNG with sharp by scripts/generate-icon.mjs. Assets in assets/icon/ include opaque app icon, adaptive foreground and monochrome layer.

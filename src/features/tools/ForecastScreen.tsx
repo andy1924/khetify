@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { useDemo, formatDateLabel } from '../../demo';
+import { useDemoSlices } from '../../demo';
 import { useT } from '../../locales';
-import { Button, Icon, Screen, Text } from './ui';
+import { Button, Icon, Screen, Text} from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { PickerField, ScreenHeading, Sheet, StatusChip } from './components';
 import { toolCopy } from './strings';
 import { useToolRecorder } from './history';
@@ -13,18 +14,17 @@ const MARKETS = ['Nashik', 'Lasalgaon', 'Pimpalgaon'];
 
 /** 11 · Forecast — the data gate is closed, so no projection is ever rendered. */
 export function ForecastScreen() {
-  const { state } = useDemo();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['market'] as const);
   const recordToolUse = useToolRecorder();
   const t = useT();
   const [picker, setPicker] = useState<'commodity' | 'market' | null>(null);
   const [marketName, setMarketName] = useState('Nashik');
   const [commodity, setCommodity] = useState(state.market.commodity);
 
-  const lastQuote = state.market.quotes[0]?.quotedOn;
-
   const showQuotes = () => {
     recordToolUse('forecast', 'tools.forecast.title', `${commodity} · ${marketName} · no forecast`);
-    router.push(`/tools/mandi?commodity=${encodeURIComponent(commodity)}`);
+    router.push(`/tools/market?commodity=${encodeURIComponent(commodity)}`);
   };
 
   return (
@@ -76,20 +76,12 @@ export function ForecastScreen() {
         }}
         onClose={() => setPicker(null)}
       />
-
-      {lastQuote ? (
-        <View style={styles.quoteNote}>
-          <Icon name="info" size={15} color="#8D9A81" />
-          <Text style={styles.quoteText}>
-            {t('mandi.stale', { date: formatDateLabel(lastQuote) })}
-          </Text>
-        </View>
-      ) : null}
     </Screen>
   );
 }
 
 function CheckRow({ label, value }: { label: string; value: string }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.checkRow}>
       <Text style={styles.checkLabel}>{label}</Text>
@@ -114,6 +106,8 @@ export function PickerSheet({
   onSelect: (value: string) => void;
   onClose: () => void;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <Sheet visible={visible} onClose={onClose} title={title}>
       {options.map(option => {
@@ -128,7 +122,7 @@ export function PickerSheet({
             style={[styles.option, active && styles.optionActive]}
           >
             <Text style={styles.optionLabel}>{option}</Text>
-            {active ? <Icon name="check" size={18} color="#3D5C30" /> : null}
+            {active ? <Icon name="check" size={18} color={palette.deep} /> : null}
           </Pressable>
         );
       })}
@@ -136,31 +130,29 @@ export function PickerSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   pickers: { flexDirection: 'row', gap: 12 },
   headline: { gap: 12, paddingVertical: 8 },
-  headlineText: { fontFamily: 'System', fontWeight: '600', fontSize: 24, lineHeight: 30, color: '#4D6541' },
-  body: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#697460' },
-  dataCard: { backgroundColor: '#F3F6ED', borderRadius: 18, padding: 16, gap: 10 },
+  headlineText: { fontFamily: 'System', fontWeight: '600', fontSize: 24, lineHeight: 30, color: p.deep },
+  body: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: p.muted },
+  dataCard: { backgroundColor: p.surfaceSoft, borderRadius: 18, padding: 16, gap: 10 },
   eyebrow: {
     fontFamily: 'System', fontWeight: '600',
     fontSize: 10,
     lineHeight: 14,
     letterSpacing: 0.4,
-    color: '#68715d',
+    color: p.muted,
   },
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  checkLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#68715f' },
+  checkLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
   checkValue: {
     fontFamily: 'System', fontWeight: '500',
     fontSize: 12,
     lineHeight: 17,
-    color: '#5f734f',
+    color: p.deep,
     textAlign: 'right',
   },
-  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#687460' },
-  quoteNote: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  quoteText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697462' },
+  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
   option: {
     minHeight: 48,
     flexDirection: 'row',
@@ -168,8 +160,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#F4F7EF',
+    backgroundColor: p.surfaceSoft,
   },
-  optionActive: { backgroundColor: '#E4EED8' },
-  optionLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: '#263B29' },
+  optionActive: { backgroundColor: p.active },
+  optionLabel: { fontFamily: 'System', fontWeight: '500', fontSize: 14, lineHeight: 20, color: p.ink },
 });

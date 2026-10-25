@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useDemo } from '../../demo';
+import { useDemoSlices, useDemoActions } from '../../demo';
 import { formatDateLabel, type SoilParamKey } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Text } from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { Banner, ScreenHeading, SelectCircle, TwoButtonRow } from './components';
 import { soilParamLabel, toolCopy } from './strings';
 
@@ -17,7 +18,10 @@ function displayValue(key: SoilParamKey, value: string, unit?: string): string {
 
 /** 10 · Explicit import confirmation — review selected fields, confirm or cancel. */
 export function ImportScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['soil', 'farm', 'plan'] as const);
+  const actions = useDemoActions();
   useFocusEffect(useCallback(() => () => actions.cancelSoilImport(), [actions]));
   const t = useT();
   const result = state.soil.result;
@@ -71,7 +75,7 @@ export function ImportScreen() {
 
       <View style={styles.destination}>
         <View style={styles.destinationRow}>
-          <Icon name="sprout" size={28} color="#72975A" />
+          <Icon name="sprout" size={28} color={palette.icon} />
           <View style={styles.destinationCopy}>
             <Text style={styles.farmName}>{state.farm.farmName}</Text>
             <Text style={styles.planLine}>
@@ -131,7 +135,7 @@ export function ImportScreen() {
         />
 
         <View style={styles.selectionNote}>
-          <Icon name="shield-check" size={15} color="#8D9A81" />
+          <Icon name="shield-check" size={15} color={palette.icon} />
           <Text style={styles.selectionText}>
             {selected.length === 0
               ? toolCopy('import.needOne')
@@ -159,6 +163,7 @@ export function ImportScreen() {
 }
 
 function ReadOnlyRow({ label, value }: { label: string; value: string }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.row}>
       <View style={styles.circleSpacer} />
@@ -168,38 +173,38 @@ function ReadOnlyRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  destination: { backgroundColor: '#EFF5E7', borderRadius: 18, padding: 14 },
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
+  destination: { backgroundColor: p.surfaceSoft, borderRadius: 18, padding: 14 },
   destinationRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   destinationCopy: { flex: 1, gap: 4 },
-  farmName: { fontFamily: 'System', fontWeight: '600', fontSize: 20, lineHeight: 28, color: '#3C5930' },
-  planLine: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#647059' },
+  farmName: { fontFamily: 'System', fontWeight: '600', fontSize: 20, lineHeight: 28, color: p.heading },
+  planLine: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
 
   panel: {
-    backgroundColor: '#FAFCF6',
+    backgroundColor: p.page,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#DFE8D5',
+    borderColor: p.border,
     padding: 18,
     gap: 14,
   },
-  question: { fontFamily: 'System', fontWeight: '600', fontSize: 22, lineHeight: 28.6, color: '#344F2A' },
-  selectHint: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#6a7560' },
+  question: { fontFamily: 'System', fontWeight: '600', fontSize: 22, lineHeight: 28.6, color: p.heading },
+  selectHint: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.muted },
   rows: { gap: 2 },
   row: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  rowLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#6a7560' },
+  rowLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
   rowValue: {
     fontFamily: 'System', fontWeight: '500',
     fontSize: 12,
     lineHeight: 17,
-    color: '#526D43',
+    color: p.deep,
     textAlign: 'right',
   },
-  rowValueMuted: { color: '#7E8A74' },
+  rowValueMuted: { color: p.faint },
   circleSpacer: { width: 22, height: 22 },
-  divider: { height: 0, backgroundColor: '#E6EBE1' },
-  note: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#68755d' },
+  divider: { height: 0, backgroundColor: p.borderSoft },
+  note: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: p.muted },
   selectionNote: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  selectionText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#68755d' },
-  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697461' },
+  selectionText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.muted },
+  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.faint },
 });

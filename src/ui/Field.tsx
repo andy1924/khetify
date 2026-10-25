@@ -10,6 +10,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors, fonts, radii } from './tokens';
+import { useAccentPalette, useStyles, type AccentPalette } from './AccentTheme';
 import { Text } from './Text';
 
 export type FieldProps = {
@@ -75,9 +76,11 @@ export function Field({
   onBlur,
   onFocus,
 }: FieldProps) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   const canEdit = editable && Boolean(onChangeText);
   const background =
-    tone === 'soft' ? colors.surfaceSoft : tone === 'plain' ? colors.surfacePlain : colors.transparent;
+    tone === 'soft' ? palette.surfaceSoft : tone === 'plain' ? palette.page : colors.transparent;
 
   return (
     <View style={style}>
@@ -93,7 +96,7 @@ export function Field({
       >
         <View style={styles.labels}>
           {label ? (
-            <Text variant="caption" color={colors.muted} style={styles.label}>
+            <Text variant="caption" color={palette.muted} style={styles.label}>
               {label}
             </Text>
           ) : null}
@@ -103,7 +106,7 @@ export function Field({
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
-                placeholderTextColor={colors.muted}
+                placeholderTextColor={palette.faint}
                 keyboardType={keyboardType as KeyboardTypeOptions}
                 multiline={multiline}
                 autoFocus={autoFocus}
@@ -116,7 +119,7 @@ export function Field({
                 onSubmitEditing={onSubmitEditing}
                 accessibilityLabel={accessibilityLabel ?? label ?? placeholder}
                 testID={testID}
-                selectionColor={colors.accentDeep}
+                selectionColor={palette.deep}
                 style={[
                   styles.editableInput,
                   large ? styles.largeValue : styles.value,
@@ -130,7 +133,7 @@ export function Field({
             <Text
               variant={large ? 'title' : 'body'}
               weight={large ? 'medium' : 'regular'}
-              color={value ? colors.ink : colors.muted}
+              color={value ? palette.ink : palette.faint}
               style={large ? styles.largeValueText : styles.valueText}
               numberOfLines={multiline ? undefined : 1}
             >
@@ -145,7 +148,7 @@ export function Field({
           {error}
         </Text>
       ) : hint ? (
-        <Text variant="meta" color={colors.faint} style={styles.message}>
+        <Text variant="meta" color={palette.faint} style={styles.message}>
           {hint}
         </Text>
       ) : null}
@@ -153,7 +156,7 @@ export function Field({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   container: {
     minHeight: 54,
     borderRadius: radii.md,
@@ -183,7 +186,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 16,
     lineHeight: 24,
-    color: colors.ink,
+    color: p.ink,
     includeFontPadding: false,
   },
   largeValue: {
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 22,
     lineHeight: 26,
-    color: colors.ink,
+    color: p.ink,
     includeFontPadding: false,
   },
   valueText: {

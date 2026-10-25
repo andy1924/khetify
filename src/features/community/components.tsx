@@ -1,7 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Ellipse, Line, Path, Rect } from 'react-native-svg';
-import { Chip, Icon, colors, type IconName } from '../../ui';
+import { Chip, Icon, type IconName } from '../../ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { Text } from '../../ui';
 import type { ObservationStatus } from '../../demo';
 
@@ -22,12 +23,14 @@ export function CommunityHeading({
   action?: React.ReactNode;
   back?: React.ReactNode;
 }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <View style={styles.heading}>
       {back}
       <View style={styles.headingRow}>
         <View style={styles.headingText}>
-          <Text variant="heading" color={colors.heading} accessibilityRole="header">
+          <Text variant="heading" color={palette.heading} accessibilityRole="header">
             {title}
           </Text>
         </View>
@@ -45,9 +48,15 @@ export const STATUS_KEYS = {
   confirmed: 'community.status.confirmed',
 } as const;
 
-export function StatusChip({ status, label }: { status: ObservationStatus; label: string }) {
+export const StatusChip = React.memo(function StatusChip({
+  status,
+  label,
+}: {
+  status: ObservationStatus;
+  label: string;
+}) {
   return <Chip label={label} tone={status} />;
-}
+});
 
 const POST_ICONS: Record<ObservationStatus, IconName> = {
   reported: 'bug',
@@ -60,46 +69,55 @@ const POST_ICONS: Record<ObservationStatus, IconName> = {
  * title, 12/400 line — closed by a hairline. Tappable rows keep ≥48dp and an
  * accessibility label carrying the whole post.
  */
-export function FeedPost({
+/**
+ * Memoised: the community feed re-renders while a report is being composed in
+ * another route, and none of these props change. `onOpen` takes the post id so
+ * the parent can pass one stable callback.
+ */
+export const FeedPost = React.memo(function FeedPost({
+  id,
   time,
   title,
   detail,
   status,
   statusLabel,
-  onPress,
+  onOpen,
 }: {
+  id: string;
   time: string;
   title: string;
   detail: string;
   status: ObservationStatus;
   statusLabel: string;
-  onPress: () => void;
+  onOpen: (id: string) => void;
 }) {
+  const styles = useStyles(makeStyles);
+  const palette = useAccentPalette();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${statusLabel}. ${time}. ${detail}`}
-      onPress={onPress}
+      onPress={() => onOpen(id)}
       style={({ pressed }) => [styles.post, pressed && styles.pressed]}
     >
       <View style={styles.postMeta}>
-        <Icon name={POST_ICONS[status]} size={20} color={colors.icon} strokeWidth={1.6} />
-        <Text variant="meta" color="#687160" style={styles.postMetaText} numberOfLines={1}>
+        <Icon name={POST_ICONS[status]} size={20} color={palette.icon} strokeWidth={1.6} />
+        <Text variant="meta" color={palette.faint} style={styles.postMetaText} numberOfLines={1}>
           {time}
         </Text>
       </View>
       <View style={styles.badgeRow}>
         <StatusChip status={status} label={statusLabel} />
       </View>
-      <Text variant="subtitle" color="#47603B">
+      <Text variant="subtitle" color={palette.ink}>
         {title}
       </Text>
-      <Text variant="caption" color="#68715C" style={styles.postDetail}>
+      <Text variant="caption" color={palette.faint} style={styles.postDetail}>
         {detail}
       </Text>
     </Pressable>
   );
-}
+});
 
 /* ---------------------------------------------------------- fixture photos */
 
@@ -136,7 +154,8 @@ export function findFixturePhoto(id: string | null): FixturePhoto | null {
 }
 
 /** Native vector rendering of a fixture; no image files or permissions. */
-export function FixtureArt({
+/** Memoised: the SVG fixtures are deep trees and never change for fixed props. */
+export const FixtureArt = React.memo(function FixtureArt({
   id,
   height = 148,
   compact = false,
@@ -145,6 +164,8 @@ export function FixtureArt({
   height?: number;
   compact?: boolean;
 }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <View style={[styles.art, { height }]} accessible={false}>
       <Svg width="100%" height="100%" viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice">
@@ -156,14 +177,14 @@ export function FixtureArt({
       </Svg>
       {!compact ? (
         <View style={styles.artBadge}>
-          <Text variant="meta" weight="medium" color="#4A693D">
+          <Text variant="meta" weight="medium" color={palette.chipInk}>
             Fixture
           </Text>
         </View>
       ) : null}
     </View>
   );
-}
+});
 
 function LeafSpotsArt() {
   return (
@@ -232,7 +253,7 @@ function SproutRowsArt() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   heading: { gap: 10 },
   headingRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   headingText: { flex: 1, gap: 6 },
@@ -243,7 +264,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: 8,
     borderBottomWidth: 0,
-    borderBottomColor: colors.borderSoft,
+    borderBottomColor: p.borderSoft,
   },
   pressed: { opacity: 0.85 },
   postMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 20 },

@@ -81,7 +81,7 @@ import {
   X,
 } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { colors } from './tokens';
+import { useAccentPalette } from './AccentTheme';
 
 /** Icon names used across the reference screens plus common UI affordances. */
 export const iconMap = {
@@ -182,7 +182,9 @@ export type IconProps = {
  * Thin wrapper over lucide-react-native with the reference stroke weight
  * (1.6 at 18–22pt) and a graceful fallback for unknown names.
  */
-export function Icon({ name, size = 18, color = colors.icon, strokeWidth = 1.6, component }: IconProps) {
+export function Icon({ name, size = 18, color, strokeWidth = 1.6, component }: IconProps) {
+  const palette = useAccentPalette();
+  color = color ?? palette.icon;
   const Glyph = component ?? iconMap[name as keyof typeof iconMap];
   if (!Glyph) return null;
   return <Glyph size={size} color={color} strokeWidth={strokeWidth} />;

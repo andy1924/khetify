@@ -1,12 +1,12 @@
 import type { DemoState, MarketRow, Observation, PlanStage, SoilSummary, StageId } from './types';
 import { SOIL_PARAMS } from './fixtures';
 
-export function selectRemainingBudget(state: DemoState): number {
+export function selectRemainingBudget(state: Pick<DemoState, 'plan'>): number {
   return Math.max(0, state.plan.budget - state.plan.committedCost);
 }
 
 /** Net proceeds are `null` whenever any cost is unknown — never treated as zero. */
-export function marketRows(state: DemoState): MarketRow[] {
+export function marketRows(state: Pick<DemoState, 'market'>): MarketRow[] {
   const quantity = state.market.quantityQuintals;
   return state.market.quotes
     .map(quote => {
@@ -36,7 +36,7 @@ export function marketRows(state: DemoState): MarketRow[] {
 
 export const selectMarketRows = marketRows;
 
-export function selectSoilSummary(state: DemoState): SoilSummary {
+export function selectSoilSummary(state: Pick<DemoState, 'soil'>): SoilSummary {
   const entered = SOIL_PARAMS.flatMap(key => {
     const value = state.soil.values[key];
     return value !== undefined && value.trim() !== '' ? [{ key, value: value.trim() }] : [];
@@ -49,7 +49,9 @@ export function selectSoilSummary(state: DemoState): SoilSummary {
   };
 }
 
-export function selectFilteredFeed(state: DemoState): Observation[] {
+export function selectFilteredFeed(
+  state: Pick<DemoState, 'community' | 'farm'>,
+): Observation[] {
   const { filter, feed } = state.community;
   return feed.filter(item => {
     if (filter === 'nearby') return item.distanceKm <= 10;
@@ -58,18 +60,18 @@ export function selectFilteredFeed(state: DemoState): Observation[] {
   });
 }
 
-export function selectStage(state: DemoState, id: StageId): PlanStage | undefined {
+export function selectStage(state: Pick<DemoState, 'plan'>, id: StageId): PlanStage | undefined {
   return state.plan.stages.find(stage => stage.id === id);
 }
 
-export function selectCurrentStage(state: DemoState): PlanStage | undefined {
+export function selectCurrentStage(state: Pick<DemoState, 'plan'>): PlanStage | undefined {
   return state.plan.stages.find(stage => stage.status === 'current');
 }
 
-export function selectIsAuthenticated(state: DemoState): boolean {
+export function selectIsAuthenticated(state: Pick<DemoState, 'onboarding'>): boolean {
   return state.onboarding.signedIn && state.onboarding.completed;
 }
 
-export function selectStageIndex(state: DemoState, id: StageId): number {
+export function selectStageIndex(state: Pick<DemoState, 'plan'>, id: StageId): number {
   return state.plan.stages.findIndex(stage => stage.id === id);
 }

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { useDemo } from '../../demo';
+import { useDemoSlices, useDemoActions } from '../../demo';
 import { formatDateLabel, type SoilParamKey } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Text } from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { Banner, ScreenHeading, Sheet, StatusChip } from './components';
 import { soilParamLabel, toolCopy } from './strings';
 
@@ -17,7 +18,10 @@ function displayValue(key: SoilParamKey, value: string, unit?: string): string {
 
 /** 09 · Soil result — partial data, persistent limitations, evidence sheet. */
 export function SoilResultScreen() {
-  const { state, actions } = useDemo();
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['soil'] as const);
+  const actions = useDemoActions();
   const t = useT();
   const [evidenceOpen, setEvidenceOpen] = useState(false);
 
@@ -48,7 +52,7 @@ export function SoilResultScreen() {
     <Screen>
       <ScreenHeading
         title={t('soilResult.title')}
-        subtitle={t('soilResult.subtitle', { date: formatDateLabel(result.sampleDate) })}
+        subtitle={formatDateLabel(result.sampleDate)}
       />
 
       {partial ? <StatusChip label={t('soilResult.partial')} tone="partial" /> : null}
@@ -73,11 +77,7 @@ export function SoilResultScreen() {
 
       {partial ? (
         <Text style={styles.explain}>{t('soilResult.explain')}</Text>
-      ) : (
-        <Text style={styles.explain}>
-          {toolCopy('soilResult.completeNote', { total: result.totalCount })}
-        </Text>
-      )}
+      ) : null}
 
       <View style={styles.limitations}>
         <Text style={styles.limitationsTitle}>{t('soilResult.limitations')}</Text>
@@ -91,14 +91,14 @@ export function SoilResultScreen() {
         onPress={() => setEvidenceOpen(true)}
         style={styles.evidenceRow}
       >
-        <Icon name="book-open" size={18} color="#52664D" />
+        <Icon name="book-open" size={18} color={palette.icon} />
         <Text style={styles.evidenceLabel}>{t('soilResult.evidence')}</Text>
-        <Icon name="chevron-down" size={16} color="#52664D" />
+        <Icon name="chevron-down" size={16} color={palette.icon} />
       </Pressable>
 
       {state.soil.imported ? (
         <View style={styles.importedNote}>
-          <Icon name="check" size={16} color="#52664D" />
+          <Icon name="check" size={16} color={palette.icon} />
           <Text style={styles.importedText}>
             {toolCopy('soil.imported')} · {toolCopy('soil.importedNote')}
           </Text>
@@ -115,7 +115,6 @@ export function SoilResultScreen() {
         onClose={() => setEvidenceOpen(false)}
         title={t('soilResult.evidence')}
       >
-        <Text style={styles.sheetBody}>{t('soilResult.evidenceBody')}</Text>
         <View style={styles.evidenceList}>
           <EvidenceRow label={toolCopy('soilResult.evidenceSample')} value={formatDateLabel(result.sampleDate)} />
           <EvidenceRow
@@ -132,27 +131,29 @@ export function SoilResultScreen() {
 }
 
 function EvidenceRow({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
   return (
     <View style={styles.evidenceItem}>
       <Text style={styles.evidenceItemLabel}>{label}</Text>
-      <Text style={[styles.evidenceItemValue, muted && { color: '#8A9483' }]}>{value}</Text>
+      <Text style={[styles.evidenceItemValue, muted && { color: palette.faint }]}>{value}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   valuesCard: {
-    backgroundColor: '#EDF4E4',
+    backgroundColor: p.surface,
     borderRadius: 18,
     padding: 16,
     gap: 8,
   },
-  captured: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#607052' },
+  captured: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
   valueGrid: { flexDirection: 'row', gap: 18, flexWrap: 'wrap' },
   valueCell: { flexBasis: '44%', flexGrow: 1, minWidth: 0, gap: 5 },
-  valueBig: { fontFamily: 'System', fontWeight: '600', fontSize: 36, lineHeight: 45, color: '#3D5C30' },
-  valueLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#637058' },
-  explain: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: '#687560' },
+  valueBig: { fontFamily: 'System', fontWeight: '600', fontSize: 36, lineHeight: 45, color: p.deep },
+  valueLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
+  explain: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18.2, color: p.muted },
   limitations: { backgroundColor: '#F6F0E0', borderRadius: 18, padding: 16, gap: 8 },
   limitationsTitle: { fontFamily: 'System', fontWeight: '600', fontSize: 13, lineHeight: 18, color: '#7b683a' },
   limitationsBody: { fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#77694b' },
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#F4F7EF',
+    backgroundColor: p.surfaceSoft,
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -171,15 +172,14 @@ const styles = StyleSheet.create({
     fontFamily: 'System', fontWeight: '600',
     fontSize: 13,
     lineHeight: 18,
-    color: '#5A714C',
+    color: p.deep,
   },
   importedNote: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  importedText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#687560' },
+  importedText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.muted },
   actions: { gap: 8 },
-  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 10, lineHeight: 14, color: '#697462' },
-  sheetBody: { fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#687560' },
-  evidenceList: { backgroundColor: '#F4F7EF', borderRadius: 14, paddingHorizontal: 14 },
+  footnote: { fontFamily: 'System', fontWeight: '400', fontSize: 10, lineHeight: 14, color: p.faint },
+  evidenceList: { backgroundColor: p.surfaceSoft, borderRadius: 14, paddingHorizontal: 14 },
   evidenceItem: { paddingVertical: 10, gap: 3 },
-  evidenceItemLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#6a7560' },
-  evidenceItemValue: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: '#526D43' },
+  evidenceItemLabel: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.muted },
+  evidenceItemValue: { fontFamily: 'System', fontWeight: '500', fontSize: 13, lineHeight: 18, color: p.deep },
 });

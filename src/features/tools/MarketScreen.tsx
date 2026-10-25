@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useDemo } from '../../demo';
+import { useDemoSlices, useDemoActions } from '../../demo';
 import {
-  formatDateLabel,
   formatRupees,
   selectMarketRows,
   type MarketCosts,
@@ -11,23 +10,28 @@ import {
 } from '../../demo';
 import { useT } from '../../locales';
 import { Button, Icon, Screen, Text } from './ui';
+import { useAccentPalette, useStyles, type AccentPalette } from '../../ui/AccentTheme';
 import { Banner, ScreenHeading, Sheet, StatusChip, TextFieldRow } from './components';
 import { toolCopy } from './strings';
 import { useToolRecorder } from './history';
 
-const COST_FIELDS: { key: keyof MarketCosts; labelKey: 'mandi.transport' | 'mandi.handling' | 'mandi.fees' }[] = [
-  { key: 'transport', labelKey: 'mandi.transport' },
-  { key: 'handling', labelKey: 'mandi.handling' },
-  { key: 'fees', labelKey: 'mandi.fees' },
+const COST_FIELDS: { key: keyof MarketCosts; labelKey: 'market.transport' | 'market.handling' | 'market.fees' }[] = [
+  { key: 'transport', labelKey: 'market.transport' },
+  { key: 'handling', labelKey: 'market.handling' },
+  { key: 'fees', labelKey: 'market.fees' },
 ];
 
-/** 12 · Mandi comparison — editable quantity/costs, deterministic local sort, unknown stays unknown. */
-export function MandiScreen() {
-  const { state, actions } = useDemo();
+/** 12 · Market comparison — editable quantity/costs, deterministic local sort, unknown stays unknown. */
+export function MarketScreen() {
+  const palette = useAccentPalette();
+  const styles = useStyles(makeStyles);
+  const state = useDemoSlices(['market'] as const);
+  const actions = useDemoActions();
   const recordToolUse = useToolRecorder();
   const t = useT();
   const params = useLocalSearchParams<{ commodity?: string }>();
-  const rows = selectMarketRows(state);
+  // Derived/sorted rows only change with the market slice.
+  const rows = useMemo(() => selectMarketRows(state), [state]);
   const bestId = rows.find(row => row.net !== null)?.id ?? null;
 
   const [sheetMarket, setSheetMarket] = useState<MarketQuote['id'] | null>(null);
@@ -38,10 +42,8 @@ export function MandiScreen() {
     fees: '',
   });
   const [errors, setErrors] = useState<string[]>([]);
-  const [recorded, setRecorded] = useState(false);
 
   const commodity = params.commodity ?? state.market.commodity;
-  const quoteDate = state.market.quotes[0]?.quotedOn;
 
   const selectedQuote = useMemo(
     () => state.market.quotes.find(quote => quote.id === sheetMarket) ?? null,
@@ -63,7 +65,7 @@ export function MandiScreen() {
   const confirmSheet = () => {
     const nextErrors: string[] = [];
     const quantity = Number(quantityDraft.trim());
-    if (!Number.isFinite(quantity) || quantity <= 0) nextErrors.push(toolCopy('mandi.quantityError'));
+    if (!Number.isFinite(quantity) || quantity <= 0) nextErrors.push(toolCopy('market.quantityError'));
 
     const parsed: Partial<Record<keyof MarketCosts, number | null>> = {};
     for (const field of COST_FIELDS) {
@@ -73,7 +75,7 @@ export function MandiScreen() {
         continue;
       }
       if (!/^\d*\.?\d*$/.test(raw) || !Number.isFinite(Number(raw))) {
-        nextErrors.push(toolCopy('mandi.costError'));
+        nextErrors.push(toolCopy('market.costError'));
         break;
       }
       parsed[field.key] = Number(raw);
@@ -90,41 +92,33 @@ export function MandiScreen() {
         actions.setMarketCost(sheetMarket, field.key, parsed[field.key] ?? null);
       }
     }
-    recordToolUse('mandi', 'tools.mandi.title', `${commodity} · ${quantity} q`);
-    setRecorded(true);
+    recordToolUse('market', 'tools.market.title', `${commodity} · ${quantity} q`);
     setSheetMarket(null);
   };
 
   if (commodity !== state.market.commodity) {
     return <Screen>
-      <ScreenHeading title={t('mandi.title')} subtitle={commodity} />
-      <Banner title={t('common.notAvailable')} body={t('mandi.unsupported', { commodity })} />
-      <Button title={t('mandi.wheatFixture')} onPress={() => router.setParams({ commodity: state.market.commodity })} />
+      <ScreenHeading title={t('market.title')} subtitle={commodity} />
+      <Banner title={t('common.notAvailable')} body={t('market.unsupported', { commodity })} />
+      <Button title={t('market.wheatFixture')} onPress={() => router.setParams({ commodity: state.market.commodity })} />
     </Screen>;
   }
 
   return (
     <Screen>
       <ScreenHeading
-        title={t('mandi.title')}
-        subtitle={t('mandi.subtitle', {
+        title={t('market.title')}
+        subtitle={t('market.subtitle', {
           crop: commodity,
           grade: state.market.grade,
           quantity: state.market.quantityQuintals,
         })}
       />
 
-      <View style={styles.stale}>
-        <Text style={styles.staleTitle}>
-          {t('mandi.stale', { date: quoteDate ? formatDateLabel(quoteDate) : t('common.unknown') })}
-        </Text>
-        <Text style={styles.staleBody}>{t('mandi.staleBody')}</Text>
-      </View>
-
       <View style={styles.sortRow}>
-        <Icon name="arrow-down-wide-narrow" size={18} color="#52664D" />
+        <Icon name="arrow-down-wide-narrow" size={18} color={palette.icon} />
         <Text style={styles.sortLabel}>
-          {t('mandi.sorted', { quantity: state.market.quantityQuintals })}
+          {t('market.sorted', { quantity: state.market.quantityQuintals })}
         </Text>
       </View>
 
@@ -138,11 +132,11 @@ export function MandiScreen() {
           >
             <View style={styles.marketHead}>
               <Text style={styles.marketName}>{row.name}</Text>
-              {best ? <StatusChip label={t('mandi.best')} tone="best" /> : null}
+              {best ? <StatusChip label={t('market.best')} tone="best" /> : null}
             </View>
 
             <View style={styles.priceNetRow}>
-              <Text style={styles.price}>{t('mandi.price', { price: formatRupees(row.pricePerQuintal) })}</Text>
+              <Text style={styles.price}>{t('market.price', { price: formatRupees(row.pricePerQuintal) })}</Text>
               <Text style={[styles.net, row.net === null && styles.netUnknown]}>
                 {row.net === null ? t('common.incomplete') : `₹ ${formatRupees(row.net)}`}
               </Text>
@@ -152,8 +146,8 @@ export function MandiScreen() {
               accessibilityRole="button"
               accessibilityLabel={
                 knownCosts
-                  ? t('mandi.costs', { costs: formatRupees(row.costsTotal ?? 0) })
-                  : t('mandi.costMissing')
+                  ? t('market.costs', { costs: formatRupees(row.costsTotal ?? 0) })
+                  : t('market.costMissing')
               }
               onPress={() => openSheet(row.id)}
               hitSlop={6}
@@ -161,8 +155,8 @@ export function MandiScreen() {
             >
               <Text style={styles.costText}>
                 {knownCosts
-                  ? t('mandi.costs', { costs: formatRupees(row.costsTotal ?? 0) })
-                  : t('mandi.costMissing')}
+                  ? t('market.costs', { costs: formatRupees(row.costsTotal ?? 0) })
+                  : t('market.costMissing')}
               </Text>
             </Pressable>
 
@@ -170,27 +164,18 @@ export function MandiScreen() {
         );
       })}
 
-      <Text style={styles.footer}>{t('mandi.footer')}</Text>
-
-      {recorded ? (
-        <View style={styles.recordedRow}>
-          <Icon name="check" size={15} color="#52664D" />
-          <Text style={styles.recordedText}>{toolCopy('mandi.recorded')}</Text>
-        </View>
-      ) : null}
-
       <Sheet
         visible={sheetMarket !== null}
         onClose={() => setSheetMarket(null)}
         title={
-          selectedQuote ? toolCopy('mandi.marketSheet', { market: selectedQuote.name }) : t('mandi.editTitle')
+          selectedQuote ? toolCopy('market.marketSheet', { market: selectedQuote.name }) : t('market.editTitle')
         }
         footer={
-          <Button title={toolCopy('mandi.confirm')} trailingArrow={false} onPress={confirmSheet} />
+          <Button title={toolCopy('market.confirm')} trailingArrow={false} onPress={confirmSheet} />
         }
       >
         <TextFieldRow
-          label={t('mandi.quantity')}
+          label={t('market.quantity')}
           value={quantityDraft}
           onChangeText={setQuantityDraft}
           keyboardType="decimal-pad"
@@ -206,7 +191,7 @@ export function MandiScreen() {
                   setCostDrafts(current => ({ ...current, [field.key]: text }))
                 }
                 keyboardType="number-pad"
-                placeholder={t('mandi.costPlaceholder')}
+                placeholder={t('market.costPlaceholder')}
               />
             </View>
             {selectedQuote && selectedQuote.costs[field.key] !== null ? (
@@ -217,7 +202,7 @@ export function MandiScreen() {
                 hitSlop={8}
                 style={styles.clearButton}
               >
-                <Icon name="minus" size={16} color="#657360" />
+                <Icon name="minus" size={16} color={palette.icon} />
               </Pressable>
             ) : null}
           </View>
@@ -228,42 +213,35 @@ export function MandiScreen() {
         ))}
 
         <View style={styles.noteRow}>
-          <Icon name="info" size={15} color="#8D9A81" />
-          <Text style={styles.noteText}>{t('mandi.incompleteNote')}</Text>
+          <Icon name="info" size={15} color={palette.icon} />
+          <Text style={styles.noteText}>{t('market.incompleteNote')}</Text>
         </View>
       </Sheet>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  stale: { backgroundColor: '#F6F0E0', borderRadius: 18, padding: 12, gap: 6 },
-  staleTitle: { fontFamily: 'System', fontWeight: '500', fontSize: 12, lineHeight: 17, color: '#7c6a3e' },
-  staleBody: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#756a4c' },
+const makeStyles = (p: AccentPalette) => StyleSheet.create({
   sortRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 18 },
-  sortLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: '#637656' },
+  sortLabel: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 12, lineHeight: 17, color: p.muted },
 
   marketCard: { borderRadius: 18, padding: 14, gap: 8 },
-  bestCard: { backgroundColor: '#EAF2DE' },
-  otherCard: { backgroundColor: '#F4F7EF' },
+  bestCard: { backgroundColor: p.surface },
+  otherCard: { backgroundColor: p.surfaceSoft },
   marketHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  marketName: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: '#4B673D' },
+  marketName: { fontFamily: 'System', fontWeight: '600', fontSize: 15, lineHeight: 21, color: p.deep },
   priceNetRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  price: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: '#626c56' },
+  price: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 13, lineHeight: 18, color: p.muted },
   net: {
     fontFamily: 'System', fontWeight: '600',
     fontSize: 21,
     lineHeight: 29,
-    color: '#4B6A3A',
+    color: p.deep,
     textAlign: 'right',
   },
-  netUnknown: { color: '#4B6A3A' },
+  netUnknown: { color: p.deep },
   costRow: { minHeight: 32, justifyContent: 'center' },
-  costText: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#646e5a' },
-
-  footer: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#697560' },
-  recordedRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  recordedText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#687560' },
+  costText: { fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.muted },
 
   costFieldRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   costField: { flex: 1 },
@@ -271,10 +249,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#F4F7EF',
+    backgroundColor: p.surfaceSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   noteRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  noteText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: '#687560' },
+  noteText: { flex: 1, fontFamily: 'System', fontWeight: '400', fontSize: 11, lineHeight: 15, color: p.icon },
 });

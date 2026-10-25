@@ -45,3 +45,7 @@ example
 # generated native folders
 /ios
 /android
+
+# local scratch
+.scratch/
+tsc.out

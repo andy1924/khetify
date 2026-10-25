@@ -9,6 +9,7 @@ import {
 import { Icon, type IconName, type LucideIcon } from './Icon';
 import { Text } from './Text';
 import { colors, radii } from './tokens';
+import { useAccentPalette, type AccentPalette } from './AccentTheme';
 
 export type ChipTone =
   | 'neutral'
@@ -39,12 +40,14 @@ export type ChipProps = {
   testID?: string;
 };
 
-const toneStyles: Record<ChipTone, { bg: string; ink: string }> = {
-  neutral: { bg: colors.chipBg, ink: colors.chipInk },
-  soft: { bg: colors.chipBg, ink: colors.chipInk },
-  selected: { bg: colors.selected, ink: colors.chipInk },
-  info: { bg: colors.infoBg, ink: colors.chipInk },
-  success: { bg: colors.surfaceTint, ink: colors.successInk },
+/** Green-family tones follow the accent; status tones stay semantic. */
+function toneStyles(p: AccentPalette): Record<ChipTone, { bg: string; ink: string }> {
+  return {
+  neutral: { bg: p.chip, ink: p.chipInk },
+  soft: { bg: p.chip, ink: p.chipInk },
+  selected: { bg: p.active, ink: p.chipInk },
+  info: { bg: p.surfaceSoft, ink: p.chipInk },
+  success: { bg: p.chip, ink: p.chipInk },
   ready: { bg: '#E3EED7', ink: '#5C6953' },
   limited: { bg: '#F4EDDC', ink: '#76663B' },
   unavailable: { bg: '#EAEDE5', ink: '#606D56' },
@@ -53,7 +56,8 @@ const toneStyles: Record<ChipTone, { bg: string; ink: string }> = {
   reported: { bg: '#F0ECDC', ink: '#76663C' },
   reviewed: { bg: '#E8EDE3', ink: '#556D44' },
   confirmed: { bg: '#DCECCF', ink: '#556D44' },
-};
+  };
+}
 
 /**
  * Pill chip, 25pt tall with 10pt side padding, matching the reference status
@@ -72,7 +76,9 @@ export function Chip({
   accessibilityLabel,
   testID,
 }: ChipProps) {
-  const palette = selected ? toneStyles.selected : toneStyles[tone];
+  const accentPalette = useAccentPalette();
+  const tones = toneStyles(accentPalette);
+  const palette = selected ? tones.selected : tones[tone];
   const inkColor = palette.ink;
   const iconColor = inkColor;
 

@@ -13,12 +13,27 @@ const compiled = ts.transpileModule(source, { compilerOptions: {
   module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React, esModuleInterop: true,
 } }).outputText;
 const mod = { exports: {} };
+// `motion.ts` reads AccessibilityInfo at module load and `Toggle` animates with
+// Animated; Notice does neither, so a minimal native surface is enough here.
+const nativeStub = () => ({
+  View: 'View',
+  Pressable: 'Pressable',
+  StyleSheet: { create: s => s },
+  Animated: { View: 'Animated.View' },
+});
+// Shared reduced-motion store, exercised by the app's own animations.
+const motionStub = { motion: { press: 90, release: 140, pressScale: 0.97, pressOpacity: 0.86 }, useReduceMotion: () => false };
+// Session accent theme (owned by another module); tests pin the default forest
+// accent so assertions only see the reference colour tokens.
+const accentStub = { useAccent: () => ({ accent: { id: 'forest', label: 'Forest', strong: '#285B45', soft: '#BEDDA7', selected: 'rgba(209,229,213,0.62)', ink: '#263B29' }, setAccent: () => {} }) };
 vm.runInNewContext(compiled, { exports: mod.exports, module: mod, require: name => {
   if (name === 'react') return React;
-  if (name === 'react-native') return { View: 'View', Pressable: 'Pressable', StyleSheet: { create: s => s } };
+  if (name === 'react-native') return nativeStub();
   if (name === './Text') return { Text: 'Text', SectionLabel: 'Text' };
   if (name === './Icon') return { Icon: 'Icon' };
   if (name === './tokens') return { colors: {}, radii: {}, touchTarget: 48 };
+  if (name === './motion') return motionStub;
+  if (name === './AccentTheme') return accentStub;
   throw new Error(`Unexpected import: ${name}`);
 } });
 

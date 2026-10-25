@@ -1,6 +1,7 @@
 import { Redirect } from 'expo-router';
-import { selectIsAuthenticated, useDemoState } from '../demo';
+import { selectIsAuthenticated, useDemoSlices } from '../demo';
+
 export default function Index() {
-  const state = useDemoState();
-  return <Redirect href={selectIsAuthenticated(state) ? '/(tabs)/home' : '/language'} />;
+  const state = useDemoSlices(['onboarding'] as const);
+  return <Redirect href={selectIsAuthenticated(state) ? '/(tabs)/home' : '/sign-in'} />;
 }

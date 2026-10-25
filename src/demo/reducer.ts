@@ -1,3 +1,4 @@
+import type { RegisteredField } from '../features/tools/satelliteProvider';
 import { createInitialState, SOIL_PARAMS } from './fixtures';
 import { stageCaptionKeys } from './stage-keys';
 import type {
@@ -17,6 +18,35 @@ export const REVISION_COST_DELTA = 3200;
 const digitsOnly = (value: string) => value.replace(/\D/g, '').slice(0, 10);
 
 const isValidMobile = (digits: string) => /^[6-9]\d{9}$/.test(digits);
+
+/** Fixture device fix near the demo farm in Nashik, used when location is allowed. */
+const GOOGLE_SIGN_IN_LOCATION: NonNullable<DemoState['deviceLocation']> = {
+  latitude: 19.9975,
+  longitude: 73.7898,
+  accuracy: null,
+  capturedAt: 0,
+};
+
+/**
+ * Fixture field around the demo device fix, ~1.6 ha. Signing in with the demo
+ * Google account should land on the satellite view, not the first-run field
+ * wizard, so the account arrives with one field already registered.
+ */
+const GOOGLE_SIGN_IN_FIELD: RegisteredField = {
+  id: 'field-demo',
+  name: 'Demo plot',
+  polygon: [
+    { latitude: 20.0011, longitude: 73.7862 },
+    { latitude: 20.0011, longitude: 73.7921 },
+    { latitude: 19.9968, longitude: 73.7921 },
+    { latitude: 19.9968, longitude: 73.7862 },
+  ],
+  crop: 'Wheat',
+  sowingDate: '2026-11-12',
+  alertsOptIn: false,
+  shareApproximate: false,
+  radiusKm: 5,
+};
 
 const numberOrNull = (value: string): number | null => {
   const cleaned = value.replace(/[^0-9.]/g, '');
@@ -147,6 +177,26 @@ export function demoReducer(state: DemoState, action: DemoAction): DemoState {
         ...state,
         onboarding: { ...state.onboarding, otpStatus: 'success', signedIn: true, completed: true },
       };
+
+    // Dummy Google sign-in: one atomic transition from signed-out to a fully
+    // populated demo account, so no render ever shows a half-filled profile.
+    // The fixture profile comes from `createInitialState()`; only the location
+    // consent depends on what the user chose in the consent dialog.
+    case 'onboarding/googleSignIn': {
+      const base = createInitialState();
+      return {
+        ...base,
+        deviceLocation: action.location ? GOOGLE_SIGN_IN_LOCATION : null,
+        consents: { ...base.consents, approximateLocation: action.location },
+        monitoring: { ...base.monitoring, fields: [GOOGLE_SIGN_IN_FIELD] },
+        onboarding: {
+          ...base.onboarding,
+          otpStatus: 'success',
+          signedIn: true,
+          completed: true,
+        },
+      };
+    }
 
     case 'onboarding/signOut':
       return {

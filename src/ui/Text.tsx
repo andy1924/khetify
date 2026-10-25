@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text as RNText, type TextProps as RNTextProps, type StyleProp, type TextStyle } from 'react-native';
-import { colors, textColors, typography, type TextVariant } from './tokens';
+import { colors, typography, type TextVariant } from './tokens';
+import { useAccentPalette, type AccentPalette } from './AccentTheme';
 
 /** Reference variants. `primary`/`secondary`/`muted` are accepted colour shorthands. */
 export type TextTone =
@@ -25,19 +26,35 @@ export type TextProps = RNTextProps & {
   style?: StyleProp<TextStyle>;
 };
 
-const toneColors: Record<TextTone, string> = {
-  primary: colors.ink,
-  secondary: colors.muted,
-  muted: colors.muted,
-  faint: colors.faint,
-  accent: colors.accentDeep,
-  inverse: colors.accentInk,
-  danger: colors.danger,
-  success: colors.successInk,
-  warning: colors.warningInk,
-  ink: colors.ink,
-  brand: colors.chipInk,
-};
+function paletteTextColors(p: AccentPalette): Record<TextVariant, string> {
+  return {
+    display: p.ink,
+    heading: p.heading,
+    title: p.ink,
+    subtitle: p.ink,
+    body: p.muted,
+    strong: p.ink,
+    caption: p.muted,
+    meta: p.faint,
+    label: p.muted,
+  };
+}
+
+function paletteToneColors(p: AccentPalette): Record<TextTone, string> {
+  return {
+    primary: p.ink,
+    secondary: p.muted,
+    muted: p.muted,
+    faint: p.faint,
+    accent: p.deep,
+    inverse: p.ink,
+    danger: colors.danger,
+    success: p.ink,
+    warning: colors.warningInk,
+    ink: p.ink,
+    brand: p.chipInk,
+  };
+}
 
 const weights = {
   regular: '400',
@@ -47,6 +64,7 @@ const weights = {
 } as const;
 
 export function Text({ variant = 'body', color, tone, weight, align, style, ...rest }: TextProps) {
+  const palette = useAccentPalette();
   const token = typography[variant];
   return (
     <RNText
@@ -58,7 +76,7 @@ export function Text({ variant = 'body', color, tone, weight, align, style, ...r
           fontSize: token.fontSize,
           lineHeight: token.lineHeight,
           letterSpacing: token.letterSpacing,
-          color: color ?? (tone ? toneColors[tone] : textColors[variant]),
+          color: color ?? (tone ? paletteToneColors(palette)[tone] : paletteTextColors(palette)[variant]),
           textAlign: align,
         },
         style,

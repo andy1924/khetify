@@ -1,4 +1,16 @@
-export { DemoProvider, useDemo, useDemoState, useDemoActions, useDemoSelector, createDemoActions } from './store';
+export {
+  DemoProvider,
+  useDemo,
+  useDemoState,
+  useDemoActions,
+  useDemoDispatch,
+  useDemoSlices,
+  useDemoSelector,
+  useLocale,
+  shallowEqual,
+  createDemoActions,
+} from './store';
+export type { DemoStore, DemoContextValue } from './store';
 export { demoReducer, initialsFor, digitsOnly, isValidMobile, numberOrNull } from './reducer';
 export {
   createInitialState,
