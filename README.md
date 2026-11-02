@@ -1,6 +1,6 @@
 # Khetify
 
-A native farming-app MVP built with Expo and React Native. Khetify combines local farm-planning tools with live, clearly labelled integrations for satellite monitoring, area alerts and AI-assisted plant-photo assessment.
+A native ICT-enabled farming-app MVP built with Expo and React Native. Khetify combines local farm-planning tools with live, clearly labelled integrations for satellite imagery, area alerts and AI-assisted plant-photo assessment.
 
 The app is a demo, not a production agronomy service. Several planning, soil, market and community flows still use local in-memory fixtures, while the live integrations require the backend and provider configuration described below. State resets on a full reload; Profile also includes reset and sign-out controls.
 
@@ -13,7 +13,7 @@ The app is a demo, not a production agronomy service. Several planning, soil, ma
 | Farm Plan | Empty and active plans, two-step assessment, seed options/quotes, ordered stages, budget revision with confirm/cancel |
 | Soil | Input validation and units, sample result, evidence, selective import into the plan, tool history |
 | Markets | Sample/local price states, editable quantity and costs, calculated net returns, incomplete-data states |
-| Satellite | Uses the phone's foreground GPS location, requests a 500 m sampling area, fetches dated Copernicus Sentinel-2 imagery/NDVI when available, and falls back to an Esri aerial basemap for display |
+| Satellite imagery | Uses the phone's foreground GPS location, requests a 500 m sampling area, fetches dated Copernicus Sentinel-2 satellite imagery and NDVI when available, and falls back to an Esri aerial basemap for display |
 | Alerts | Separate **Current warnings** and **Recent events** tabs; weather advisories come from Open-Meteo and nearby incidents require reviewed, consented backend data |
 | Plant health | Sends an opted-in plant photo to the configured OpenAI vision model (`gpt-4.1-mini` by default) and returns image quality, confidence, possible causes and next steps |
 | Photo tools | Bundled illustrated fixtures for unsupported grain/photo tools; the plant-health flow uses the live backend integration above |
@@ -69,7 +69,7 @@ The six language choices update the in-memory locale preference. English is the 
 
 ## ICT, AI integrations and limits
 
-The app's ICT layer connects the phone, location services, remote-sensing data and backend APIs: GPS identifies the nearby sampling area, Copernicus supplies dated crop signals, Open-Meteo supplies weather inputs, and the OpenAI vision integration assesses an opted-in plant photo. These integrations are deliberately separated from local demo fixtures so the UI can show when a source is unavailable.
+The app's ICT layer connects the phone, location services, satellite imagery, remote-sensing data and backend APIs: GPS identifies the nearby sampling area, Copernicus supplies dated satellite crop signals, Open-Meteo supplies weather inputs, and the OpenAI vision integration assesses an opted-in plant photo. These integrations are deliberately separated from local demo fixtures so the UI can show when a source is unavailable.
 
 - Copernicus credentials are required for Sentinel imagery and NDVI. The app never exposes those credentials to Expo.
 - OpenAI is used only by Plant Health. The backend validates and downsizes images, sends them to the configured vision model with structured output, and does not save the photo or result. Pesticide suggestions are not shown unless reviewed label data is configured; the app does not invent chemical advice.
